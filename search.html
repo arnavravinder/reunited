@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reunited - Search Lost & Found Items</title>
+  <!-- Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/search.css">
+</head>
+<body>
+  <div id="searchApp">
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" v-if="isLoading">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Header/Navigation -->
+    <header :class="{'mobile-menu-active': mobileMenuOpen}">
+      <div class="container header-container">
+        <a href="index.html" class="logo">Reunited</a>
+        <button class="mobile-menu-btn" @click="toggleMobileMenu">
+          <i class="fas" :class="mobileMenuOpen ? 'fa-xmark' : 'fa-bars'"></i>
+        </button>
+        <div class="nav-links">
+          <a href="search.html" class="active">Search Items</a>
+          <a href="index.html#guidelines">Guidelines</a>
+          <a href="index.html#faqs">FAQs</a>
+          <a href="index.html#contact">Contact</a>
+          <a v-if="!user" href="#" class="btn btn-outlined" @click.prevent="showLoginModal = true">Login / Sign Up</a>
+          <a v-else href="dashboard.html" class="btn btn-outlined">Dashboard</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Search Area -->
+    <section class="search-hero">
+      <div class="container">
+        <h1>Find Your Lost Items</h1>
+        <div class="search-container">
+          <div class="search-form">
+            <div class="form-row">
+              <div class="form-group search-input-group">
+                <label for="item-name">Item Name</label>
+                <input type="text" id="item-name" v-model="searchQuery" placeholder="What did you lose?">
+              </div>
+              <div class="form-group">
+                <label for="item-type">Item Type</label>
+                <select id="item-type" v-model="selectedItemType">
+                  <option value="">All Types</option>
+                  <option value="Uniform">Uniform</option>
+                  <option value="Water Bottle">Water Bottle</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Others">Others (Specify)</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group" v-if="selectedItemType === 'Others'">
+                <label for="item-type-other">Specify Item Type</label>
+                <input type="text" id="item-type-other" v-model="otherItemType" placeholder="Please specify">
+              </div>
+              <div class="form-group">
+                <label for="item-location">Where Lost</label>
+                <select id="item-location" v-model="selectedLocation">
+                  <option value="">All Locations</option>
+                  <option v-for="(location, index) in locations" :key="'loc-'+index" :value="location">
+                    {{ location }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="date-lost">Date Lost</label>
+                <input type="text" id="date-lost" class="datepicker-input" placeholder="Select date" ref="datePicker">
+              </div>
+            </div>
+            
+            <div class="search-actions">
+              <button class="btn btn-secondary" @click="resetFilters">Reset</button>
+              <button class="btn" @click="performSearch">
+                <i class="fas fa-search"></i> Search
+              </button>
+            </div>
+          </div>
+          
+          <div class="search-enhancement" v-if="aiAssisted">
+            <div class="ai-badge">
+              <i class="fas fa-robot"></i> AI Enhanced Search
+            </div>
+            <p class="ai-info">Our AI is helping find items matching your description</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search Results Section -->
+    <section class="search-results">
+      <div class="container">
+        <div class="results-header">
+          <h2>{{ searchResults.length }} Items Found</h2>
+          <div class="view-options">
+            <span>View:</span>
+            <button @click="viewMode = 'grid'" :class="{active: viewMode === 'grid'}">
+              <i class="fas fa-th-large"></i>
+            </button>
+            <button @click="viewMode = 'list'" :class="{active: viewMode === 'list'}">
+              <i class="fas fa-list"></i>
+            </button>
+          </div>
+          
+          <div class="sort-options">
+            <label>Sort By:</label>
+            <select v-model="sortOption" @change="sortResults">
+              <option value="date-desc">Date (Newest)</option>
+              <option value="date-asc">Date (Oldest)</option>
+              <option value="relevance">Relevance</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- No Results Message -->
+        <div class="no-results" v-if="searchResults.length === 0 && searchPerformed">
+          <i class="fas fa-search-minus"></i>
+          <h3>No items found</h3>
+          <p>Try adjusting your search criteria or filters</p>
+        </div>
+        
+        <!-- No Login Message -->
+        <div class="no-results auth-required-message" v-if="!user && !isLoading && !searchPerformed">
+          <i class="fas fa-user-lock"></i>
+          <h3>Authentication Required</h3>
+          <p>Please log in to search for lost items</p>
+          <button class="btn" @click="showLoginModal = true">Login / Sign Up</button>
+        </div>
+        
+        <!-- Grid View -->
+        <div class="results-grid" v-if="viewMode === 'grid' && searchResults.length > 0">
+          <div class="item-card" v-for="(item, index) in searchResults" :key="index" 
+               @click="openItemDetails(item)"
+               :class="{'item-claimed': item.claimed}">
+            <div class="item-image" :style="{ backgroundImage: `url(${item.image || 'images/no-image.png'})` }"></div>
+            <div class="item-info">
+              <div class="claimed-badge" v-if="item.claimed">
+                <i class="fas fa-check-circle"></i> Claimed
+              </div>
+              <h3>{{ item.name }}</h3>
+              <div class="item-meta">
+                <span><i class="fas fa-map-marker-alt"></i> {{ item.location }}</span>
+                <span><i class="fas fa-calendar-alt"></i> {{ formatDate(item.dateFound) }}</span>
+              </div>
+              <div class="item-category">{{ item.category }}</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- List View -->
+        <div class="results-list" v-if="viewMode === 'list' && searchResults.length > 0">
+          <div class="list-item" v-for="(item, index) in searchResults" :key="index" 
+                @click="openItemDetails(item)"
+                :class="{'item-claimed': item.claimed}">
+            <div class="list-item-image" :style="{ backgroundImage: `url(${item.image || 'images/no-image.png'})` }"></div>
+            <div class="list-item-info">
+              <div class="claimed-badge" v-if="item.claimed">
+                <i class="fas fa-check-circle"></i> Claimed
+              </div>
+              <h3>{{ item.name }}</h3>
+              <p class="item-description">{{ truncateDescription(item.description) }}</p>
+              <div class="item-meta">
+                <span><i class="fas fa-map-marker-alt"></i> {{ item.location }}</span>
+                <span><i class="fas fa-calendar-alt"></i> {{ formatDate(item.dateFound) }}</span>
+                <span><i class="fas fa-tag"></i> {{ item.category }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination" v-if="totalPages > 1">
+          <button @click="prevPage" :disabled="currentPage === 1">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span>Page {{ currentPage }} of {{ totalPages }}</span>
+          <button @click="nextPage" :disabled="currentPage === totalPages">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Item Detail Modal -->
+    <div class="modal-overlay" v-if="selectedItem">
+      <div class="modal item-detail-modal">
+        <div class="modal-close" @click="selectedItem = null">×</div>
+        <div class="item-detail-header">
+          <h2>{{ selectedItem.name }}</h2>
+          <div v-if="selectedItem.claimed" class="claimed-badge large">
+            <i class="fas fa-check-circle"></i> Claimed
+          </div>
+          <div v-else class="item-status available">Available</div>
+        </div>
+        
+        <div class="item-detail-content">
+          <div class="item-images">
+            <div class="main-image" :style="{ backgroundImage: `url(${selectedItem.image || 'images/no-image.png'})` }"></div>
+            <div class="image-thumbnails" v-if="selectedItem.additionalImages && selectedItem.additionalImages.length">
+              <div 
+                v-for="(img, idx) in selectedItem.additionalImages" 
+                :key="idx" 
+                class="thumbnail"
+                :style="{ backgroundImage: `url(${img})` }"
+                @click="selectedItem.image = img"
+              ></div>
+            </div>
+          </div>
+          
+          <div class="item-details">
+            <div class="detail-row">
+              <span class="detail-label">Item Type:</span>
+              <span class="detail-value">{{ selectedItem.category }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Date Found:</span>
+              <span class="detail-value">{{ formatDate(selectedItem.dateFound) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Location Found:</span>
+              <span class="detail-value">{{ selectedItem.location }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Time Uploaded:</span>
+              <span class="detail-value">{{ formatDateTime(selectedItem.createdAt) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Description:</span>
+              <span class="detail-value description">{{ selectedItem.description }}</span>
+            </div>
+            
+            <div v-if="selectedItem.claimed" class="claimed-info">
+              <i class="fas fa-info-circle"></i>
+              <p>This item has already been claimed by another user. To dispute this claim, please use the contact form on the homepage.</p>
+            </div>
+            
+            <div v-if="!selectedItem.claimed && user" class="item-valuation" v-show="itemValuation">
+              <div class="valuation-badge">
+                <i class="fas fa-tag"></i> Estimated Value
+              </div>
+              <div class="valuation-amount">{{ itemValuation }}</div>
+            </div>
+            
+            <div class="item-actions">
+              <button class="btn" v-if="!selectedItem.claimed && user" @click="claimItem(selectedItem)">Claim This Item</button>
+              <button class="btn btn-outlined" v-if="!selectedItem.claimed && user" @click="reportMatch(selectedItem.id)">Report Similar Loss</button>
+              <button class="btn btn-outlined" v-if="selectedItem.claimed" @click="disputeClaim(selectedItem.id)">Dispute Claim</button>
+              <button v-if="!user" class="btn" @click="showLoginModal = true">Login to Claim</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Claim Form Modal -->
+    <div class="modal-overlay" v-if="showClaimModal">
+      <div class="modal claim-modal">
+        <div class="modal-close" @click="showClaimModal = false">×</div>
+        <div class="modal-header">
+          <h3 class="modal-title">Claim Item</h3>
+        </div>
+        <div class="modal-content">
+          <div class="item-preview">
+            <div class="preview-image" :style="{ backgroundImage: `url(${claimItem.image || 'images/no-image.png'})` }"></div>
+            <div class="preview-info">
+              <h4>{{ claimItem.name }}</h4>
+              <p>{{ claimItem.location }} • {{ formatDate(claimItem.dateFound) }}</p>
+            </div>
+          </div>
+          
+          <form @submit.prevent="submitClaim">
+            <div class="form-group">
+              <label>Please provide details to verify this is your item:</label>
+              <textarea class="form-control" v-model="claimForm.description" placeholder="Describe unique features, markings, or contents that only the owner would know" required></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label>Contact Information:</label>
+              <input type="text" class="form-control" v-model="claimForm.contactInfo" placeholder="Phone number or other contact details" required>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="btn btn-outlined" @click="showClaimModal = false">Cancel</button>
+              <button type="submit" class="btn" :disabled="isSubmittingClaim">
+                {{ isSubmittingClaim ? 'Submitting...' : 'Submit Claim' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Claim Code Modal -->
+    <div class="modal-overlay" v-if="showClaimCodeModal">
+      <div class="modal claim-code-modal">
+        <div class="modal-close" @click="showClaimCodeModal = false">×</div>
+        <div class="modal-header">
+          <h3 class="modal-title">Claim Submitted Successfully</h3>
+        </div>
+        <div class="modal-content text-center">
+          <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          
+          <div class="claim-code-container">
+            <h4>Your Claim Code</h4>
+            <div class="claim-code">{{ generatedClaimCode }}</div>
+            <p class="claim-instructions">Please show this code at the Lost & Found area to collect your item</p>
+          </div>
+          
+          <div class="item-claimed">
+            <h4>Item Claimed</h4>
+            <p>{{ claimItem.name }}</p>
+            <p class="text-secondary">{{ claimItem.location }} • {{ formatDate(claimItem.dateFound) }}</p>
+          </div>
+          
+          <div class="claim-actions">
+            <button class="btn" @click="goToClaimLog">View All Claims</button>
+            <button class="btn btn-outlined" @click="showClaimCodeModal = false">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" v-if="showLoginModal">
+      <div class="modal">
+        <div class="modal-close" @click="showLoginModal = false">×</div>
+        <div class="modal-header">
+          <h3 class="modal-title">{{ isSigningUp ? 'Sign up to Reunited' : 'Login to Reunited' }}</h3>
+        </div>
+        <div class="login-methods">
+          <div class="social-login">
+            <div class="social-btn" @click="signInWithGoogle">
+              <i class="fa-brands fa-google"></i>
+            </div>
+            <div class="social-btn" @click="showAppleComingSoon = true">
+              <i class="fa-brands fa-apple"></i>
+            </div>
+            <div class="social-btn" @click="signInWithTwitter">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/5/57/X_logo_2023_%28white%29.png" alt="X" width="20" height="20">
+            </div>
+          </div>
+          <div class="or-divider">
+            <span>or</span>
+          </div>
+          <div v-if="showAppleComingSoon" class="auth-error">
+            Apple Authentication is coming soon!
+          </div>
+          <div v-if="authError" class="auth-error">
+            {{ authError }}
+          </div>
+          <div class="form-group" v-if="!magicLinkMode">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" class="form-control" v-model="loginForm.email">
+          </div>
+          <div class="form-group" v-if="!magicLinkMode && !forgotPassword">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" class="form-control" v-model="loginForm.password">
+          </div>
+          <div v-if="magicLinkMode">
+            <div class="form-group">
+              <label for="magic-email">Your Email</label>
+              <input type="email" id="magic-email" class="form-control" v-model="magicLinkEmail" placeholder="Enter your email address">
+            </div>
+            <button class="btn" style="width: 100%;" @click.prevent="sendMagicLink" :disabled="magicLinkSending">
+              {{ magicLinkSending ? 'Sending...' : 'Send Magic Link' }}
+            </button>
+            <p v-if="magicLinkSent" style="text-align: center; margin-top: 1rem; color: var(--success-color);">
+              Magic link sent! Check your email.
+            </p>
+          </div>
+          <div v-if="!magicLinkMode">
+            <button 
+              v-if="!forgotPassword" 
+              class="btn" 
+              style="width: 100%;" 
+              @click.prevent="submitLoginForm">
+              {{ isSigningUp ? 'Sign Up' : 'Login' }}
+            </button>
+            <div v-else>
+              <div class="form-group">
+                <input type="email" class="form-control" v-model="resetEmail" placeholder="Enter your email">
+              </div>
+              <button class="btn" style="width: 100%;" @click.prevent="sendPasswordReset">
+                {{ passwordResetSending ? 'Sending...' : 'Reset Password' }}
+              </button>
+              <p v-if="passwordResetSent" style="text-align: center; margin-top: 1rem; color: var(--success-color);">
+                Password reset email sent!
+              </p>
+            </div>
+            <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
+              {{ isSigningUp ? 'Already have an account?' : 'Don\'t have an account?' }} 
+              <a href="#" style="color: var(--accent-color);" @click.prevent="isSigningUp = !isSigningUp; forgotPassword = false; showAppleComingSoon=false">
+                {{ isSigningUp ? 'Login' : 'Sign up' }}
+              </a>
+            </p>
+            <p v-if="!isSigningUp && !forgotPassword" style="text-align: center; margin-top: 0.5rem; color: var(--text-secondary);">
+              <a href="#" style="color: var(--accent-color);" @click.prevent="forgotPassword = true; showAppleComingSoon=false">
+                Forgot password?
+              </a>
+            </p>
+          </div>
+          <div class="magic-link-section">
+            <h4 class="magic-link-title">{{ magicLinkMode ? 'Use Password Instead' : 'Or Use Magic Link' }}</h4>
+            <button class="btn-tiny btn-outlined" @click.prevent="toggleMagicLinkMode">
+              {{ magicLinkMode ? 'Password' : 'Magic Link' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-logo">Reunited</div>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="index.html#guidelines">Guidelines</a>
+          <a href="index.html#faqs">FAQs</a>
+          <a href="index.html#contact">Contact</a>
+        </div>
+        <div class="copyright">
+          &copy; 2025 Reunited. All rights reserved.
+        </div>
+        <div class="made-with-love">
+          Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav R</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Firebase + Vue + Env + Search Script -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
+  <script src="scripts/env.js"></script>
+  <script src="scripts/search.js"></script>
+</body>
+</html>
