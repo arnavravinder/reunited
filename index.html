@@ -5,623 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reunited - Find What You've Lost</title>
   <!-- Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root {
-      --dark-bg: #1a1a1a;
-      --darker-bg: #121212;
-      --light-bg: #2a2a2a;
-      --accent-color: #6e7fff;
-      --secondary-accent: #ff7eb3;
-      --text-color: #f8f8f8;
-      --text-secondary: #b0b0b0;
-      --success-color: #4caf50;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Work Sans', sans-serif;
-      background-color: var(--dark-bg);
-      color: var(--text-color);
-      line-height: 1.6;
-    }
-    
-    h1, h2, h3 {
-      font-family: 'Kanit', sans-serif;
-      font-weight: 500;
-    }
-    
-    h1 {
-      font-size: 3.5rem;
-      margin-bottom: 1rem;
-    }
-    
-    h2 {
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-      color: var(--accent-color);
-    }
-    
-    p {
-      font-family: 'Raleway', sans-serif;
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
-    }
-    
-    .container {
-      width: 85%;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 0;
-    }
-    
-    .btn {
-      display: inline-block;
-      padding: 0.8rem 2rem;
-      background-color: var(--accent-color);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      font-family: 'Kanit', sans-serif;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      text-align: center;
-    }
-    
-    .btn:hover {
-      background-color: #5867ff;
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(94, 114, 228, 0.3);
-    }
-
-    .btn-outlined {
-      background-color: transparent;
-      border: 2px solid var(--accent-color);
-      color: var(--accent-color);
-    }
-    
-    .btn-outlined:hover {
-      background-color: var(--accent-color);
-      color: white;
-    }
-    
-    .btn-secondary {
-      background-color: var(--secondary-accent);
-    }
-    
-    .btn-secondary:hover {
-      background-color: #ff6ba3;
-    }
-    
-    .splash-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: var(--darker-bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      overflow: hidden;
-      transition: opacity 0.5s ease;
-    }
-    
-    .splash-logo {
-      font-family: 'Lora', serif;
-      font-size: 3rem;
-      color: white;
-      position: relative;
-      transition: opacity 0.5s ease;
-    }
-    
-    .splash-dot {
-      position: absolute;
-      width: 15px;
-      height: 15px;
-      background-color: var(--secondary-accent);
-      border-radius: 50%;
-      bottom: -8px;
-      right: -15px;
-      z-index: 10;
-      transform-origin: center;
-    }
-    
-    header {
-      padding: 0.5rem 0;
-      background-color: rgba(26, 26, 26, 0.95);
-      position: fixed;
-      width: 100%;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(5px);
-    }
-    
-    .header-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .logo {
-      font-family: 'Lora', serif;
-      font-size: 1.8rem;
-      font-weight: 600;
-      color: white;
-      text-decoration: none;
-      position: relative;
-    }
-    
-    .logo::after {
-      content: ".";
-      font-size: 2.5rem;
-      color: var(--secondary-accent);
-      position: absolute;
-      bottom: -5px;
-    }
-    
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-      align-items: center;
-    }
-    
-    .nav-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-family: 'Work Sans', sans-serif;
-      font-size: 1rem;
-      transition: color 0.3s ease;
-    }
-    
-    .nav-links a:hover {
-      color: var(--accent-color);
-    }
-    
-    .nav-links .btn {
-      color: white !important;
-      margin-left: 0.5rem;
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-    }
-    
-    .mobile-menu-btn {
-      display: none;
-      font-size: 1.5rem;
-      color: var(--text-color);
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-    
-    .hero {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-      background: radial-gradient(circle at center, var(--light-bg) 0%, var(--dark-bg) 70%);
-    }
-    
-    .hero-content {
-      text-align: center;
-      max-width: 800px;
-      padding: 0 2rem;
-      position: relative;
-      z-index: 2;
-    }
-    
-    .hero-subtitle {
-      font-family: 'Raleway', sans-serif;
-      font-size: 1.3rem;
-      color: var(--text-secondary);
-      margin-bottom: 2rem;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    
-    .hero-btns {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      margin-top: 2rem;
-    }
-    
-    .floating-item {
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0.1;
-      background-color: var(--accent-color);
-      animation: float 20s infinite alternate ease-in-out;
-    }
-    
-    @keyframes float {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      100% { transform: translate(100px, 100px) rotate(180deg); }
-    }
-    
-    .guidelines {
-      padding: 8rem 0;
-      background-color: var(--darker-bg);
-    }
-    
-    .section-title {
-      text-align: center;
-      margin-bottom: 4rem;
-    }
-    
-    .guidelines-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 2rem;
-    }
-    
-    .guideline-card {
-      background-color: var(--light-bg);
-      border-radius: 10px;
-      padding: 2rem;
-      text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .guideline-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-    }
-    
-    .guideline-icon {
-      font-size: 2.5rem;
-      color: var(--accent-color);
-      margin-bottom: 1.5rem;
-    }
-    
-    .guideline-title {
-      font-family: 'Kanit', sans-serif;
-      font-size: 1.4rem;
-      margin-bottom: 1rem;
-    }
-    
-    .faqs {
-      padding: 8rem 0;
-    }
-    
-    .faq-container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    .faq-item {
-      margin-bottom: 1.5rem;
-      border-bottom: 1px solid var(--light-bg);
-      padding-bottom: 1.5rem;
-    }
-    
-    .faq-question {
-      font-family: 'Lora', serif;
-      font-size: 1.3rem;
-      font-weight: 500;
-      margin-bottom: 0.8rem;
-      color: var(--accent-color);
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: color 0.3s ease;
-    }
-    
-    .faq-question:hover {
-      color: var(--secondary-accent);
-    }
-    
-    .faq-answer {
-      font-family: 'Raleway', sans-serif;
-      color: var(--text-secondary);
-      padding-left: 1rem;
-      border-left: 2px solid var(--accent-color);
-      margin-bottom: 1rem;
-      transition: all 0.3s ease;
-    }
-    
-    .contact {
-      padding: 8rem 0;
-      background-color: var(--darker-bg);
-    }
-    
-    .contact-form {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: var(--light-bg);
-      padding: 3rem;
-      border-radius: 10px;
-    }
-    
-    .form-row {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .form-group {
-      margin-bottom: 1.5rem;
-      flex: 1;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-family: 'Work Sans', sans-serif;
-      color: var(--text-secondary);
-    }
-    
-    .form-control {
-      width: 100%;
-      padding: 0.8rem 1rem;
-      background-color: var(--dark-bg);
-      border: 1px solid var(--light-bg);
-      color: var(--text-color);
-      border-radius: 5px;
-      font-family: 'Raleway', sans-serif;
-    }
-    
-    textarea.form-control {
-      min-height: 150px;
-      resize: vertical;
-    }
-    
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(5px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    
-    .modal {
-      background-color: var(--dark-bg);
-      border-radius: 10px;
-      width: 90%;
-      max-width: 450px;
-      padding: 2rem;
-      position: relative;
-    }
-    
-    .modal-close {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      font-size: 1.5rem;
-      color: var(--text-secondary);
-      cursor: pointer;
-    }
-    
-    .modal-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    
-    .modal-title {
-      font-family: 'Kanit', sans-serif;
-      font-size: 1.8rem;
-    }
-    
-    .login-methods {
-      margin-bottom: 2rem;
-    }
-    
-    .social-login {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .social-btn {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.8rem;
-      border-radius: 5px;
-      background-color: var(--light-bg);
-      color: var(--text-color);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .social-btn:hover {
-      background-color: var(--accent-color);
-    }
-    
-    .or-divider {
-      display: flex;
-      align-items: center;
-      margin: 1.5rem 0;
-      color: var(--text-secondary);
-    }
-    
-    .or-divider::before,
-    .or-divider::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background-color: var(--light-bg);
-    }
-    
-    .or-divider span {
-      padding: 0 1rem;
-    }
-    
-    .auth-error {
-      color: #ff4c4c;
-      background-color: rgba(255, 76, 76, 0.1);
-      padding: 0.8rem;
-      border-radius: 5px;
-      text-align: center;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-    }
-    
-    footer {
-      background-color: var(--darker-bg);
-      padding: 3rem 0;
-      text-align: center;
-    }
-    
-    .footer-logo {
-      font-family: 'Lora', serif;
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-      display: inline-block;
-      position: relative;
-    }
-    
-    .footer-logo::after {
-      content: ".";
-      font-size: 2rem;
-      color: var(--secondary-accent);
-      position: absolute;
-      bottom: -5px;
-    }
-    
-    .footer-links {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin: 1.5rem 0;
-    }
-    
-    .footer-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-    
-    .footer-links a:hover {
-      color: var(--accent-color);
-    }
-    
-    .copyright {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
-    }
-    
-    .made-with-love {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-    
-    .made-with-love a {
-      color: var(--accent-color);
-      text-decoration: none;
-    }
-    
-    .made-with-love a:hover {
-      text-decoration: underline;
-    }
-    
-    .heart {
-      color: var(--secondary-accent);
-      display: inline-block;
-      animation: heartbeat 1.5s infinite;
-    }
-    
-    @keyframes heartbeat {
-      0% { transform: scale(1); }
-      5% { transform: scale(1.25); }
-      10% { transform: scale(1); }
-      15% { transform: scale(1.25); }
-      20% { transform: scale(1); }
-      100% { transform: scale(1); }
-    }
-    
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 2.2rem;
-      }
-      
-      h2 {
-        font-size: 1.8rem;
-      }
-      
-      .hero-subtitle {
-        font-size: 1rem;
-      }
-      
-      .hero-btns {
-        flex-direction: column;
-      }
-      
-      .nav-links {
-        display: none;
-      }
-      
-      .mobile-menu-btn {
-        display: block;
-      }
-      
-      .mobile-menu-active .nav-links {
-        position: fixed;
-        top: 80px;
-        left: 0;
-        right: 0;
-        display: flex;
-        flex-direction: column;
-        background-color: var(--dark-bg);
-        padding: 1.5rem;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-      }
-      
-      .mobile-menu-active .nav-links a {
-        padding: 0.8rem 0;
-      }
-      
-      .form-row {
-        flex-direction: column;
-        gap: 1.5rem;
-      }
-      
-      .container {
-        width: 90%;
-        padding: 1rem 0;
-      }
-      
-      .contact-form {
-        padding: 1.5rem;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
   <div id="app">
     <div class="splash-screen" v-if="loading">
-      <div class="splash-logo">Reunited</div>
+      <div class="splash-logo" ref="splashLogo">
+        <span class="splash-text" ref="splashText">Reunited</span>
+        <div class="splash-dot-wrapper" ref="splashDotWrapper">
+          <span class="splash-dot" ref="splashDot"></span>
+        </div>
+      </div>
     </div>
-    
     <header :class="{'mobile-menu-active': mobileMenuOpen}">
       <div class="container header-container">
-        <a href="#" class="logo">Reunited</a>
+        <a href="#" class="logo" ref="navLogo">Reunited</a>
         <button class="mobile-menu-btn" @click="toggleMobileMenu">
           <i class="fas" :class="mobileMenuOpen ? 'fa-xmark' : 'fa-bars'"></i>
         </button>
@@ -635,7 +37,7 @@
         </div>
       </div>
     </header>
-    
+
     <section class="hero">
       <div v-for="(item, index) in floatingItems" :key="index" class="floating-item" :style="item.style"></div>
       <div class="hero-content">
@@ -647,7 +49,7 @@
         </div>
       </div>
     </section>
-    
+
     <section class="guidelines" id="guidelines">
       <div class="container">
         <div class="section-title">
@@ -685,7 +87,7 @@
         </div>
       </div>
     </section>
-    
+
     <section class="faqs" id="faqs">
       <div class="container">
         <div class="section-title">
@@ -704,42 +106,49 @@
         </div>
       </div>
     </section>
-    
+
     <section class="contact" id="contact">
       <div class="container">
         <div class="section-title">
           <h2>Contact Us</h2>
         </div>
         <div class="contact-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="name">Full Name</label>
-              <input type="text" id="name" class="form-control" v-model="contactForm.name">
-            </div>
-            <div class="form-group">
-              <label for="email">Email Address</label>
-              <input type="email" id="email" class="form-control" v-model="contactForm.email">
-            </div>
+          <div class="form-success" v-if="formSubmitted">
+            Your message has been sent successfully! We'll get back to you soon.
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="phone">Phone Number</label>
-              <input type="tel" id="phone" class="form-control" v-model="contactForm.phone">
+          <form @submit.prevent="submitContactForm" :action="formspreeUrl" method="POST">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" class="form-control" v-model="contactForm.name" required>
+              </div>
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" v-model="contactForm.email" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" class="form-control" v-model="contactForm.phone">
+              </div>
+              <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" name="subject" class="form-control" v-model="contactForm.subject" required>
+              </div>
             </div>
             <div class="form-group">
-              <label for="subject">Subject</label>
-              <input type="text" id="subject" class="form-control" v-model="contactForm.subject">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" class="form-control" v-model="contactForm.message" required></textarea>
             </div>
-          </div>
-          <div class="form-group">
-            <label for="message">Message</label>
-            <textarea id="message" class="form-control" v-model="contactForm.message"></textarea>
-          </div>
-          <button class="btn" @click.prevent="submitContactForm">Send Message</button>
+            <button type="submit" class="btn" :disabled="formSubmitting">
+              {{ formSubmitting ? 'Sending...' : 'Send Message' }}
+            </button>
+          </form>
         </div>
       </div>
     </section>
-    
+
     <footer>
       <div class="container">
         <div class="footer-logo">Reunited</div>
@@ -757,7 +166,7 @@
         </div>
       </div>
     </footer>
-    
+
     <div class="modal-overlay" v-if="showLoginModal">
       <div class="modal">
         <div class="modal-close" @click="showLoginModal = false">×</div>
@@ -769,7 +178,7 @@
             <div class="social-btn" @click="signInWithGoogle">
               <i class="fa-brands fa-google"></i>
             </div>
-            <div class="social-btn" @click="signInWithApple">
+            <div class="social-btn" @click="showAppleComingSoon = true">
               <i class="fa-brands fa-apple"></i>
             </div>
             <div class="social-btn" @click="signInWithTwitter">
@@ -779,275 +188,79 @@
           <div class="or-divider">
             <span>or</span>
           </div>
+          <div v-if="showAppleComingSoon" class="auth-error">
+            Apple Authentication is coming soon!
+          </div>
           <div v-if="authError" class="auth-error">
             {{ authError }}
           </div>
-          <div class="form-group">
+          <div class="form-group" v-if="!magicLinkMode">
             <label for="login-email">Email</label>
             <input type="email" id="login-email" class="form-control" v-model="loginForm.email">
           </div>
-          <div class="form-group">
+          <div class="form-group" v-if="!magicLinkMode && !forgotPassword">
             <label for="login-password">Password</label>
             <input type="password" id="login-password" class="form-control" v-model="loginForm.password">
           </div>
-          <button class="btn" style="width: 100%;" @click.prevent="submitLoginForm">{{ isSigningUp ? 'Sign Up' : 'Login' }}</button>
-          <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
-            {{ isSigningUp ? 'Already have an account?' : 'Don\'t have an account?' }} 
-            <a href="#" style="color: var(--accent-color);" @click.prevent="isSigningUp = !isSigningUp">
-              {{ isSigningUp ? 'Login' : 'Sign up' }}
-            </a>
-          </p>
+          <div v-if="magicLinkMode">
+            <div class="form-group">
+              <label for="magic-email">Your Email</label>
+              <input type="email" id="magic-email" class="form-control" v-model="magicLinkEmail" placeholder="Enter your email address">
+            </div>
+            <button class="btn" style="width: 100%;" @click.prevent="sendMagicLink" :disabled="magicLinkSending">
+              {{ magicLinkSending ? 'Sending...' : 'Send Magic Link' }}
+            </button>
+            <p v-if="magicLinkSent" style="text-align: center; margin-top: 1rem; color: var(--success-color);">
+              Magic link sent! Check your email.
+            </p>
+          </div>
+          <div v-if="!magicLinkMode">
+            <button 
+              v-if="!forgotPassword" 
+              class="btn" 
+              style="width: 100%;" 
+              @click.prevent="submitLoginForm">
+              {{ isSigningUp ? 'Sign Up' : 'Login' }}
+            </button>
+            <div v-else>
+              <div class="form-group">
+                <input type="email" class="form-control" v-model="resetEmail" placeholder="Enter your email">
+              </div>
+              <button class="btn" style="width: 100%;" @click.prevent="sendPasswordReset">
+                {{ passwordResetSending ? 'Sending...' : 'Reset Password' }}
+              </button>
+              <p v-if="passwordResetSent" style="text-align: center; margin-top: 1rem; color: var(--success-color);">
+                Password reset email sent!
+              </p>
+            </div>
+            <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
+              {{ isSigningUp ? 'Already have an account?' : 'Don\'t have an account?' }} 
+              <a href="#" style="color: var(--accent-color);" @click.prevent="isSigningUp = !isSigningUp; forgotPassword = false; showAppleComingSoon=false">
+                {{ isSigningUp ? 'Login' : 'Sign up' }}
+              </a>
+            </p>
+            <p v-if="!isSigningUp && !forgotPassword" style="text-align: center; margin-top: 0.5rem; color: var(--text-secondary);">
+              <a href="#" style="color: var(--accent-color);" @click.prevent="forgotPassword = true; showAppleComingSoon=false">
+                Forgot password?
+              </a>
+            </p>
+          </div>
+          <div class="magic-link-section">
+            <h4 class="magic-link-title">{{ magicLinkMode ? 'Use Password Instead' : 'Or Use Magic Link' }}</h4>
+            <button class="btn-tiny btn-outlined" @click.prevent="toggleMagicLinkMode">
+              {{ magicLinkMode ? 'Password' : 'Magic Link' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  
-  <script>
-    // Load environment variables from .env file if available
-    const getEnvVar = (key, defaultValue = null) => {
-      // Try to get from window.env (which can be set outside this script)
-      if (window.env && window.env[key]) {
-        return window.env[key];
-      }
-      // If there's a process.env available (like in Node.js environments)
-      if (typeof process !== 'undefined' && process.env && process.env[key]) {
-        return process.env[key];
-      }
-      return defaultValue;
-    };
-    
-    // Initialize Firebase with env variables
-    const firebaseConfig = {
-      apiKey: getEnvVar('FIREBASE_API_KEY', 'YOUR_API_KEY'),
-      authDomain: getEnvVar('FIREBASE_AUTH_DOMAIN', 'your-project-id.firebaseapp.com'),
-      projectId: getEnvVar('FIREBASE_PROJECT_ID', 'your-project-id'),
-      storageBucket: getEnvVar('FIREBASE_STORAGE_BUCKET', 'your-project-id.appspot.com'),
-      messagingSenderId: getEnvVar('FIREBASE_MESSAGING_SENDER_ID', 'YOUR_MESSAGING_SENDER_ID'),
-      appId: getEnvVar('FIREBASE_APP_ID', 'YOUR_APP_ID')
-    };
-    
-    // Initialize Firebase app
-    firebase.initializeApp(firebaseConfig);
-    
-    const app = Vue.createApp({
-      data() {
-        return {
-          loading: true,
-          mobileMenuOpen: false,
-          showLoginModal: false,
-          isSigningUp: false,
-          floatingItems: [],
-          contactForm: {
-            name: '',
-            email: '',
-            phone: '',
-            subject: '',
-            message: ''
-          },
-          loginForm: {
-            email: '',
-            password: ''
-          },
-          user: null,
-          authError: null,
-          faqs: [
-            {
-              question: "How can I post about a lost item on the website?",
-              answer: "If you have lost an item, login with your account and scroll to the bottom of the page. Fill in the form to find lost items which match the description of your post.",
-              isOpen: false
-            },
-            {
-              question: "What happens if someone loses an expensive item?",
-              answer: "If you lose an item of high value such as a phone or a laptop, contact us using the form at the bottom of this page and we will get back to you as soon as possible.",
-              isOpen: false
-            },
-            {
-              question: "What happens if an item is not claimed?",
-              answer: "Posts remain active for 6 months. If an item is not claimed within this time frame, it will be donated to a local charity or the support staff at workplace.",
-              isOpen: false
-            },
-            {
-              question: "How to report a lost item?",
-              answer: "To report a lost item, please hand it over to our team at the Lost and Found, located in the lunch hall.",
-              isOpen: false
-            }
-          ]
-        }
-      },
-      mounted() {
-        console.log("Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder");
-        
-        this.generateFloatingItems();
-        
-        // Set up Firebase auth state listener
-        firebase.auth().onAuthStateChanged(user => {
-          this.user = user;
-        });
-        
-        // Start loading animation
-        this.startLoadingAnimation();
-      },
-      methods: {
-        startLoadingAnimation() {
-          const splash = document.querySelector('.splash-screen');
-          const logo = document.querySelector('.splash-logo');
-          const dot = document.createElement('div');
-          
-          dot.className = 'splash-dot';
-          logo.appendChild(dot);
-          
-          setTimeout(() => {
-            const textWidth = logo.offsetWidth;
-            const textHeight = logo.offsetHeight;
-            
-            const centerX = 0;
-            const centerY = 0;
-            const radiusX = textWidth * 0.7;
-            const radiusY = textHeight * 1.5;
-            
-            dot.style.transition = 'transform 3s cubic-bezier(0.37, 0, 0.63, 1)';
-            dot.style.transform = `translate(${centerX}px, ${centerY - radiusY}px)`;
-            
-            setTimeout(() => {
-              dot.style.transform = `translate(${centerX + radiusX}px, ${centerY}px)`;
-              
-              setTimeout(() => {
-                dot.style.transform = `translate(${centerX}px, ${centerY + radiusY}px)`;
-                
-                setTimeout(() => {
-                  dot.style.transform = `translate(${centerX - radiusX}px, ${centerY}px)`;
-                  
-                  setTimeout(() => {
-                    dot.style.transform = 'translate(0px, 0px)';
-                    
-                    setTimeout(() => {
-                      dot.style.transition = 'all 0.8s ease-in';
-                      dot.style.transform = 'scale(100)';
-                      
-                      setTimeout(() => {
-                        splash.style.opacity = '0';
-                        
-                        setTimeout(() => {
-                          this.loading = false;
-                        }, 300);
-                      }, 800);
-                    }, 300);
-                  }, 750);
-                }, 750);
-              }, 750);
-            }, 750);
-          }, 500);
-        },
-        generateFloatingItems() {
-          const items = [];
-          
-          for (let i = 0; i < 20; i++) {
-            const size = Math.random() * 20 + 5;
-            const x = Math.random() * 100;
-            const y = Math.random() * 100;
-            const opacity = Math.random() * 0.15 + 0.05;
-            const delay = Math.random() * 5;
-            const duration = Math.random() * 10 + 10;
-            
-            items.push({
-              style: {
-                width: `${size}px`,
-                height: `${size}px`,
-                left: `${x}%`,
-                top: `${y}%`,
-                opacity: opacity,
-                backgroundColor: Math.random() > 0.5 ? 'var(--accent-color)' : 'var(--secondary-accent)',
-                animationDuration: `${duration}s`,
-                animationDelay: `${delay}s`
-              }
-            });
-          }
-          
-          this.floatingItems = items;
-        },
-        animateFloatingItems() {
-          // Animation is handled by CSS
-        },
-        toggleMobileMenu() {
-          this.mobileMenuOpen = !this.mobileMenuOpen;
-        },
-        toggleFaq(index) {
-          this.faqs[index].isOpen = !this.faqs[index].isOpen;
-        },
-        submitContactForm() {
-          alert('Thank you for your message! We will get back to you soon.');
-          this.contactForm = {
-            name: '',
-            email: '',
-            phone: '',
-            subject: '',
-            message: ''
-          };
-        },
-        submitLoginForm() {
-          this.authError = null;
-          
-          if (this.isSigningUp) {
-            firebase.auth().createUserWithEmailAndPassword(this.loginForm.email, this.loginForm.password)
-              .then(() => {
-                this.showLoginModal = false;
-                this.loginForm = { email: '', password: '' };
-              })
-              .catch(error => {
-                this.authError = error.message;
-              });
-          } else {
-            firebase.auth().signInWithEmailAndPassword(this.loginForm.email, this.loginForm.password)
-              .then(() => {
-                this.showLoginModal = false;
-                this.loginForm = { email: '', password: '' };
-              })
-              .catch(error => {
-                this.authError = error.message;
-              });
-          }
-        },
-        signInWithGoogle() {
-          const provider = new firebase.auth.GoogleAuthProvider();
-          firebase.auth().signInWithPopup(provider)
-            .then(() => {
-              this.showLoginModal = false;
-            })
-            .catch(error => {
-              this.authError = error.message;
-            });
-        },
-        signInWithApple() {
-          const provider = new firebase.auth.OAuthProvider('apple.com');
-          firebase.auth().signInWithPopup(provider)
-            .then(() => {
-              this.showLoginModal = false;
-            })
-            .catch(error => {
-              this.authError = error.message;
-            });
-        },
-        signInWithTwitter() {
-          const provider = new firebase.auth.TwitterAuthProvider();
-          firebase.auth().signInWithPopup(provider)
-            .then(() => {
-              this.showLoginModal = false;
-            })
-            .catch(error => {
-              this.authError = error.message;
-            });
-        },
-        signOut() {
-          firebase.auth().signOut()
-            .catch(error => {
-              console.error("Sign out error:", error);
-            });
-        },
-        goToSearchPage() {
-          window.location.href = "/search.html";
-        }
-      }
-    }).mount('#app');
-  </script>
+
+  <!-- Firebase + Vue + Env + Main -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
+  <script src="scripts/env.js"></script>
+  <script src="scripts/main.js"></script>
 </body>
 </html>
