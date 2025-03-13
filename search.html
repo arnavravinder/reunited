@@ -15,12 +15,10 @@
 </head>
 <body>
   <div id="searchApp">
-    <!-- Loading Spinner -->
     <div class="loading-spinner" v-if="isLoading">
       <div class="spinner"></div>
     </div>
 
-    <!-- Header/Navigation -->
     <header :class="{'mobile-menu-active': mobileMenuOpen}">
       <div class="container header-container">
         <a href="index.html" class="logo">Reunited</a>
@@ -38,7 +36,6 @@
       </div>
     </header>
 
-    <!-- Main Search Area -->
     <section class="search-hero">
       <div class="container">
         <h1>Find Your Lost Items</h1>
@@ -89,18 +86,17 @@
             </div>
           </div>
           
-          <div class="search-enhancement" v-if="aiAssisted">
+          <div class="search-enhancement" v-if="aiAssisted && searchPerformed">
             <div class="ai-badge">
               <i class="fas fa-robot"></i> AI Enhanced Search
             </div>
-            <p class="ai-info">Our AI is helping find items matching your description</p>
+            <p class="ai-info">We found {{ allItems.length }} items matching your description!</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Search Results Section -->
-    <section class="search-results">
+    <section class="search-results" v-if="searchPerformed">
       <div class="container">
         <div class="results-header">
           <h2>{{ searchResults.length }} Items Found</h2>
@@ -124,22 +120,12 @@
           </div>
         </div>
         
-        <!-- No Results Message -->
-        <div class="no-results" v-if="searchResults.length === 0 && searchPerformed">
+        <div class="no-results" v-if="searchResults.length === 0">
           <i class="fas fa-search-minus"></i>
           <h3>No items found</h3>
           <p>Try adjusting your search criteria or filters</p>
         </div>
         
-        <!-- No Login Message -->
-        <div class="no-results auth-required-message" v-if="!user && !isLoading && !searchPerformed">
-          <i class="fas fa-user-lock"></i>
-          <h3>Authentication Required</h3>
-          <p>Please log in to search for lost items</p>
-          <button class="btn" @click="showLoginModal = true">Login / Sign Up</button>
-        </div>
-        
-        <!-- Grid View -->
         <div class="results-grid" v-if="viewMode === 'grid' && searchResults.length > 0">
           <div class="item-card" v-for="(item, index) in searchResults" :key="index" 
                @click="openItemDetails(item)"
@@ -159,7 +145,6 @@
           </div>
         </div>
         
-        <!-- List View -->
         <div class="results-list" v-if="viewMode === 'list' && searchResults.length > 0">
           <div class="list-item" v-for="(item, index) in searchResults" :key="index" 
                 @click="openItemDetails(item)"
@@ -180,7 +165,6 @@
           </div>
         </div>
         
-        <!-- Pagination -->
         <div class="pagination" v-if="totalPages > 1">
           <button @click="prevPage" :disabled="currentPage === 1">
             <i class="fas fa-chevron-left"></i>
@@ -192,8 +176,18 @@
         </div>
       </div>
     </section>
+    
+    <section class="search-results" v-if="!searchPerformed && !user && !isLoading">
+      <div class="container">
+        <div class="no-results auth-required-message">
+          <i class="fas fa-user-lock"></i>
+          <h3>Authentication Required</h3>
+          <p>Please log in to search for lost items</p>
+          <button class="btn" @click="showLoginModal = true">Login / Sign Up</button>
+        </div>
+      </div>
+    </section>
 
-    <!-- Item Detail Modal -->
     <div class="modal-overlay" v-if="selectedItem">
       <div class="modal item-detail-modal">
         <div class="modal-close" @click="selectedItem = null">×</div>
@@ -264,7 +258,6 @@
       </div>
     </div>
     
-    <!-- Claim Form Modal -->
     <div class="modal-overlay" v-if="showClaimModal">
       <div class="modal claim-modal">
         <div class="modal-close" @click="showClaimModal = false">×</div>
@@ -302,7 +295,6 @@
       </div>
     </div>
     
-    <!-- Claim Code Modal -->
     <div class="modal-overlay" v-if="showClaimCodeModal">
       <div class="modal claim-code-modal">
         <div class="modal-close" @click="showClaimCodeModal = false">×</div>
@@ -334,7 +326,6 @@
       </div>
     </div>
 
-    <!-- Login Modal -->
     <div class="modal-overlay" v-if="showLoginModal">
       <div class="modal">
         <div class="modal-close" @click="showLoginModal = false">×</div>
@@ -423,7 +414,6 @@
       </div>
     </div>
 
-    <!-- Footer -->
     <footer>
       <div class="container">
         <div class="footer-logo">Reunited</div>
@@ -443,7 +433,6 @@
     </footer>
   </div>
 
-  <!-- Firebase + Vue + Env + Search Script -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>

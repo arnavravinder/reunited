@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reunited - User Dashboard</title>
+  <!-- Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/dashboard.css">
+</head>
+<body>
+  <div id="dashboardApp">
+    <div class="loading-spinner" v-if="isLoading">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="auth-required" v-if="!user && !isLoading">
+      <div class="auth-required-content">
+        <h2>Authentication Required</h2>
+        <p>Please login to access your dashboard</p>
+        <button class="btn" @click="showLoginModal = true">Login / Sign Up</button>
+        <a href="index.html" class="btn btn-outlined">Back to Home</a>
+      </div>
+    </div>
+
+    <div v-if="user && !isLoading">
+      <header :class="{'mobile-menu-active': mobileMenuOpen}">
+        <div class="container header-container">
+          <a href="index.html" class="logo">Reunited</a>
+          <button class="mobile-menu-btn" @click="toggleMobileMenu">
+            <i class="fas" :class="mobileMenuOpen ? 'fa-xmark' : 'fa-bars'"></i>
+          </button>
+          <div class="nav-links">
+            <a href="search.html">Search Items</a>
+            <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="index.html#guidelines">Guidelines</a>
+            <a href="index.html#contact">Contact</a>
+            <a href="#" class="btn btn-outlined" @click.prevent="signOut">Sign Out</a>
+          </div>
+        </div>
+      </header>
+
+      <section class="dashboard-header">
+        <div class="container">
+          <div class="user-welcome">
+            <div class="user-avatar">
+              <img :src="user.photoURL || 'images/default-avatar.png'" alt="User Avatar">
+            </div>
+            <div class="user-info">
+              <h1>Welcome, {{ user.displayName || user.email }}</h1>
+              <p>Manage your lost and found items</p>
+            </div>
+          </div>
+          <div class="dashboard-actions">
+            <button class="btn" @click="showReportLostModal = true">
+              <i class="fas fa-search"></i> Report Lost Item
+            </button>
+            <button class="btn btn-secondary" @click="showReportFoundModal = true">
+              <i class="fas fa-hand-holding"></i> Report Found Item
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-content">
+        <div class="container">
+          <div class="dashboard-tabs">
+            <button 
+              v-for="tab in tabs" 
+              :key="tab.id" 
+              :class="['tab-btn', { active: activeTab === tab.id }]" 
+              @click="activeTab = tab.id"
+            >
+              <i :class="tab.icon"></i> {{ tab.name }}
+              <span v-if="getTabCount(tab.id)" class="tab-count">{{ getTabCount(tab.id) }}</span>
+            </button>
+          </div>
+          
+          <div class="tab-content" v-if="activeTab === 'notifications'">
+            <div class="section-header">
+              <h2>Notifications</h2>
+              <button class="btn-tiny" @click="markAllAsRead" v-if="hasUnreadNotifications()">
+                Mark All as Read
+              </button>
+            </div>
+            
+            <div class="empty-state" v-if="notifications.length === 0">
+              <i class="fas fa-bell-slash"></i>
+              <h3>No Notifications</h3>
+              <p>You don't have any notifications at the moment</p>
+            </div>
+            
+            <div class="notifications-list" v-else>
+              <div 
+                v-for="(notification, index) in notifications" 
+                :key="index" 
+                class="notification-item"
+                :class="{ unread: !notification.read }"
+                @click="markAsRead(notification.id)"
+              >
+                <div class="notification-icon">
+                  <i :class="getNotificationIcon(notification.type)"></i>
+                </div>
+                <div class="notification-content">
+                  <div class="notification-title">{{ notification.title }}</div>
+                  <div class="notification-message">{{ notification.message }}</div>
+                  <div class="notification-time">{{ formatDate(notification.timestamp) }}</div>
+                </div>
+                <div class="notification-actions">
+                  <button class="action-btn" v-if="notification.actionable" @click.stop="handleNotificationAction(notification)">
+                    <i class="fas fa-arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="tab-content" v-if="activeTab === 'lost'">
+            <div class="section-header">
+              <h2>My Lost Items</h2>
+              <button class="btn-tiny" @click="showReportLostModal = true">
+                <i class="fas fa-plus"></i> Report New
+              </button>
+            </div>
+            
+            <div class="empty-state" v-if="lostItems.length === 0">
+              <i class="fas fa-search"></i>
+              <h3>No Lost Items</h3>
+              <p>You haven't reported any lost items yet</p>
+              <button class="btn" @click="showReportLostModal = true">Report Lost Item</button>
+            </div>
+            
+            <div class="items-grid" v-else>
+              <div class="item-card" v-for="(item, index) in lostItems" :key="index">
+                <div class="item-status" :class="item.status">{{ item.status }}</div>
+                <div class="item-image" :style="{ backgroundImage: `url(${item.image || 'images/no-image.png'})` }"></div>
+                <div class="item-info">
+                  <h3>{{ item.name }}</h3>
+                  <div class="item-meta">
+                    <span><i class="fas fa-calendar-alt"></i> {{ formatDate(item.dateLost) }}</span>
+                    <span><i class="fas fa-map-marker-alt"></i> {{ item.location }}</span>
+                  </div>
+                  <div class="item-description">{{ truncateDescription(item.description) }}</div>
+                  <div class="item-actions">
+                    <button class="btn-tiny" @click="viewItemDetails(item, 'lost')">View Details</button>
+                    <button class="btn-tiny btn-outlined" @click="editItem(item, 'lost')">Edit</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="tab-content" v-if="activeTab === 'found'">
+            <div class="section-header">
+              <h2>My Found Items</h2>
+              <button class="btn-tiny" @click="showReportFoundModal = true">
+                <i class="fas fa-plus"></i> Report New
+              </button>

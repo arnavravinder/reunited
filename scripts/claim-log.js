@@ -1,365 +1,375 @@
-// Claim Log JavaScript
-
 const getEnvVar = (key, defaultValue = null) => {
-    if (window.env && window.env[key]) {
-      return window.env[key];
-    }
-    if (typeof process !== 'undefined' && process.env && process.env[key]) {
-      return process.env[key];
-    }
-    return defaultValue;
-  };
-  
-  // Firebase config from environment variables
-  const firebaseConfig = {
-    apiKey: getEnvVar('FIREBASE_API_KEY'),
-    authDomain: getEnvVar('FIREBASE_AUTH_DOMAIN'),
-    databaseURL: getEnvVar('FIREBASE_DATABASE_URL'),
-    projectId: getEnvVar('FIREBASE_PROJECT_ID'),
-    storageBucket: getEnvVar('FIREBASE_STORAGE_BUCKET'),
-    messagingSenderId: getEnvVar('FIREBASE_MESSAGING_SENDER_ID'),
-    appId: getEnvVar('FIREBASE_APP_ID')
-  };
-  
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  
-  // Initialize Firestore
-  const db = firebase.firestore();
-  
-  // Vue App
-  const app = Vue.createApp({
-    data() {
-      return {
-        // Auth
-        user: null,
-        authError: null,
-        showLoginModal: false,
-        isSigningUp: false,
-        loginForm: {
-          email: '',
-          password: ''
-        },
-        magicLinkMode: false,
-        magicLinkEmail: '',
-        magicLinkSending: false,
-        magicLinkSent: false,
-        forgotPassword: false,
-        resetEmail: '',
-        passwordResetSending: false,
-        passwordResetSent: false,
-        showAppleComingSoon: false,
+  if (window.env && window.env[key]) {
+    return window.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  return defaultValue;
+};
+
+const firebaseConfig = {
+  apiKey: getEnvVar('FIREBASE_API_KEY'),
+  authDomain: getEnvVar('FIREBASE_AUTH_DOMAIN'),
+  databaseURL: getEnvVar('FIREBASE_DATABASE_URL'),
+  projectId: getEnvVar('FIREBASE_PROJECT_ID'),
+  storageBucket: getEnvVar('FIREBASE_STORAGE_BUCKET'),
+  messagingSenderId: getEnvVar('FIREBASE_MESSAGING_SENDER_ID'),
+  appId: getEnvVar('FIREBASE_APP_ID')
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const app = Vue.createApp({
+  data() {
+    return {
+      user: null,
+      authError: null,
+      showLoginModal: false,
+      isSigningUp: false,
+      loginForm: {
+        email: '',
+        password: ''
+      },
+      magicLinkMode: false,
+      magicLinkEmail: '',
+      magicLinkSending: false,
+      magicLinkSent: false,
+      forgotPassword: false,
+      resetEmail: '',
+      passwordResetSending: false,
+      passwordResetSent: false,
+      showAppleComingSoon: false,
+      
+      isLoading: true,
+      mobileMenuOpen: false,
+      
+      searchQuery: '',
+      selectedStatus: '',
+      selectedCategory: '',
+      sortOption: 'date-desc',
+      
+      currentPage: 1,
+      itemsPerPage: 10,
+      totalPages: 1,
+      
+      claims: []
+    };
+  },
+  computed: {
+    filteredClaims() {
+      return this.claims.filter(claim => {
+        const matchesSearch = !this.searchQuery || 
+          claim.itemName.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
+          claim.location.toLowerCase().includes(this.searchQuery.toLowerCase());
         
-        // UI States
-        isLoading: true,
-        mobileMenuOpen: false,
+        const matchesStatus = !this.selectedStatus || claim.status === this.selectedStatus;
         
-        // Claim Data
-        currentClaim: null,
-        claimHistory: [],
-        selectedClaim: null
-      };
-    },
-    mounted() {
-      // Check authentication state
-      firebase.auth().onAuthStateChanged(user => {
-        this.user = user;
+        const matchesCategory = !this.selectedCategory || claim.category === this.selectedCategory;
         
-        if (user) {
-          // Load claim data
-          this.loadClaimData();
-        } else {
-          this.isLoading = false;
-        }
+        return matchesSearch && matchesStatus && matchesCategory;
       });
-      
-      // Check for magic link sign-in
-      this.checkMagicLinkSignIn();
     },
-    methods: {
-      // Authentication Methods
-      submitLoginForm() {
-        this.authError = null;
-        if (this.isSigningUp) {
-          // Create user
-          firebase.auth().createUserWithEmailAndPassword(
-            this.loginForm.email,
-            this.loginForm.password
-          )
-          .then(() => {
-            this.showLoginModal = false;
-            this.loginForm = { email: '', password: '' };
-          })
-          .catch(error => {
-            this.authError = error.message;
-          });
-        } else {
-          // Sign in existing user
-          firebase.auth().signInWithEmailAndPassword(
-            this.loginForm.email,
-            this.loginForm.password
-          )
-          .then(() => {
-            this.showLoginModal = false;
-            this.loginForm = { email: '', password: '' };
-          })
-          .catch(error => {
-            this.authError = error.message;
-          });
-        }
-      },
+    paginatedClaims() {
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+      const endIndex = startIndex + this.itemsPerPage;
+      return this.filteredClaims.slice(startIndex, endIndex);
+    }
+  },
+  watch: {
+    filteredClaims() {
+      this.updatePagination();
+    },
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    selectedStatus() {
+      this.currentPage = 1;
+    },
+    selectedCategory() {
+      this.currentPage = 1;
+    },
+    sortOption() {
+      this.sortClaims();
+    }
+  },
+  mounted() {
+    console.log("Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder");
+    
+    firebase.auth().onAuthStateChanged(user => {
+      this.user = user;
+    });
+    
+    this.loadPublicClaims();
+    
+    this.checkMagicLinkSignIn();
+  },
+  methods: {
+    loadPublicClaims() {
+      this.isLoading = true;
       
-      sendMagicLink() {
-        if (!this.magicLinkEmail) {
-          this.authError = "Please enter your email address";
-          return;
-        }
-        this.magicLinkSending = true;
-        this.authError = null;
-        const actionCodeSettings = {
-          url: window.location.href,
-          handleCodeInApp: true
-        };
-        firebase.auth().sendSignInLinkToEmail(this.magicLinkEmail, actionCodeSettings)
-        .then(() => {
-          window.localStorage.setItem('emailForSignIn', this.magicLinkEmail);
-          this.magicLinkSent = true;
-        })
-        .catch(error => {
-          this.authError = error.message;
-        })
-        .finally(() => {
-          this.magicLinkSending = false;
-        });
-      },
-      
-      sendPasswordReset() {
-        if (!this.resetEmail) {
-          this.authError = "Please enter your email address";
-          return;
-        }
-        this.passwordResetSending = true;
-        this.authError = null;
-        firebase.auth().sendPasswordResetEmail(this.resetEmail)
-        .then(() => {
-          this.passwordResetSent = true;
-        })
-        .catch(error => {
-          this.authError = error.message;
-        })
-        .finally(() => {
-          this.passwordResetSending = false;
-        });
-      },
-      
-      signInWithGoogle() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithPopup(provider)
-        .then(() => {
-          this.showLoginModal = false;
-        })
-        .catch(error => {
-          this.authError = error.message;
-        });
-      },
-      
-      signInWithTwitter() {
-        const provider = new firebase.auth.TwitterAuthProvider();
-        firebase.auth().signInWithPopup(provider)
-        .then(() => {
-          this.showLoginModal = false;
-        })
-        .catch(error => {
-          this.authError = error.message;
-        });
-      },
-      
-      toggleMagicLinkMode() {
-        this.magicLinkMode = !this.magicLinkMode;
-        this.magicLinkSent = false;
-        this.forgotPassword = false;
-        this.showAppleComingSoon = false;
-      },
-      
-      checkMagicLinkSignIn() {
-        if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
-          let email = window.localStorage.getItem('emailForSignIn');
-          if (!email) {
-            email = window.prompt('Please provide your email for confirmation');
-          }
-          if (email) {
-            this.isLoading = true;
-            firebase.auth().signInWithEmailLink(email, window.location.href)
-            .then(() => {
-              window.localStorage.removeItem('emailForSignIn');
-              if (window.history && window.history.replaceState) {
-                window.history.replaceState({}, document.title, window.location.pathname);
-              }
-            })
-            .catch(() => {
-              alert("Error signing in. Please try again.");
-            })
-            .finally(() => {
-              this.isLoading = false;
-            });
-          }
-        }
-      },
-      
-      signOut() {
-        firebase.auth().signOut()
-        .then(() => {
-          window.location.href = 'index.html';
-        })
-        .catch(error => {
-          console.error("Sign out error:", error);
-        });
-      },
-      
-      // UI Methods
-      toggleMobileMenu() {
-        this.mobileMenuOpen = !this.mobileMenuOpen;
-      },
-      
-      // Claim Data Methods
-      async loadClaimData() {
-        try {
-          if (!this.user) return;
+      db.collection('claims')
+        .orderBy('claimDate', 'desc')
+        .get()
+        .then(snapshot => {
+          const claimsData = [];
+          const itemPromises = [];
           
-          // Get claims for current user
-          const claimsSnapshot = await db.collection('claims')
-            .where('userId', '==', this.user.uid)
-            .orderBy('claimDate', 'desc')
-            .get();
-          
-          if (claimsSnapshot.empty) {
-            this.currentClaim = null;
-            this.claimHistory = [];
-            this.isLoading = false;
-            return;
-          }
-          
-          // Process claims
-          const claims = [];
-          let activeClaim = null;
-          
-          for (const doc of claimsSnapshot.docs) {
+          snapshot.forEach(doc => {
             const claim = { id: doc.id, ...doc.data() };
             
-            // Convert timestamp to date
-            if (claim.claimDate) {
-              claim.claimDate = claim.claimDate.toDate().toISOString();
-            }
-            if (claim.collectionDate) {
-              claim.collectionDate = claim.collectionDate.toDate().toISOString();
-            }
+            const itemPromise = db.collection('items').doc(claim.itemId).get()
+              .then(itemDoc => {
+                if (itemDoc.exists) {
+                  const itemData = itemDoc.data();
+                  return {
+                    ...claim,
+                    itemName: itemData.name,
+                    category: itemData.category,
+                    location: itemData.location
+                  };
+                }
+                return null;
+              });
             
-            // Get item details
-            const itemDoc = await db.collection('items').doc(claim.itemId).get();
-            if (itemDoc.exists) {
-              claim.item = { id: itemDoc.id, ...itemDoc.data() };
-            } else {
-              claim.item = {
-                id: claim.itemId,
-                name: 'Unknown Item',
-                category: 'Unknown',
-                location: 'Unknown',
-                dateFound: new Date().toISOString(),
-                description: 'Item details not available',
-                image: 'images/no-image.png'
-              };
-            }
-            
-            // Check if this is an active claim (pending and has claim code)
-            if (claim.status === 'pending' && claim.claimCode && !activeClaim) {
-              activeClaim = claim;
-            } else {
-              claims.push(claim);
-            }
-          }
+            itemPromises.push(itemPromise);
+          });
           
-          this.currentClaim = activeClaim;
-          this.claimHistory = claims;
+          return Promise.all(itemPromises);
+        })
+        .then(claimsWithItems => {
+          this.claims = claimsWithItems.filter(claim => claim !== null);
+          this.sortClaims();
+          this.updatePagination();
+        })
+        .catch(error => {
+          console.error("Error loading claims:", error);
+        })
+        .finally(() => {
           this.isLoading = false;
-        } catch (error) {
-          console.error("Error loading claim data:", error);
-          this.isLoading = false;
+        });
+    },
+    
+    sortClaims() {
+      switch (this.sortOption) {
+        case 'date-desc':
+          this.claims.sort((a, b) => {
+            const dateA = a.claimDate && a.claimDate.toDate ? a.claimDate.toDate() : new Date(a.claimDate);
+            const dateB = b.claimDate && b.claimDate.toDate ? b.claimDate.toDate() : new Date(b.claimDate);
+            return dateB - dateA;
+          });
+          break;
+        case 'date-asc':
+          this.claims.sort((a, b) => {
+            const dateA = a.claimDate && a.claimDate.toDate ? a.claimDate.toDate() : new Date(a.claimDate);
+            const dateB = b.claimDate && b.claimDate.toDate ? b.claimDate.toDate() : new Date(b.claimDate);
+            return dateA - dateB;
+          });
+          break;
+        case 'status':
+          this.claims.sort((a, b) => {
+            const statusOrder = { pending: 0, approved: 1, collected: 2, rejected: 3 };
+            return statusOrder[a.status] - statusOrder[b.status];
+          });
+          break;
+      }
+    },
+    
+    updatePagination() {
+      this.totalPages = Math.ceil(this.filteredClaims.length / this.itemsPerPage);
+      if (this.currentPage > this.totalPages) {
+        this.currentPage = Math.max(1, this.totalPages);
+      }
+    },
+    
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+    
+    formatDate(dateValue) {
+      try {
+        let date;
+        if (dateValue && typeof dateValue === 'object' && dateValue.toDate) {
+          date = dateValue.toDate();
+        } else if (dateValue) {
+          date = new Date(dateValue);
+        } else {
+          return "No date available";
         }
-      },
-      
-      // Claim Action Methods
-      viewClaimDetails(claim) {
-        this.selectedClaim = { ...claim };
-      },
-      
-      disputeClaim(claimId) {
-        window.location.href = 'index.html#contact';
-      },
-      
-      async cancelClaim(claimId) {
-        if (confirm('Are you sure you want to cancel this claim?')) {
-          try {
-            this.isLoading = true;
-            
-            // Get claim data
-            const claimDoc = await db.collection('claims').doc(claimId).get();
-            if (!claimDoc.exists) {
-              throw new Error('Claim not found');
-            }
-            
-            const claim = claimDoc.data();
-            
-            // Update claim status
-            await db.collection('claims').doc(claimId).update({
-              status: 'canceled',
-              cancelDate: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            
-            // Update item status if this claim is for the item
-            const itemDoc = await db.collection('items').doc(claim.itemId).get();
-            if (itemDoc.exists) {
-              const item = itemDoc.data();
-              if (item.claimId === claimId) {
-                await db.collection('items').doc(claim.itemId).update({
-                  claimed: false,
-                  claimId: null
-                });
-              }
-            }
-            
-            // Reload claim data
-            await this.loadClaimData();
-            
-            // Close claim detail modal
-            this.selectedClaim = null;
-          } catch (error) {
-            console.error("Error canceling claim:", error);
-            alert("An error occurred while canceling your claim. Please try again.");
-          } finally {
-            this.isLoading = false;
-          }
+        
+        if (isNaN(date.getTime())) {
+          return "Invalid date";
         }
-      },
-      
-      // Formatting Methods
-      formatDate(dateString) {
-        const date = new Date(dateString);
+        
         return new Intl.DateTimeFormat('en-US', { 
           year: 'numeric', 
           month: 'short', 
           day: 'numeric' 
         }).format(date);
-      },
-      
-      formatDateTime(dateString) {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('en-US', { 
-          year: 'numeric', 
-          month: 'short', 
-          day: 'numeric',
-          hour: 'numeric',
-          minute: 'numeric'
-        }).format(date);
+      } catch (error) {
+        console.error("Error formatting date:", error);
+        return "Date format error";
+      }
+    },
+    
+    formatStatus(status) {
+      switch (status) {
+        case 'pending':
+          return 'Pending';
+        case 'approved':
+          return 'Approved';
+        case 'collected':
+          return 'Collected';
+        case 'rejected':
+          return 'Rejected';
+        default:
+          return status.charAt(0).toUpperCase() + status.slice(1);
+      }
+    },
+    
+    toggleMobileMenu() {
+      this.mobileMenuOpen = !this.mobileMenuOpen;
+    },
+    
+    submitLoginForm() {
+      this.authError = null;
+      if (this.isSigningUp) {
+        firebase.auth().createUserWithEmailAndPassword(
+          this.loginForm.email,
+          this.loginForm.password
+        )
+        .then(() => {
+          this.showLoginModal = false;
+          this.loginForm = { email: '', password: '' };
+        })
+        .catch(error => {
+          this.authError = error.message;
+        });
+      } else {
+        firebase.auth().signInWithEmailAndPassword(
+          this.loginForm.email,
+          this.loginForm.password
+        )
+        .then(() => {
+          this.showLoginModal = false;
+          this.loginForm = { email: '', password: '' };
+        })
+        .catch(error => {
+          this.authError = error.message;
+        });
+      }
+    },
+    
+    sendMagicLink() {
+      if (!this.magicLinkEmail) {
+        this.authError = "Please enter your email address";
+        return;
+      }
+      this.magicLinkSending = true;
+      this.authError = null;
+      const actionCodeSettings = {
+        url: window.location.href,
+        handleCodeInApp: true
+      };
+      firebase.auth().sendSignInLinkToEmail(this.magicLinkEmail, actionCodeSettings)
+      .then(() => {
+        window.localStorage.setItem('emailForSignIn', this.magicLinkEmail);
+        this.magicLinkSent = true;
+      })
+      .catch(error => {
+        this.authError = error.message;
+      })
+      .finally(() => {
+        this.magicLinkSending = false;
+      });
+    },
+    
+    sendPasswordReset() {
+      if (!this.resetEmail) {
+        this.authError = "Please enter your email address";
+        return;
+      }
+      this.passwordResetSending = true;
+      this.authError = null;
+      firebase.auth().sendPasswordResetEmail(this.resetEmail)
+      .then(() => {
+        this.passwordResetSent = true;
+      })
+      .catch(error => {
+        this.authError = error.message;
+      })
+      .finally(() => {
+        this.passwordResetSending = false;
+      });
+    },
+    
+    signInWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+      .then(() => {
+        this.showLoginModal = false;
+      })
+      .catch(error => {
+        this.authError = error.message;
+      });
+    },
+    
+    signInWithTwitter() {
+      const provider = new firebase.auth.TwitterAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+      .then(() => {
+        this.showLoginModal = false;
+      })
+      .catch(error => {
+        this.authError = error.message;
+      });
+    },
+    
+    toggleMagicLinkMode() {
+      this.magicLinkMode = !this.magicLinkMode;
+      this.magicLinkSent = false;
+      this.forgotPassword = false;
+      this.showAppleComingSoon = false;
+    },
+    
+    signOut() {
+      firebase.auth().signOut().catch(error => {
+        console.error("Error signing out:", error);
+      });
+    },
+    
+    checkMagicLinkSignIn() {
+      if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
+        let email = window.localStorage.getItem('emailForSignIn');
+        if (!email) {
+          email = window.prompt('Please provide your email for confirmation');
+        }
+        if (email) {
+          this.isLoading = true;
+          firebase.auth().signInWithEmailLink(email, window.location.href)
+          .then(() => {
+            window.localStorage.removeItem('emailForSignIn');
+            if (window.history && window.history.replaceState) {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          })
+          .catch(() => {
+            alert("Error signing in. Please try again.");
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
+        }
       }
     }
-  }).mount('#claimLogApp');
+  }
+}).mount('#claimLogApp');

@@ -3,307 +3,278 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reunited - Claim Log</title>
+  <title>Reunited - Public Claim Log</title>
   <!-- Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="styles/main.css">
-  <link rel="stylesheet" href="styles/search.css">
   <link rel="stylesheet" href="styles/claim-log.css">
 </head>
 <body>
   <div id="claimLogApp">
-    <!-- Loading Spinner -->
     <div class="loading-spinner" v-if="isLoading">
       <div class="spinner"></div>
     </div>
 
-    <!-- Authentication Protection -->
-    <div class="auth-required" v-if="!user && !isLoading">
-      <div class="auth-required-content">
-        <h2>Authentication Required</h2>
-        <p>Please login to access your claim log</p>
-        <button class="btn" @click="showLoginModal = true">Login / Sign Up</button>
-        <a href="index.html" class="btn btn-outlined">Back to Home</a>
+    <header :class="{'mobile-menu-active': mobileMenuOpen}">
+      <div class="container header-container">
+        <a href="index.html" class="logo">Reunited</a>
+        <button class="mobile-menu-btn" @click="toggleMobileMenu">
+          <i class="fas" :class="mobileMenuOpen ? 'fa-xmark' : 'fa-bars'"></i>
+        </button>
+        <div class="nav-links">
+          <a href="search.html">Search Items</a>
+          <a href="claim-log.html" class="active">Claim Log</a>
+          <a href="dashboard.html" v-if="user">Dashboard</a>
+          <a href="index.html#guidelines">Guidelines</a>
+          <a href="index.html#contact">Contact</a>
+          <a v-if="!user" href="#" class="btn btn-outlined" @click.prevent="showLoginModal = true">Login / Sign Up</a>
+          <a v-else href="#" class="btn btn-outlined" @click.prevent="signOut">Sign Out</a>
+        </div>
       </div>
-    </div>
+    </header>
 
-    <div v-if="user && !isLoading">
-      <!-- Header/Navigation -->
-      <header :class="{'mobile-menu-active': mobileMenuOpen}">
-        <div class="container header-container">
-          <a href="index.html" class="logo">Reunited</a>
-          <button class="mobile-menu-btn" @click="toggleMobileMenu">
-            <i class="fas" :class="mobileMenuOpen ? 'fa-xmark' : 'fa-bars'"></i>
+    <section class="claim-log-hero">
+      <div class="container">
+        <h1>Public Claim Log</h1>
+        <p class="claim-log-description">
+          View the status of recently claimed items. For your personal claim history and detailed information, 
+          please visit your <a href="dashboard.html" v-if="user">dashboard</a><a href="#" @click.prevent="showLoginModal = true" v-else>dashboard</a>.
+        </p>
+      </div>
+    </section>
+
+    <section class="claim-log-content">
+      <div class="container">
+        <div class="filter-controls">
+          <div class="search-input">
+            <i class="fas fa-search"></i>
+            <input type="text" v-model="searchQuery" placeholder="Search by item name or location">
+          </div>
+          
+          <div class="filter-dropdown">
+            <label>Status: </label>
+            <select v-model="selectedStatus">
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="collected">Collected</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          
+          <div class="filter-dropdown">
+            <label>Category: </label>
+            <select v-model="selectedCategory">
+              <option value="">All Categories</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Uniform">Uniform</option>
+              <option value="Water Bottle">Water Bottle</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          
+          <div class="filter-dropdown">
+            <label>Sort By: </label>
+            <select v-model="sortOption">
+              <option value="date-desc">Date (Newest)</option>
+              <option value="date-asc">Date (Oldest)</option>
+              <option value="status">Status</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="no-claims" v-if="filteredClaims.length === 0">
+          <i class="fas fa-clipboard-check"></i>
+          <h3>No Claims Found</h3>
+          <p>There are currently no claims matching your filters</p>
+        </div>
+        
+        <div class="claims-table-container" v-if="filteredClaims.length > 0">
+          <table class="claims-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Item</th>
+                <th>Location Found</th>
+                <th>Category</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(claim, index) in paginatedClaims" :key="index">
+                <td>{{ formatDate(claim.claimDate) }}</td>
+                <td>{{ claim.itemName }}</td>
+                <td>{{ claim.location }}</td>
+                <td>{{ claim.category }}</td>
+                <td>
+                  <span class="status-badge" :class="claim.status">
+                    {{ formatStatus(claim.status) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="pagination" v-if="totalPages > 1">
+          <button @click="prevPage" :disabled="currentPage === 1">
+            <i class="fas fa-chevron-left"></i>
           </button>
-          <div class="nav-links">
-            <a href="search.html">Search Items</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="claim-log.html" class="active">Claim Log</a>
-            <a href="index.html#guidelines">Guidelines</a>
-            <a href="index.html#contact">Contact</a>
-            <a href="#" class="btn btn-outlined" @click.prevent="signOut">Sign Out</a>
-          </div>
+          <span>Page {{ currentPage }} of {{ totalPages }}</span>
+          <button @click="nextPage" :disabled="currentPage === totalPages">
+            <i class="fas fa-chevron-right"></i>
+          </button>
         </div>
-      </header>
-
-      <!-- Claim Log Header -->
-      <section class="claim-log-header">
-        <div class="container">
-          <h1>Your Claim Log</h1>
-          <p class="claim-log-description">Track all your claimed items and claim codes</p>
-        </div>
-      </section>
-
-      <!-- Current Claim Code Section -->
-      <section class="current-claim-section" v-if="currentClaim">
-        <div class="container">
-          <div class="section-title">
-            <h2>Active Claim Code</h2>
-          </div>
-          
-          <div class="current-claim-card">
-            <div class="claim-card-content">
-              <div class="claim-item-info">
-                <div class="claim-item-image" :style="{ backgroundImage: `url(${currentClaim.item.image || 'images/no-image.png'})` }"></div>
-                <div class="claim-item-details">
-                  <h3>{{ currentClaim.item.name }}</h3>
-                  <div class="item-meta">
-                    <span><i class="fas fa-map-marker-alt"></i> {{ currentClaim.item.location }}</span>
-                    <span><i class="fas fa-calendar-alt"></i> {{ formatDate(currentClaim.item.dateFound) }}</span>
-                  </div>
-                  <div class="item-category">{{ currentClaim.item.category }}</div>
-                </div>
+        
+        <div class="instructions-section">
+          <h2>Claim Process</h2>
+          <div class="instruction-cards">
+            <div class="instruction-card">
+              <div class="instruction-icon">
+                <i class="fas fa-search"></i>
               </div>
-              
-              <div class="claim-code-display">
-                <div class="claim-code-label">Claim Code</div>
-                <div class="claim-code">{{ currentClaim.claimCode }}</div>
-                <div class="claim-date">Created on {{ formatDateTime(currentClaim.claimDate) }}</div>
-                <div class="claim-instructions">
-                  <i class="fas fa-info-circle"></i>
-                  <p>Please show this code at the Lost & Found area to collect your item.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Claim History Section -->
-      <section class="claim-history-section">
-        <div class="container">
-          <div class="section-title">
-            <h2>Claim History</h2>
-          </div>
-          
-          <div class="empty-state" v-if="claimHistory.length === 0">
-            <i class="fas fa-clipboard-list"></i>
-            <h3>No Previous Claims</h3>
-            <p>You haven't claimed any items yet</p>
-            <a href="search.html" class="btn">Find Lost Items</a>
-          </div>
-          
-          <div class="claim-history-list" v-else>
-            <div class="claim-history-item" v-for="(claim, index) in claimHistory" :key="index">
-              <div class="claim-status" :class="claim.status">{{ claim.status }}</div>
-              <div class="claim-history-content">
-                <div class="claim-item-info">
-                  <div class="claim-item-image" :style="{ backgroundImage: `url(${claim.item.image || 'images/no-image.png'})` }"></div>
-                  <div class="claim-item-details">
-                    <h3>{{ claim.item.name }}</h3>
-                    <div class="item-meta">
-                      <span><i class="fas fa-map-marker-alt"></i> {{ claim.item.location }}</span>
-                      <span><i class="fas fa-calendar-alt"></i> {{ formatDate(claim.item.dateFound) }}</span>
-                      <span><i class="fas fa-user"></i> Claimed by {{ claim.userName }}</span>
-                    </div>
-                    <div class="claim-code-info">
-                      <span>Claim Code: <strong>{{ claim.claimCode }}</strong></span>
-                      <span>Claimed on {{ formatDateTime(claim.claimDate) }}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="claim-actions">
-                  <button class="btn-tiny" @click="viewClaimDetails(claim)">View Details</button>
-                  <button class="btn-tiny btn-outlined" @click="disputeClaim(claim.id)" v-if="claim.status === 'collected'">Dispute</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      <!-- Claim Detail Modal -->
-      <div class="modal-overlay" v-if="selectedClaim">
-        <div class="modal claim-detail-modal">
-          <div class="modal-close" @click="selectedClaim = null">×</div>
-          <div class="modal-header">
-            <h3 class="modal-title">Claim Details</h3>
-            <div class="claim-status" :class="selectedClaim.status">{{ selectedClaim.status }}</div>
-          </div>
-          
-          <div class="modal-content">
-            <div class="item-preview">
-              <div class="preview-image" :style="{ backgroundImage: `url(${selectedClaim.item.image || 'images/no-image.png'})` }"></div>
-              <div class="preview-info">
-                <h4>{{ selectedClaim.item.name }}</h4>
-                <p>{{ selectedClaim.item.location }} • {{ formatDate(selectedClaim.item.dateFound) }}</p>
-              </div>
+              <h3>1. Find Your Item</h3>
+              <p>Use the search page to find your lost item in our database.</p>
             </div>
             
-            <div class="claim-details">
-              <div class="detail-row">
-                <span class="detail-label">Claim Code:</span>
-                <span class="detail-value">{{ selectedClaim.claimCode }}</span>
+            <div class="instruction-card">
+              <div class="instruction-icon">
+                <i class="fas fa-clipboard-list"></i>
               </div>
-              <div class="detail-row">
-                <span class="detail-label">Claimed On:</span>
-                <span class="detail-value">{{ formatDateTime(selectedClaim.claimDate) }}</span>
-              </div>
-              <div class="detail-row" v-if="selectedClaim.collectionDate">
-                <span class="detail-label">Collected On:</span>
-                <span class="detail-value">{{ formatDateTime(selectedClaim.collectionDate) }}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Claimed By:</span>
-                <span class="detail-value">{{ selectedClaim.userName }}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Contact:</span>
-                <span class="detail-value">{{ selectedClaim.contactInfo }}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Item Description:</span>
-                <span class="detail-value">{{ selectedClaim.item.description }}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Claim Description:</span>
-                <span class="detail-value">{{ selectedClaim.description }}</span>
-              </div>
+              <h3>2. Submit a Claim</h3>
+              <p>Provide verification details to prove ownership of the item.</p>
             </div>
             
-            <div class="claim-actions-detail">
-              <button v-if="selectedClaim.status === 'collected'" class="btn btn-outlined" @click="disputeClaim(selectedClaim.id)">Dispute Claim</button>
-              <button v-if="selectedClaim.status === 'pending'" class="btn btn-outlined" @click="cancelClaim(selectedClaim.id)">Cancel Claim</button>
+            <div class="instruction-card">
+              <div class="instruction-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <h3>3. Receive Claim Code</h3>
+              <p>After approval, you'll receive a unique claim code.</p>
+            </div>
+            
+            <div class="instruction-card">
+              <div class="instruction-icon">
+                <i class="fas fa-hand-holding"></i>
+              </div>
+              <h3>4. Collect Your Item</h3>
+              <p>Visit the Lost & Found office with your claim code to collect your item.</p>
             </div>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Login Modal -->
-      <div class="modal-overlay" v-if="showLoginModal">
-        <div class="modal">
-          <div class="modal-close" @click="showLoginModal = false">×</div>
-          <div class="modal-header">
-            <h3 class="modal-title">{{ isSigningUp ? 'Sign up to Reunited' : 'Login to Reunited' }}</h3>
+    <div class="modal-overlay" v-if="showLoginModal">
+      <div class="modal">
+        <div class="modal-close" @click="showLoginModal = false">×</div>
+        <div class="modal-header">
+          <h3 class="modal-title">{{ isSigningUp ? 'Sign up to Reunited' : 'Login to Reunited' }}</h3>
+        </div>
+        <div class="login-methods">
+          <div class="social-login">
+            <div class="social-btn" @click="signInWithGoogle">
+              <i class="fa-brands fa-google"></i>
+            </div>
+            <div class="social-btn" @click="showAppleComingSoon = true">
+              <i class="fa-brands fa-apple"></i>
+            </div>
+            <div class="social-btn" @click="signInWithTwitter">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/5/57/X_logo_2023_%28white%29.png" alt="X" width="20" height="20">
+            </div>
           </div>
-          <div class="login-methods">
-            <div class="social-login">
-              <div class="social-btn" @click="signInWithGoogle">
-                <i class="fa-brands fa-google"></i>
-              </div>
-              <div class="social-btn" @click="showAppleComingSoon = true">
-                <i class="fa-brands fa-apple"></i>
-              </div>
-              <div class="social-btn" @click="signInWithTwitter">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/57/X_logo_2023_%28white%29.png" alt="X" width="20" height="20">
-              </div>
+          <div class="or-divider">
+            <span>or</span>
+          </div>
+          <div v-if="showAppleComingSoon" class="auth-error">
+            Apple Authentication is coming soon!
+          </div>
+          <div v-if="authError" class="auth-error">
+            {{ authError }}
+          </div>
+          <div class="form-group" v-if="!magicLinkMode">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" class="form-control" v-model="loginForm.email">
+          </div>
+          <div class="form-group" v-if="!magicLinkMode && !forgotPassword">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" class="form-control" v-model="loginForm.password">
+          </div>
+          <div v-if="magicLinkMode">
+            <div class="form-group">
+              <label for="magic-email">Your Email</label>
+              <input type="email" id="magic-email" class="form-control" v-model="magicLinkEmail" placeholder="Enter your email address">
             </div>
-            <div class="or-divider">
-              <span>or</span>
-            </div>
-            <div v-if="showAppleComingSoon" class="auth-error">
-              Apple Authentication is coming soon!
-            </div>
-            <div v-if="authError" class="auth-error">
-              {{ authError }}
-            </div>
-            <div class="form-group" v-if="!magicLinkMode">
-              <label for="login-email">Email</label>
-              <input type="email" id="login-email" class="form-control" v-model="loginForm.email">
-            </div>
-            <div class="form-group" v-if="!magicLinkMode && !forgotPassword">
-              <label for="login-password">Password</label>
-              <input type="password" id="login-password" class="form-control" v-model="loginForm.password">
-            </div>
-            <div v-if="magicLinkMode">
+            <button class="btn" style="width: 100%;" @click.prevent="sendMagicLink" :disabled="magicLinkSending">
+              {{ magicLinkSending ? 'Sending...' : 'Send Magic Link' }}
+            </button>
+            <p v-if="magicLinkSent" style="text-align: center; margin-top: 1rem; color: var(--success-color);">
+              Magic link sent! Check your email.
+            </p>
+          </div>
+          <div v-if="!magicLinkMode">
+            <button 
+              v-if="!forgotPassword" 
+              class="btn" 
+              style="width: 100%;" 
+              @click.prevent="submitLoginForm">
+              {{ isSigningUp ? 'Sign Up' : 'Login' }}
+            </button>
+            <div v-else>
               <div class="form-group">
-                <label for="magic-email">Your Email</label>
-                <input type="email" id="magic-email" class="form-control" v-model="magicLinkEmail" placeholder="Enter your email address">
+                <input type="email" class="form-control" v-model="resetEmail" placeholder="Enter your email">
               </div>
-              <button class="btn" style="width: 100%;" @click.prevent="sendMagicLink" :disabled="magicLinkSending">
-                {{ magicLinkSending ? 'Sending...' : 'Send Magic Link' }}
+              <button class="btn" style="width: 100%;" @click.prevent="sendPasswordReset">
+                {{ passwordResetSending ? 'Sending...' : 'Reset Password' }}
               </button>
-              <p v-if="magicLinkSent" style="text-align: center; margin-top: 1rem; color: var(--success-color);">
-                Magic link sent! Check your email.
+              <p v-if="passwordResetSent" style="text-align: center; margin-top: 1rem; color: var(--success-color);">
+                Password reset email sent!
               </p>
             </div>
-            <div v-if="!magicLinkMode">
-              <button 
-                v-if="!forgotPassword" 
-                class="btn" 
-                style="width: 100%;" 
-                @click.prevent="submitLoginForm">
-                {{ isSigningUp ? 'Sign Up' : 'Login' }}
-              </button>
-              <div v-else>
-                <div class="form-group">
-                  <input type="email" class="form-control" v-model="resetEmail" placeholder="Enter your email">
-                </div>
-                <button class="btn" style="width: 100%;" @click.prevent="sendPasswordReset">
-                  {{ passwordResetSending ? 'Sending...' : 'Reset Password' }}
-                </button>
-                <p v-if="passwordResetSent" style="text-align: center; margin-top: 1rem; color: var(--success-color);">
-                  Password reset email sent!
-                </p>
-              </div>
-              <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
-                {{ isSigningUp ? 'Already have an account?' : 'Don\'t have an account?' }} 
-                <a href="#" style="color: var(--accent-color);" @click.prevent="isSigningUp = !isSigningUp; forgotPassword = false; showAppleComingSoon=false">
-                  {{ isSigningUp ? 'Login' : 'Sign up' }}
-                </a>
-              </p>
-              <p v-if="!isSigningUp && !forgotPassword" style="text-align: center; margin-top: 0.5rem; color: var(--text-secondary);">
-                <a href="#" style="color: var(--accent-color);" @click.prevent="forgotPassword = true; showAppleComingSoon=false">
-                  Forgot password?
-                </a>
-              </p>
-            </div>
-            <div class="magic-link-section">
-              <h4 class="magic-link-title">{{ magicLinkMode ? 'Use Password Instead' : 'Or Use Magic Link' }}</h4>
-              <button class="btn-tiny btn-outlined" @click.prevent="toggleMagicLinkMode">
-                {{ magicLinkMode ? 'Password' : 'Magic Link' }}
-              </button>
-            </div>
+            <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
+              {{ isSigningUp ? 'Already have an account?' : 'Don\'t have an account?' }} 
+              <a href="#" style="color: var(--accent-color);" @click.prevent="isSigningUp = !isSigningUp; forgotPassword = false; showAppleComingSoon=false">
+                {{ isSigningUp ? 'Login' : 'Sign up' }}
+              </a>
+            </p>
+            <p v-if="!isSigningUp && !forgotPassword" style="text-align: center; margin-top: 0.5rem; color: var(--text-secondary);">
+              <a href="#" style="color: var(--accent-color);" @click.prevent="forgotPassword = true; showAppleComingSoon=false">
+                Forgot password?
+              </a>
+            </p>
+          </div>
+          <div class="magic-link-section">
+            <h4 class="magic-link-title">{{ magicLinkMode ? 'Use Password Instead' : 'Or Use Magic Link' }}</h4>
+            <button class="btn-tiny btn-outlined" @click.prevent="toggleMagicLinkMode">
+              {{ magicLinkMode ? 'Password' : 'Magic Link' }}
+            </button>
           </div>
         </div>
       </div>
-
-      <!-- Footer -->
-      <footer>
-        <div class="container">
-          <div class="footer-logo">Reunited</div>
-          <div class="footer-links">
-            <a href="index.html">Home</a>
-            <a href="index.html#guidelines">Guidelines</a>
-            <a href="index.html#faqs">FAQs</a>
-            <a href="index.html#contact">Contact</a>
-          </div>
-          <div class="copyright">
-            &copy; 2025 Reunited. All rights reserved.
-          </div>
-          <div class="made-with-love">
-            Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav R</a>
-          </div>
-        </div>
-      </footer>
     </div>
+
+    <footer>
+      <div class="container">
+        <div class="footer-logo">Reunited</div>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="index.html#guidelines">Guidelines</a>
+          <a href="index.html#faqs">FAQs</a>
+          <a href="index.html#contact">Contact</a>
+        </div>
+        <div class="copyright">
+          &copy; 2025 Reunited. All rights reserved.
+        </div>
+        <div class="made-with-love">
+          Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav R</a>
+        </div>
+      </div>
+    </footer>
   </div>
 
-  <!-- Firebase + Vue + Env + Claim Log Script -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
