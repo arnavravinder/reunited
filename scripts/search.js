@@ -397,7 +397,7 @@ const app = Vue.createApp({
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              model: 'gemini-.0-flash',
+              model: 'gemini-1.5-flash',
               prompt
             })
           });
