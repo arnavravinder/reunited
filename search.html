@@ -248,12 +248,12 @@
             </div>
             
             <div class="item-actions">
-              <button class="btn" v-if="!selectedItem.claimed && user" @click="claimItem(selectedItem)">Claim This Item</button>
+              <button class="btn" v-if="!selectedItem.claimed && user" @click="initiateClaimItem(selectedItem)">Claim This Item</button>
               <button class="btn btn-outlined" v-if="!selectedItem.claimed && user" @click="reportMatch(selectedItem.id)">Report Similar Loss</button>
               <button class="btn btn-outlined" v-if="selectedItem.claimed" @click="disputeClaim(selectedItem.id)">Dispute Claim</button>
               <button v-if="!user" class="btn" @click="showLoginModal = true">Login to Claim</button>
             </div>
-          </div>
+            </div>
         </div>
       </div>
     </div>
