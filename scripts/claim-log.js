@@ -110,7 +110,9 @@ const app = Vue.createApp({
       this.isLoading = true;
       
       db.collection('claims')
+        .where('status', 'in', ['approved', 'collected'])
         .orderBy('claimDate', 'desc')
+        .limit(100)
         .get()
         .then(snapshot => {
           const claimsData = [];
@@ -119,27 +121,40 @@ const app = Vue.createApp({
           snapshot.forEach(doc => {
             const claim = { id: doc.id, ...doc.data() };
             
-            const itemPromise = db.collection('items').doc(claim.itemId).get()
-              .then(itemDoc => {
-                if (itemDoc.exists) {
-                  const itemData = itemDoc.data();
-                  return {
-                    ...claim,
-                    itemName: itemData.name,
-                    category: itemData.category,
-                    location: itemData.location
-                  };
-                }
-                return null;
+            if (claim.itemName && claim.category && claim.itemLocation) {
+              claimsData.push({
+                id: doc.id,
+                claimDate: claim.claimDate,
+                status: claim.status,
+                itemName: claim.itemName,
+                category: claim.category,
+                location: claim.itemLocation
               });
-            
-            itemPromises.push(itemPromise);
+            } else {
+              const itemPromise = db.collection('items').doc(claim.itemId).get()
+                .then(itemDoc => {
+                  if (itemDoc.exists) {
+                    const itemData = itemDoc.data();
+                    return {
+                      id: doc.id,
+                      claimDate: claim.claimDate,
+                      status: claim.status,
+                      itemName: itemData.name,
+                      category: itemData.category,
+                      location: itemData.location
+                    };
+                  }
+                  return null;
+                });
+              
+              itemPromises.push(itemPromise);
+            }
           });
           
-          return Promise.all(itemPromises);
+          return Promise.all([Promise.resolve(claimsData), Promise.all(itemPromises)]);
         })
-        .then(claimsWithItems => {
-          this.claims = claimsWithItems.filter(claim => claim !== null);
+        .then(([basicClaimsData, fetchedClaimsData]) => {
+          this.claims = [...basicClaimsData, ...fetchedClaimsData.filter(claim => claim !== null)];
           this.sortClaims();
           this.updatePagination();
         })

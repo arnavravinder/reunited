@@ -280,6 +280,56 @@
   margin-bottom: 1rem;
 }
 
+.claim-process-steps {
+  margin-top: 2rem;
+}
+
+.step-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  padding-left: 40px;
+}
+
+.step-container::before {
+  content: '';
+  position: absolute;
+  top: 30px;
+  left: 15px;
+  width: 2px;
+  height: calc(100% - 60px);
+  background-color: var(--light-bg);
+}
+
+.step {
+  position: relative;
+}
+
+.step-number {
+  position: absolute;
+  top: 0;
+  left: -40px;
+  width: 30px;
+  height: 30px;
+  background-color: var(--accent-color);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+}
+
+.step-title {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.step-description {
+  color: var(--text-secondary);
+}
+
 @media (max-width: 768px) {
   .filter-controls {
     flex-direction: column;

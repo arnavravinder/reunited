@@ -366,7 +366,7 @@ const app = Vue.createApp({
             }
           });
           
-          this.sortResults(results);
+          results = this.sortResults(results);
           this.updatePagination(results);
         })
         .catch(error => {
@@ -422,12 +422,12 @@ const app = Vue.createApp({
             results = this.fallbackSearch(params, allItems);
           }
           
-          this.sortResults(results);
+          results = this.sortResults(results);
           this.updatePagination(results);
         } catch (apiError) {
           console.error("API error in AI search:", apiError);
           const results = this.fallbackSearch(params, allItems);
-          this.sortResults(results);
+          results = this.sortResults(results);
           this.updatePagination(results);
         }
       } catch (error) {
@@ -440,7 +440,7 @@ const app = Vue.createApp({
         });
         
         const results = this.fallbackSearch(params, allItems);
-        this.sortResults(results);
+        results = this.sortResults(results);
         this.updatePagination(results);
       } finally {
         this.isLoading = false;
@@ -564,14 +564,48 @@ const app = Vue.createApp({
     },
     
     sortResults(items = null) {
-      const toSort = items || this.searchResults;
+      const toSort = items || [...this.allItems]; 
       
       switch (this.sortOption) {
         case 'date-desc':
-          toSort.sort((a, b) => new Date(b.dateFound) - new Date(a.dateFound));
+          toSort.sort((a, b) => {
+            let dateA = a.dateFound;
+            let dateB = b.dateFound;
+            
+            if (dateA && typeof dateA === 'object' && dateA.toDate) {
+              dateA = dateA.toDate();
+            } else if (dateA) {
+              dateA = new Date(dateA);
+            }
+            
+            if (dateB && typeof dateB === 'object' && dateB.toDate) {
+              dateB = dateB.toDate();
+            } else if (dateB) {
+              dateB = new Date(dateB);
+            }
+            
+            return dateB - dateA;
+          });
           break;
         case 'date-asc':
-          toSort.sort((a, b) => new Date(a.dateFound) - new Date(b.dateFound));
+          toSort.sort((a, b) => {
+            let dateA = a.dateFound;
+            let dateB = b.dateFound;
+            
+            if (dateA && typeof dateA === 'object' && dateA.toDate) {
+              dateA = dateA.toDate();
+            } else if (dateA) {
+              dateA = new Date(dateA);
+            }
+            
+            if (dateB && typeof dateB === 'object' && dateB.toDate) {
+              dateB = dateB.toDate();
+            } else if (dateB) {
+              dateB = new Date(dateB);
+            }
+            
+            return dateA - dateB;
+          });
           break;
         case 'relevance':
           if (!this.aiAssisted && this.searchQuery) {
@@ -591,28 +625,41 @@ const app = Vue.createApp({
     calculateRelevanceScore(item, query) {
       let score = 0;
       
-      if (item.name.toLowerCase().includes(query)) {
+      if (!item || !query) return score;
+      
+      if (item.name && item.name.toLowerCase().includes(query)) {
         score += 10;
         if (item.name.toLowerCase() === query) {
           score += 5;
         }
       }
       
-      if (item.category.toLowerCase().includes(query)) {
+      if (item.category && item.category.toLowerCase().includes(query)) {
         score += 5;
       }
       
-      if (item.description.toLowerCase().includes(query)) {
+      if (item.description && item.description.toLowerCase().includes(query)) {
         score += 3;
       }
       
-      if (item.location.toLowerCase().includes(query)) {
+      if (item.location && item.location.toLowerCase().includes(query)) {
         score += 3;
       }
       
-      const daysAgo = Math.floor((new Date() - new Date(item.dateFound)) / (1000 * 60 * 60 * 24));
-      if (daysAgo < 7) {
-        score += (7 - daysAgo) / 7 * 2;
+      let itemDate;
+      if (item.dateFound) {
+        if (typeof item.dateFound === 'object' && item.dateFound.toDate) {
+          itemDate = item.dateFound.toDate();
+        } else {
+          itemDate = new Date(item.dateFound);
+        }
+        
+        if (!isNaN(itemDate.getTime())) {
+          const daysAgo = Math.floor((new Date() - itemDate) / (1000 * 60 * 60 * 24));
+          if (daysAgo < 7) {
+            score += (7 - daysAgo) / 7 * 2;
+          }
+        }
       }
       
       return score;
@@ -766,9 +813,18 @@ Description: ${item.description}`
       this.isSubmittingClaim = true;
       
       try {
-        const isValuableElectronic = this.isValuableElectronic(this.claimItem);
+        let estimatedValue = 0;
+        if (this.itemValuation) {
+          const valueMatch = this.itemValuation.match(/\$(\d+)(?:-\d+)?/);
+          if (valueMatch && valueMatch[1]) {
+            estimatedValue = parseInt(valueMatch[1], 10);
+          }
+        }
         
-        if (!isValuableElectronic) {
+        const isHighValue = estimatedValue >= 75;
+        const claimStatus = isHighValue ? 'pending' : 'approved';
+        
+        if (!isHighValue) {
           this.generatedClaimCode = this.generateClaimCode();
         }
         
@@ -776,24 +832,70 @@ Description: ${item.description}`
           itemId: this.claimItem.id,
           userId: this.user.uid,
           userName: this.user.displayName || this.user.email,
+          userEmail: this.user.email,
           claimDate: firebase.firestore.FieldValue.serverTimestamp(),
           description: this.claimForm.description,
           contactInfo: this.claimForm.contactInfo,
-          status: 'pending',
-          claimCode: isValuableElectronic ? null : this.generatedClaimCode
+          status: claimStatus,
+          itemName: this.claimItem.name,
+          itemCategory: this.claimItem.category,
+          itemLocation: this.claimItem.location,
+          estimatedValue: estimatedValue,
+          claimCode: isHighValue ? null : this.generatedClaimCode
         };
         
         const claimRef = await db.collection('claims').add(claimData);
         
         await db.collection('items').doc(this.claimItem.id).update({
           claimed: true,
+          claimId: claimRef.id,
+          claimStatus: claimStatus
+        });
+        
+        await db.collection('notifications').add({
+          userId: this.user.uid,
+          title: isHighValue ? 'Claim Submitted for Review' : 'Item Claimed Successfully',
+          message: isHighValue 
+            ? `Your claim for ${this.claimItem.name} is pending review. Please use the contact form for follow-up.` 
+            : `Your claim for ${this.claimItem.name} has been approved. Use code ${this.generatedClaimCode} to collect your item.`,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          type: 'claim',
+          read: false,
+          actionable: true,
+          itemId: this.claimItem.id,
           claimId: claimRef.id
         });
         
-        if (isValuableElectronic) {
+        if (isHighValue) {
           this.showClaimModal = false;
-          alert("For valuable electronics, please visit the Lost & Found office with identification to claim this item.");
+          
+          const contactUrl = `index.html#contact?claim=${claimRef.id}&item=${this.claimItem.name}`;
+          
+          alert(`This item's estimated value ($${estimatedValue}) requires verification. Please use the contact form to complete your claim.`);
+          
+          setTimeout(() => {
+            window.location.href = contactUrl;
+          }, 1500);
         } else {
+          try {
+            await fetch(`/api/send-claim-email`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                email: this.user.email,
+                userName: this.user.displayName || this.user.email,
+                itemName: this.claimItem.name,
+                claimCode: this.generatedClaimCode,
+                itemLocation: this.claimItem.location,
+                claimDate: new Date().toISOString()
+              })
+            });
+          } catch (emailError) {
+            console.error("Error sending claim email:", emailError);
+          }
+          
           this.showClaimModal = false;
           this.showClaimCodeModal = true;
         }
@@ -803,18 +905,6 @@ Description: ${item.description}`
       } finally {
         this.isSubmittingClaim = false;
       }
-    },
-    
-    isValuableElectronic(item) {
-      const valuableCategories = ['Electronics'];
-      const valuableKeywords = ['laptop', 'phone', 'tablet', 'ipad', 'iphone', 'macbook', 'airpods', 'watch'];
-      
-      if (!valuableCategories.includes(item.category)) {
-        return false;
-      }
-      
-      const nameLower = item.name.toLowerCase();
-      return valuableKeywords.some(keyword => nameLower.includes(keyword));
     },
     
     generateClaimCode() {
@@ -827,7 +917,7 @@ Description: ${item.description}`
     },
     
     goToClaimLog() {
-      window.location.href = 'claim-log.html';
+      window.location.href = 'dashboard.html#claims';
     },
     
     reportMatch(itemId) {
@@ -836,7 +926,7 @@ Description: ${item.description}`
         return;
       }
       
-      window.location.href = 'dashboard.html';
+      window.location.href = 'dashboard.html#lost';
     },
     
     disputeClaim(itemId) {
