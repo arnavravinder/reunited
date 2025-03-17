@@ -391,7 +391,7 @@ const app = Vue.createApp({
         const prompt = this.buildAIPrompt(params, allItems);
         
         try {
-          const response = await fetch('https://reunited-api.vercel.app/api/gemini', {
+          const response = await fetch('https://solvr-api.vercel.app/api/gemini', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
