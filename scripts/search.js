@@ -80,6 +80,14 @@ const app = Vue.createApp({
       generatedClaimCode: '',
       isSubmittingClaim: false,
       
+      // Custom notification popup
+      notificationPopup: {
+        show: false,
+        message: '',
+        type: 'info', // 'info', 'success', 'error', 'warning'
+        duration: 4000
+      },
+      
       locations: [
         'Main Building', 'Cafeteria', 'Library', 'Gymnasium',
         'Lecture Hall', 'Parking Lot', 'Bus Stop', 'Park', 'Other'
@@ -88,6 +96,9 @@ const app = Vue.createApp({
   },
   mounted() {
     console.log("Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder");
+    
+    // Add notification styles to document
+    this.injectNotificationStyles();
     
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
@@ -112,6 +123,130 @@ const app = Vue.createApp({
     }
   },
   methods: {
+    injectNotificationStyles() {
+      // Create and add notification styles to head
+      if (!document.getElementById('notification-styles')) {
+        const styleEl = document.createElement('style');
+        styleEl.id = 'notification-styles';
+        styleEl.textContent = `
+          .notification-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 350px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-20px);
+            color: white;
+            font-family: 'Work Sans', sans-serif;
+          }
+          .notification-popup.show {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          .notification-popup.info {
+            background-color: #2196F3;
+          }
+          .notification-popup.success {
+            background-color: #4CAF50;
+          }
+          .notification-popup.warning {
+            background-color: #FF9800;
+          }
+          .notification-popup.error {
+            background-color: #F44336;
+          }
+          .notification-content {
+            display: flex;
+            align-items: center;
+          }
+          .notification-icon {
+            margin-right: 12px;
+            font-size: 20px;
+          }
+          .notification-message {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.5;
+          }
+          .notification-close {
+            margin-left: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            opacity: 0.7;
+          }
+          .notification-close:hover {
+            opacity: 1;
+          }
+          @media (max-width: 480px) {
+            .notification-popup {
+              left: 20px;
+              right: 20px;
+              max-width: calc(100% - 40px);
+            }
+          }
+        `;
+        document.head.appendChild(styleEl);
+      }
+    },
+    
+    showNotification(message, type = 'info', duration = 4000) {
+      // Hide any existing notification
+      this.notificationPopup.show = false;
+      
+      // Set up new notification
+      setTimeout(() => {
+        this.notificationPopup.message = message;
+        this.notificationPopup.type = type;
+        this.notificationPopup.duration = duration;
+        this.notificationPopup.show = true;
+        
+        // Create DOM element if it doesn't exist
+        let notificationEl = document.getElementById('notification-popup');
+        if (!notificationEl) {
+          notificationEl = document.createElement('div');
+          notificationEl.id = 'notification-popup';
+          notificationEl.className = 'notification-popup';
+          document.body.appendChild(notificationEl);
+        }
+        
+        // Get icon based on type
+        let icon = '';
+        switch (type) {
+          case 'success': icon = '<i class="fas fa-check-circle"></i>'; break;
+          case 'error': icon = '<i class="fas fa-exclamation-circle"></i>'; break;
+          case 'warning': icon = '<i class="fas fa-exclamation-triangle"></i>'; break;
+          default: icon = '<i class="fas fa-info-circle"></i>';
+        }
+        
+        // Update notification content
+        notificationEl.className = `notification-popup ${type}`;
+        notificationEl.innerHTML = `
+          <div class="notification-content">
+            <div class="notification-icon">${icon}</div>
+            <div class="notification-message">${message}</div>
+            <div class="notification-close" onclick="document.getElementById('notification-popup').classList.remove('show')">×</div>
+          </div>
+        `;
+        
+        // Show notification with animation
+        setTimeout(() => notificationEl.classList.add('show'), 10);
+        
+        // Auto hide after duration
+        if (duration > 0) {
+          setTimeout(() => {
+            notificationEl.classList.remove('show');
+            // Reset show flag after animation
+            setTimeout(() => { this.notificationPopup.show = false; }, 300);
+          }, duration);
+        }
+      }, 300);
+    },
+    
     scrollToResults() {
       const resultsSection = document.querySelector('.search-results');
       if (resultsSection) {
@@ -185,6 +320,7 @@ const app = Vue.createApp({
         .then(() => {
           this.showLoginModal = false;
           this.loginForm = { email: '', password: '' };
+          this.showNotification('Account created successfully!', 'success');
         })
         .catch(error => {
           this.authError = error.message;
@@ -197,6 +333,7 @@ const app = Vue.createApp({
         .then(() => {
           this.showLoginModal = false;
           this.loginForm = { email: '', password: '' };
+          this.showNotification('Logged in successfully!', 'success');
         })
         .catch(error => {
           this.authError = error.message;
@@ -238,6 +375,7 @@ const app = Vue.createApp({
       firebase.auth().sendPasswordResetEmail(this.resetEmail)
       .then(() => {
         this.passwordResetSent = true;
+        this.showNotification('Password reset email sent!', 'success');
       })
       .catch(error => {
         this.authError = error.message;
@@ -252,6 +390,7 @@ const app = Vue.createApp({
       firebase.auth().signInWithPopup(provider)
       .then(() => {
         this.showLoginModal = false;
+        this.showNotification('Logged in with Google successfully!', 'success');
       })
       .catch(error => {
         this.authError = error.message;
@@ -263,6 +402,7 @@ const app = Vue.createApp({
       firebase.auth().signInWithPopup(provider)
       .then(() => {
         this.showLoginModal = false;
+        this.showNotification('Logged in with Twitter successfully!', 'success');
       })
       .catch(error => {
         this.authError = error.message;
@@ -290,9 +430,10 @@ const app = Vue.createApp({
             if (window.history && window.history.replaceState) {
               window.history.replaceState({}, document.title, window.location.pathname);
             }
+            this.showNotification('Magic link sign-in successful!', 'success');
           })
-          .catch(() => {
-            alert("Error signing in. Please try again.");
+          .catch((error) => {
+            this.showNotification('Error signing in: ' + error.message, 'error');
           })
           .finally(() => {
             this.isLoading = false;
@@ -368,9 +509,17 @@ const app = Vue.createApp({
           
           results = this.sortResults(results);
           this.updatePagination(results);
+          
+          // Show notification with results count
+          if (results.length > 0) {
+            this.showNotification(`Found ${results.length} items matching your search!`, 'success');
+          } else {
+            this.showNotification('No items found. Try adjusting your search criteria.', 'info');
+          }
         })
         .catch(error => {
           console.error("Error searching items:", error);
+          this.showNotification('Error performing search. Please try again.', 'error');
           this.searchResults = [];
           this.totalPages = 0;
         })
@@ -424,11 +573,19 @@ const app = Vue.createApp({
           
           results = this.sortResults(results);
           this.updatePagination(results);
+          
+          // Show notification with AI results
+          if (results.length > 0) {
+            this.showNotification(`AI found ${results.length} items that might match what you're looking for!`, 'success');
+          } else {
+            this.showNotification('No items found. Try adjusting your search criteria.', 'info');
+          }
         } catch (apiError) {
           console.error("API error in AI search:", apiError);
           const results = this.fallbackSearch(params, allItems);
           results = this.sortResults(results);
           this.updatePagination(results);
+          this.showNotification('AI search encountered an issue. Showing standard results instead.', 'warning');
         }
       } catch (error) {
         console.error("Error in AI search:", error);
@@ -442,6 +599,7 @@ const app = Vue.createApp({
         const results = this.fallbackSearch(params, allItems);
         results = this.sortResults(results);
         this.updatePagination(results);
+        this.showNotification('Error in search. Showing basic results instead.', 'warning');
       } finally {
         this.isLoading = false;
       }
@@ -496,11 +654,11 @@ const app = Vue.createApp({
     fallbackSearch(params, allItems) {
       return allItems.filter(item => {
         const matchesQuery = !params.query || 
-          item.name.toLowerCase().includes(params.query.toLowerCase()) ||
-          item.description.toLowerCase().includes(params.query.toLowerCase());
+          item.name?.toLowerCase().includes(params.query.toLowerCase()) ||
+          item.description?.toLowerCase().includes(params.query.toLowerCase());
         
         const matchesType = !params.itemType || 
-          item.category.toLowerCase() === params.itemType.toLowerCase();
+          item.category?.toLowerCase() === params.itemType.toLowerCase();
         
         const matchesLocation = !params.location || 
           item.location === params.location;
@@ -683,6 +841,7 @@ const app = Vue.createApp({
       this.searchResults = [];
       this.searchPerformed = false;
       this.aiAssisted = false;
+      this.showNotification('Search filters have been reset', 'info');
     },
     
     prevPage() {
@@ -769,8 +928,8 @@ Description: ${item.description}`
         
         this.itemValuation = aiResponse.trim();
         
-        if (!this.itemValuation.includes('$')) {
-          this.itemValuation = '$' + this.itemValuation;
+        if (!this.itemValuation.includes(')) {
+          this.itemValuation = ' + this.itemValuation;
         }
       } catch (error) {
         console.error("Error in AI valuation:", error);
@@ -792,7 +951,7 @@ Description: ${item.description}`
       }
       
       if (item.claimed) {
-        alert("This item has already been claimed.");
+        this.showNotification("This item has already been claimed.", "warning");
         return;
       }
       
@@ -811,7 +970,7 @@ Description: ${item.description}`
       }
       
       if (!this.claimItem) {
-        alert("No item selected for claiming.");
+        this.showNotification("No item selected for claiming.", "error");
         return;
       }
       
@@ -876,14 +1035,16 @@ Description: ${item.description}`
           
           const contactUrl = `index.html#contact?claim=${claimRef.id}&item=${this.claimItem.name}`;
           
-          alert(`This item's estimated value ($${estimatedValue}) requires verification. Please use the contact form to complete your claim.`);
+          this.showNotification(`This item's estimated value (${estimatedValue}) requires verification. Please use the contact form to complete your claim.`, "warning");
           
           setTimeout(() => {
             window.location.href = contactUrl;
           }, 1500);
         } else {
+          // Send confirmation email
           try {
-            await fetch('/api/send-claim-email', {
+            const dateStr = new Date().toISOString();
+            const emailResponse = await fetch('https://api.reunited.co.in/api/send-claim-email', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -894,9 +1055,14 @@ Description: ${item.description}`
                 itemName: this.claimItem.name,
                 claimCode: this.generatedClaimCode,
                 itemLocation: this.claimItem.location,
-                claimDate: new Date().toISOString()
+                claimDate: dateStr
               })
             });
+            
+            console.log('Email API response:', emailResponse);
+            if (!emailResponse.ok) {
+              console.error("Email sending failed:", await emailResponse.text());
+            }
           } catch (emailError) {
             console.error("Error sending claim email:", emailError);
           }
@@ -906,7 +1072,7 @@ Description: ${item.description}`
         }
       } catch (error) {
         console.error("Error submitting claim:", error);
-        alert("An error occurred while submitting your claim. Please try again.");
+        this.showNotification("An error occurred while submitting your claim. Please try again.", "error");
       } finally {
         this.isSubmittingClaim = false;
       }
