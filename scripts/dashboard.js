@@ -848,21 +848,6 @@ const app = Vue.createApp({
       }
     },
     
-    getFormattedClaimStatus(status) {
-      switch (status) {
-        case 'pending':
-          return 'Pending Review';
-        case 'approved':
-          return 'Approved';
-        case 'collected':
-          return 'Collected';
-        case 'rejected':
-          return 'Rejected';
-        default:
-          return status.charAt(0).toUpperCase() + status.slice(1);
-      }
-    },
-    
     formatDate(dateValue) {
       try {
         let date;

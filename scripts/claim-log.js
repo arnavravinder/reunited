@@ -121,13 +121,13 @@ const app = Vue.createApp({
           snapshot.forEach(doc => {
             const claim = { id: doc.id, ...doc.data() };
             
-            if (claim.itemName && claim.category && claim.itemLocation) {
+            if (claim.itemName && claim.itemCategory && claim.itemLocation) {
               claimsData.push({
                 id: doc.id,
                 claimDate: claim.claimDate,
                 status: claim.status,
                 itemName: claim.itemName,
-                category: claim.category,
+                category: claim.itemCategory,
                 location: claim.itemLocation
               });
             } else {

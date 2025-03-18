@@ -391,15 +391,12 @@ const app = Vue.createApp({
         const prompt = this.buildAIPrompt(params, allItems);
         
         try {
-          const response = await fetch('https://solvr-api.vercel.app/api/gemini', {
+          const response = await fetch(`https://${getEnvVar('GEMINI_API_URL')}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-              model: 'gemini-1.5-flash',
-              prompt
-            })
+            body: JSON.stringify({ prompt })
           });
           
           if (!response.ok) {
@@ -409,7 +406,9 @@ const app = Vue.createApp({
           const data = await response.json();
           
           let aiResponse = "";
-          if (data && data.response) {
+          if (data && data.data && data.data.candidates && data.data.candidates.length > 0) {
+            aiResponse = data.data.candidates[0].content?.parts?.[0]?.text || "";
+          } else if (data && data.response) {
             aiResponse = data.response;
           } else {
             throw new Error('Invalid API response format');
@@ -739,13 +738,12 @@ const app = Vue.createApp({
     
     async getItemValuation(item) {
       try {
-        const response = await fetch('https://reunited-api.vercel.app/api/gemini', {
+        const response = await fetch(`https://${getEnvVar('GEMINI_API_URL')}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            model: 'gemini-2.0-flash',
             prompt: `Please estimate the value of the following item in dollars. Return only the numeric value with dollar sign, e.g. "$25" or "$100-150" for a range. No explanation needed.
             
 Item: ${item.name}
@@ -761,7 +759,9 @@ Description: ${item.description}`
         const data = await response.json();
         
         let aiResponse = "";
-        if (data && data.response) {
+        if (data && data.data && data.data.candidates && data.data.candidates.length > 0) {
+          aiResponse = data.data.candidates[0].content?.parts?.[0]?.text || "";
+        } else if (data && data.response) {
           aiResponse = data.response;
         } else {
           throw new Error('Invalid API response format');
@@ -883,7 +883,7 @@ Description: ${item.description}`
           }, 1500);
         } else {
           try {
-            await fetch('https://reunited-api.vercel.app/api/send-claim-email', {
+            await fetch('/api/send-claim-email', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
