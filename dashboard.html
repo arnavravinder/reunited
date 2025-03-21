@@ -160,3 +160,304 @@
               <button class="btn-tiny" @click="showReportFoundModal = true">
                 <i class="fas fa-plus"></i> Report New
               </button>
+            </div>
+            <div class="empty-state" v-if="foundItems.length === 0">
+              <i class="fas fa-hand-holding"></i>
+              <h3>No Found Items</h3>
+              <p>You haven't reported any found items yet</p>
+              <button class="btn" @click="showReportFoundModal = true">Report Found Item</button>
+            </div>
+            <div class="items-grid" v-else>
+              <div class="item-card" v-for="(item, index) in foundItems" :key="index">
+                <div class="item-status" :class="item.status">{{ item.status }}</div>
+                <div class="item-image" :style="{ backgroundImage: `url(${item.image || 'images/no-image.png'})` }"></div>
+                <div class="item-info">
+                  <h3>{{ item.name }}</h3>
+                  <div class="item-meta">
+                    <span><i class="fas fa-calendar-alt"></i> {{ formatDate(item.dateFound) }}</span>
+                    <span><i class="fas fa-map-marker-alt"></i> {{ item.location }}</span>
+                  </div>
+                  <div class="item-description">{{ truncateDescription(item.description) }}</div>
+                  <div class="item-actions">
+                    <button class="btn-tiny" @click="viewItemDetails(item, 'found')">View Details</button>
+                    <button class="btn-tiny btn-outlined" @click="editItem(item, 'found')">Edit</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="tab-content" v-if="activeTab === 'claims'">
+            <div class="section-header">
+              <h2>My Claims</h2>
+            </div>
+            <div class="empty-state" v-if="claims.length === 0">
+              <i class="fas fa-clipboard-check"></i>
+              <h3>No Claims</h3>
+              <p>You haven't made any claims yet</p>
+            </div>
+            <div class="claims-list" v-else>
+              <div class="claim-item" v-for="(claim, index) in claims" :key="index">
+                <div class="claim-status" :class="claim.status">{{ claim.status }}</div>
+                <div class="claim-image" :style="{ backgroundImage: `url(${claim.item.image || 'images/no-image.png'})` }"></div>
+                <div class="claim-info">
+                  <h3>{{ claim.item.name }}</h3>
+                  <div class="claim-meta">
+                    <span><i class="fas fa-calendar-alt"></i> {{ formatDate(claim.claimDate) }}</span>
+                  </div>
+                  <div class="claim-actions">
+                    <button class="btn-tiny" @click="viewClaimDetails(claim)">View Details</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="tab-content" v-if="activeTab === 'settings'">
+            <div class="section-header">
+              <h2>Settings</h2>
+            </div>
+            <div class="settings-content">
+              <div class="settings-card">
+                <h3>Profile</h3>
+                <input type="text" v-model="userProfile.displayName" placeholder="Display Name">
+                <input type="text" v-model="userProfile.phone" placeholder="Phone">
+                <button class="btn" @click="updateProfile" :disabled="isUpdating">Update Profile</button>
+              </div>
+              <div class="settings-card">
+                <h3>Preferences</h3>
+                <div class="setting-option">
+                  <div class="setting-label">
+                    <span>Email Notifications</span>
+                    <p class="setting-description">Receive notifications via email</p>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" v-model="userPreferences.emailNotifications">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="setting-option">
+                  <div class="setting-label">
+                    <span>Match Alerts</span>
+                    <p class="setting-description">Get alerts for potential matches</p>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" v-model="userPreferences.matchAlerts">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="setting-option">
+                  <div class="setting-label">
+                    <span>Status Updates</span>
+                    <p class="setting-description">Receive updates on your item status</p>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" v-model="userPreferences.statusUpdates">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <button class="btn" @click="updatePreferences" :disabled="isUpdating">Save Preferences</button>
+              </div>
+              <div class="settings-card">
+                <h3>Security</h3>
+                <div class="security-option">
+                  <button class="btn" @click="showChangePasswordModal = true">Change Password</button>
+                </div>
+                <div class="security-option">
+                  <button class="btn btn-danger" @click="showDeleteAccountModal = true">Delete Account</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal" v-if="showLoginModal">
+      <div class="modal-content">
+        <span class="close" @click="showLoginModal = false">&times;</span>
+        <h2 v-if="!isSigningUp">Login</h2>
+        <h2 v-else>Sign Up</h2>
+        <form @submit.prevent="submitLoginForm">
+          <input type="email" v-model="loginForm.email" placeholder="Email" required>
+          <input type="password" v-model="loginForm.password" placeholder="Password" required>
+          <div v-if="authError" class="error">{{ authError }}</div>
+          <button type="submit" class="btn">{{ isSigningUp ? 'Sign Up' : 'Login' }}</button>
+        </form>
+        <button class="btn btn-secondary" @click="toggleMagicLinkMode">Use Magic Link</button>
+        <div v-if="!magicLinkMode">
+          <p>
+            <a href="#" @click.prevent="forgotPassword = !forgotPassword">Forgot Password?</a>
+          </p>
+        </div>
+        <div v-if="magicLinkMode">
+          <input type="email" v-model="magicLinkEmail" placeholder="Enter your email for magic link" required>
+          <button class="btn" @click="sendMagicLink" :disabled="magicLinkSending">
+            {{ magicLinkSending ? 'Sending...' : 'Send Magic Link' }}
+          </button>
+          <p v-if="magicLinkSent">Magic link sent! Check your email.</p>
+        </div>
+        <button class="btn" @click="signInWithGoogle">Login with Google</button>
+        <button class="btn" @click="signInWithTwitter">Login with Twitter</button>
+        <p>
+          <a href="#" @click.prevent="isSigningUp = !isSigningUp">
+            {{ isSigningUp ? 'Already have an account? Login' : 'Don\'t have an account? Sign Up' }}
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <div class="modal" v-if="showReportLostModal">
+      <div class="modal-content report-modal">
+        <span class="close" @click="showReportLostModal = false">&times;</span>
+        <h2 v-if="!lostItemForm.id">Report Lost Item</h2>
+        <h2 v-else>Edit Lost Item</h2>
+        <form @submit.prevent="submitLostItemReport">
+          <input type="text" v-model="lostItemForm.name" placeholder="Item Name" required>
+          <select v-model="lostItemForm.category" required>
+            <option disabled value="">Select Category</option>
+            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+          </select>
+          <input type="date" v-model="lostItemForm.dateLost" required>
+          <select v-model="lostItemForm.location" required>
+            <option disabled value="">Select Location</option>
+            <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
+          </select>
+          <textarea v-model="lostItemForm.description" placeholder="Description" required></textarea>
+          <div class="image-upload-container">
+            <label class="image-upload">
+              <input type="file" multiple @change="handleImageUpload">
+              <div class="upload-placeholder">
+                <i class="fas fa-upload"></i>
+                <span>Upload Images</span>
+              </div>
+            </label>
+            <div class="upload-preview" v-if="lostItemForm.images.length">
+              <div class="preview-thumbnail" v-for="(img, index) in lostItemForm.images" :key="index">
+                <img :src="img.preview" alt="Image Preview">
+                <button type="button" class="remove-image" @click="removeImage(index)">x</button>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Submitting...' : (lostItemForm.id ? 'Update Lost Item' : 'Report Lost Item') }}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" v-if="showReportFoundModal">
+      <div class="modal-content report-modal">
+        <span class="close" @click="showReportFoundModal = false">&times;</span>
+        <h2 v-if="!foundItemForm.id">Report Found Item</h2>
+        <h2 v-else>Edit Found Item</h2>
+        <form @submit.prevent="submitFoundItemReport">
+          <input type="text" v-model="foundItemForm.name" placeholder="Item Name" required>
+          <select v-model="foundItemForm.category" required>
+            <option disabled value="">Select Category</option>
+            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+          </select>
+          <input type="date" v-model="foundItemForm.dateFound" required>
+          <select v-model="foundItemForm.location" required>
+            <option disabled value="">Select Location</option>
+            <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
+          </select>
+          <textarea v-model="foundItemForm.description" placeholder="Description" required></textarea>
+          <div class="image-upload-container">
+            <label class="image-upload">
+              <input type="file" multiple @change="handleFoundImageUpload">
+              <div class="upload-placeholder">
+                <i class="fas fa-upload"></i>
+                <span>Upload Images</span>
+              </div>
+            </label>
+            <div class="upload-preview" v-if="foundItemForm.images.length">
+              <div class="preview-thumbnail" v-for="(img, index) in foundItemForm.images" :key="index">
+                <img :src="img.preview" alt="Image Preview">
+                <button type="button" class="remove-image" @click="removeFoundImage(index)">x</button>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Submitting...' : (foundItemForm.id ? 'Update Found Item' : 'Report Found Item') }}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" v-if="showChangePasswordModal">
+      <div class="modal-content">
+        <span class="close" @click="showChangePasswordModal = false">&times;</span>
+        <h2>Change Password</h2>
+        <form @submit.prevent="changePassword">
+          <input type="password" v-model="passwordForm.currentPassword" placeholder="Current Password" required>
+          <input type="password" v-model="passwordForm.newPassword" placeholder="New Password" required>
+          <input type="password" v-model="passwordForm.confirmPassword" placeholder="Confirm New Password" required>
+          <div v-if="passwordError" class="error">{{ passwordError }}</div>
+          <div v-if="passwordSuccess" class="success">{{ passwordSuccess }}</div>
+          <button type="submit" class="btn" :disabled="isUpdating">Change Password</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" v-if="showDeleteAccountModal">
+      <div class="modal-content">
+        <span class="close" @click="showDeleteAccountModal = false">&times;</span>
+        <h2>Delete Account</h2>
+        <p>Type DELETE to confirm account deletion.</p>
+        <input type="text" v-model="deleteConfirmation" placeholder="Type DELETE to confirm" required>
+        <button class="btn btn-danger" @click="deleteAccount" :disabled="isDeleting">
+          {{ isDeleting ? 'Deleting...' : 'Delete Account' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="modal" v-if="showClaimDetailsModal">
+      <div class="modal-content claim-details-modal">
+        <span class="close" @click="showClaimDetailsModal = false">&times;</span>
+        <h2>Claim Details</h2>
+        <div v-if="selectedClaim">
+          <div class="claim-info">
+            <h3>{{ selectedClaim.item.name }}</h3>
+            <p>Status: <span :class="getClaimStatusClass(selectedClaim.status)">{{ selectedClaim.status }}</span></p>
+            <p>Claim Date: {{ formatDate(selectedClaim.claimDate) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" v-if="selectedItem">
+      <div class="modal-content item-detail-modal">
+        <span class="close" @click="selectedItem = null">&times;</span>
+        <div class="item-detail-header">
+          <h2>{{ selectedItem.name }}</h2>
+          <button class="btn-tiny btn-danger" @click="deleteItem(selectedItem.id, selectedItemType)">Delete</button>
+        </div>
+        <div class="item-detail-content">
+          <div class="item-images">
+            <div class="main-image" :style="{ backgroundImage: `url(${selectedItem.image || 'images/no-image.png'})` }"></div>
+          </div>
+          <div class="item-details">
+            <p><strong>Category:</strong> {{ selectedItem.category }}</p>
+            <p><strong>Date:</strong> {{ selectedItemType === 'lost' ? formatDate(selectedItem.dateLost) : formatDate(selectedItem.dateFound) }}</p>
+            <p><strong>Location:</strong> {{ selectedItem.location }}</p>
+            <p><strong>Description:</strong> {{ selectedItem.description }}</p>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn" @click="editItem(selectedItem, selectedItemType)">Edit</button>
+          <button class="btn btn-outlined" @click="selectedItem = null">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3"></script>
+  <script src="scripts/env.js"></script>
+  <script src="scripts/dashboard.js"></script>
+</body>
+</html>
