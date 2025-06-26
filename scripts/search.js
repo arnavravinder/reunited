@@ -77,7 +77,6 @@ const app = Vue.createApp({
         description: '',
         contactInfo: ''
       },
-      generatedClaimCode: '',
       isSubmittingClaim: false,
       
       locations: [
@@ -87,8 +86,6 @@ const app = Vue.createApp({
     };
   },
   mounted() {
-    console.log("Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder");
-    
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
       
@@ -744,7 +741,7 @@ const app = Vue.createApp({
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            prompt: `Please estimate the value of the following item in dollars. Return only the numeric value with dollar sign, e.g. "$25" or "$100-150" for a range. No explanation needed.
+            prompt: `Please estimate the value of the following item in Indian Rupees (INR). Return only the numeric value with the currency symbol, e.g. "₹2000" or "₹8000-12000" for a range. No explanation needed.
             
 Item: ${item.name}
 Category: ${item.category}
@@ -769,19 +766,9 @@ Description: ${item.description}`
         
         this.itemValuation = aiResponse.trim();
         
-        if (!this.itemValuation.includes('$')) {
-          this.itemValuation = '$' + this.itemValuation;
-        }
       } catch (error) {
         console.error("Error in AI valuation:", error);
-        
-        if (item.category === 'Electronics') {
-          this.itemValuation = "$50-200";
-        } else if (item.category === 'Uniform') {
-          this.itemValuation = "$20-40";
-        } else {
-          this.itemValuation = "$10-30";
-        }
+        this.itemValuation = "₹500-1500";
       }
     },
     
@@ -805,13 +792,8 @@ Description: ${item.description}`
     },
     
     async submitClaim() {
-      if (!this.user) {
+      if (!this.user || !this.claimItem) {
         this.showLoginModal = true;
-        return;
-      }
-      
-      if (!this.claimItem) {
-        alert("No item selected for claiming.");
         return;
       }
       
@@ -820,18 +802,14 @@ Description: ${item.description}`
       try {
         let estimatedValue = 0;
         if (this.itemValuation) {
-          const valueMatch = this.itemValuation.match(/\$(\d+)(?:-\d+)?/);
+          const valueMatch = this.itemValuation.match(/₹(\d+)/);
           if (valueMatch && valueMatch[1]) {
             estimatedValue = parseInt(valueMatch[1], 10);
           }
         }
         
-        const isHighValue = estimatedValue >= 75;
+        const isHighValue = estimatedValue >= 5000;
         const claimStatus = isHighValue ? 'pending' : 'approved';
-        
-        if (!isHighValue) {
-          this.generatedClaimCode = this.generateClaimCode();
-        }
         
         const claimData = {
           itemId: this.claimItem.id,
@@ -846,7 +824,7 @@ Description: ${item.description}`
           itemCategory: this.claimItem.category,
           itemLocation: this.claimItem.location,
           estimatedValue: estimatedValue,
-          claimCode: isHighValue ? null : this.generatedClaimCode
+          claimCode: this.claimItem.claimCode || null
         };
         
         const claimRef = await db.collection('claims').add(claimData);
@@ -857,12 +835,21 @@ Description: ${item.description}`
           claimStatus: claimStatus
         });
         
+        const claimantFirstName = this.user.displayName ? this.user.displayName.split(' ')[0] : 'User';
+        await db.collection('log').add({
+            itemName: this.claimItem.name,
+            claimDate: firebase.firestore.FieldValue.serverTimestamp(),
+            claimantFirstName: claimantFirstName,
+            itemId: this.claimItem.id,
+            claimId: claimRef.id
+        });
+        
         await db.collection('notifications').add({
           userId: this.user.uid,
           title: isHighValue ? 'Claim Submitted for Review' : 'Item Claimed Successfully',
           message: isHighValue 
             ? `Your claim for ${this.claimItem.name} is pending review. Please use the contact form for follow-up.` 
-            : `Your claim for ${this.claimItem.name} has been approved. Use code ${this.generatedClaimCode} to collect your item.`,
+            : `Your claim for ${this.claimItem.name} has been approved. Use code ${this.claimItem.claimCode} to collect your item.`,
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           type: 'claim',
           read: false,
@@ -876,7 +863,7 @@ Description: ${item.description}`
           
           const contactUrl = `index.html#contact?claim=${claimRef.id}&item=${this.claimItem.name}`;
           
-          alert(`This item's estimated value ($${estimatedValue}) requires verification. Please use the contact form to complete your claim.`);
+          alert(`This item's estimated value (₹${estimatedValue}) requires verification. Please use the contact form to complete your claim.`);
           
           setTimeout(() => {
             window.location.href = contactUrl;
@@ -892,7 +879,7 @@ Description: ${item.description}`
                 email: this.user.email,
                 userName: this.user.displayName || this.user.email,
                 itemName: this.claimItem.name,
-                claimCode: this.generatedClaimCode,
+                claimCode: this.claimItem.claimCode,
                 itemLocation: this.claimItem.location,
                 claimDate: new Date().toISOString()
               })
@@ -910,15 +897,6 @@ Description: ${item.description}`
       } finally {
         this.isSubmittingClaim = false;
       }
-    },
-    
-    generateClaimCode() {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      let code = '';
-      for (let i = 0; i < 6; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return code;
     },
     
     goToClaimLog() {

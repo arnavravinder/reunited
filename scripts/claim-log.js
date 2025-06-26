@@ -46,153 +46,92 @@ const app = Vue.createApp({
       mobileMenuOpen: false,
       
       searchQuery: '',
-      selectedStatus: '',
-      selectedCategory: '',
       sortOption: 'date-desc',
       
       currentPage: 1,
       itemsPerPage: 10,
       totalPages: 1,
       
-      claims: []
+      logs: []
     };
   },
   computed: {
-    filteredClaims() {
-      return this.claims.filter(claim => {
-        const matchesSearch = !this.searchQuery || 
-          claim.itemName.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
-          claim.location.toLowerCase().includes(this.searchQuery.toLowerCase());
-        
-        const matchesStatus = !this.selectedStatus || claim.status === this.selectedStatus;
-        
-        const matchesCategory = !this.selectedCategory || claim.category === this.selectedCategory;
-        
-        return matchesSearch && matchesStatus && matchesCategory;
+    filteredLogs() {
+      if (!this.searchQuery) {
+        return this.logs;
+      }
+      return this.logs.filter(log => {
+        return log.itemName.toLowerCase().includes(this.searchQuery.toLowerCase());
       });
     },
-    paginatedClaims() {
+    paginatedLogs() {
       const startIndex = (this.currentPage - 1) * this.itemsPerPage;
       const endIndex = startIndex + this.itemsPerPage;
-      return this.filteredClaims.slice(startIndex, endIndex);
+      return this.filteredLogs.slice(startIndex, endIndex);
     }
   },
   watch: {
-    filteredClaims() {
+    filteredLogs() {
       this.updatePagination();
     },
     searchQuery() {
       this.currentPage = 1;
     },
-    selectedStatus() {
-      this.currentPage = 1;
-    },
-    selectedCategory() {
-      this.currentPage = 1;
-    },
     sortOption() {
-      this.sortClaims();
+      this.sortLogs();
     }
   },
   mounted() {
-    console.log("Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder");
-    
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
     });
     
-    this.loadPublicClaims();
+    this.loadPublicLog();
     
     this.checkMagicLinkSignIn();
   },
   methods: {
-    loadPublicClaims() {
+    loadPublicLog() {
       this.isLoading = true;
       
-      db.collection('claims')
-        .where('status', 'in', ['approved', 'collected'])
+      db.collection('log')
         .orderBy('claimDate', 'desc')
         .limit(100)
         .get()
         .then(snapshot => {
-          const claimsData = [];
-          const itemPromises = [];
-          
-          snapshot.forEach(doc => {
-            const claim = { id: doc.id, ...doc.data() };
-            
-            if (claim.itemName && claim.itemCategory && claim.itemLocation) {
-              claimsData.push({
-                id: doc.id,
-                claimDate: claim.claimDate,
-                status: claim.status,
-                itemName: claim.itemName,
-                category: claim.itemCategory,
-                location: claim.itemLocation
-              });
-            } else {
-              const itemPromise = db.collection('items').doc(claim.itemId).get()
-                .then(itemDoc => {
-                  if (itemDoc.exists) {
-                    const itemData = itemDoc.data();
-                    return {
-                      id: doc.id,
-                      claimDate: claim.claimDate,
-                      status: claim.status,
-                      itemName: itemData.name,
-                      category: itemData.category,
-                      location: itemData.location
-                    };
-                  }
-                  return null;
-                });
-              
-              itemPromises.push(itemPromise);
-            }
-          });
-          
-          return Promise.all([Promise.resolve(claimsData), Promise.all(itemPromises)]);
-        })
-        .then(([basicClaimsData, fetchedClaimsData]) => {
-          this.claims = [...basicClaimsData, ...fetchedClaimsData.filter(claim => claim !== null)];
-          this.sortClaims();
+          this.logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          this.sortLogs();
           this.updatePagination();
         })
         .catch(error => {
-          console.error("Error loading claims:", error);
+          console.error("Error loading public log:", error);
         })
         .finally(() => {
           this.isLoading = false;
         });
     },
     
-    sortClaims() {
+    sortLogs() {
       switch (this.sortOption) {
         case 'date-desc':
-          this.claims.sort((a, b) => {
-            const dateA = a.claimDate && a.claimDate.toDate ? a.claimDate.toDate() : new Date(a.claimDate);
-            const dateB = b.claimDate && b.claimDate.toDate ? b.claimDate.toDate() : new Date(b.claimDate);
+          this.logs.sort((a, b) => {
+            const dateA = a.claimDate?.toDate ? a.claimDate.toDate() : new Date(0);
+            const dateB = b.claimDate?.toDate ? b.claimDate.toDate() : new Date(0);
             return dateB - dateA;
           });
           break;
         case 'date-asc':
-          this.claims.sort((a, b) => {
-            const dateA = a.claimDate && a.claimDate.toDate ? a.claimDate.toDate() : new Date(a.claimDate);
-            const dateB = b.claimDate && b.claimDate.toDate ? b.claimDate.toDate() : new Date(b.claimDate);
+          this.logs.sort((a, b) => {
+            const dateA = a.claimDate?.toDate ? a.claimDate.toDate() : new Date(0);
+            const dateB = b.claimDate?.toDate ? b.claimDate.toDate() : new Date(0);
             return dateA - dateB;
-          });
-          break;
-        case 'status':
-          this.claims.sort((a, b) => {
-            const statusOrder = { pending: 0, approved: 1, collected: 2, rejected: 3 };
-            return statusOrder[a.status] - statusOrder[b.status];
           });
           break;
       }
     },
     
     updatePagination() {
-      this.totalPages = Math.ceil(this.filteredClaims.length / this.itemsPerPage);
+      this.totalPages = Math.ceil(this.filteredLogs.length / this.itemsPerPage);
       if (this.currentPage > this.totalPages) {
         this.currentPage = Math.max(1, this.totalPages);
       }
@@ -233,21 +172,6 @@ const app = Vue.createApp({
       } catch (error) {
         console.error("Error formatting date:", error);
         return "Date format error";
-      }
-    },
-    
-    formatStatus(status) {
-      switch (status) {
-        case 'pending':
-          return 'Pending';
-        case 'approved':
-          return 'Approved';
-        case 'collected':
-          return 'Collected';
-        case 'rejected':
-          return 'Rejected';
-        default:
-          return status.charAt(0).toUpperCase() + status.slice(1);
       }
     },
     

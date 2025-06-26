@@ -40,7 +40,7 @@
       <div class="container">
         <h1>Public Claim Log</h1>
         <p class="claim-log-description">
-          View the status of recently claimed items. For your personal claim history and detailed information, 
+          For transparency, this is a public log of recently claimed items. For your personal claim history, 
           please visit your <a href="dashboard.html" v-if="user">dashboard</a><a href="#" @click.prevent="showLoginModal = true" v-else>dashboard</a>.
         </p>
       </div>
@@ -51,29 +51,7 @@
         <div class="filter-controls">
           <div class="search-input">
             <i class="fas fa-search"></i>
-            <input type="text" v-model="searchQuery" placeholder="Search by item name or location">
-          </div>
-          
-          <div class="filter-dropdown">
-            <label>Status: </label>
-            <select v-model="selectedStatus">
-              <option value="">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="collected">Collected</option>
-              <option value="rejected">Rejected</option>
-            </select>
-          </div>
-          
-          <div class="filter-dropdown">
-            <label>Category: </label>
-            <select v-model="selectedCategory">
-              <option value="">All Categories</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Uniform">Uniform</option>
-              <option value="Water Bottle">Water Bottle</option>
-              <option value="Other">Other</option>
-            </select>
+            <input type="text" v-model="searchQuery" placeholder="Search by item name...">
           </div>
           
           <div class="filter-dropdown">
@@ -81,39 +59,30 @@
             <select v-model="sortOption">
               <option value="date-desc">Date (Newest)</option>
               <option value="date-asc">Date (Oldest)</option>
-              <option value="status">Status</option>
             </select>
           </div>
         </div>
         
-        <div class="no-claims" v-if="filteredClaims.length === 0">
+        <div class="no-claims" v-if="filteredLogs.length === 0 && !isLoading">
           <i class="fas fa-clipboard-check"></i>
           <h3>No Claims Found</h3>
-          <p>There are currently no claims matching your filters</p>
+          <p>There are currently no claims matching your search, or no items have been claimed yet.</p>
         </div>
         
-        <div class="claims-table-container" v-if="filteredClaims.length > 0">
+        <div class="claims-table-container" v-if="filteredLogs.length > 0">
           <table class="claims-table">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Item</th>
-                <th>Location Found</th>
-                <th>Category</th>
-                <th>Status</th>
+                <th>Claim Date</th>
+                <th>Item Name</th>
+                <th>Claimed By</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(claim, index) in paginatedClaims" :key="index">
-                <td>{{ formatDate(claim.claimDate) }}</td>
-                <td>{{ claim.itemName }}</td>
-                <td>{{ claim.location }}</td>
-                <td>{{ claim.category }}</td>
-                <td>
-                  <span class="status-badge" :class="claim.status">
-                    {{ formatStatus(claim.status) }}
-                  </span>
-                </td>
+              <tr v-for="(log, index) in paginatedLogs" :key="index">
+                <td>{{ formatDate(log.claimDate) }}</td>
+                <td>{{ log.itemName }}</td>
+                <td>{{ log.claimantFirstName }}</td>
               </tr>
             </tbody>
           </table>
@@ -266,7 +235,7 @@
           <a href="index.html#contact">Contact</a>
         </div>
         <div class="copyright">
-          &copy; 2025 Reunited. All rights reserved.
+          © 2025 Reunited. All rights reserved.
         </div>
         <div class="made-with-love">
           Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav R</a>

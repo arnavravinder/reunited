@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add Test Items to Reunited</title>
+  <title>Add Specific Test Items to Reunited</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -57,17 +57,18 @@
       border-radius: 5px;
       overflow: auto;
       margin-top: 20px;
+      max-height: 300px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Add 200 Test Items to Reunited</h1>
-    <p>Click the button below to add 200 unique lost and found items to your Firebase database.</p>
-    <button id="addItemsBtn">Add 200 Test Items</button>
+    <h1>Add Specific Test Items</h1>
+    <p>Click the button below to add specific, branded items (Nike, Adidas, Puma, Inventure) to your Firebase database. This will overwrite existing items.</p>
+    <button id="addItemsBtn">Generate Specific Items</button>
     
     <div id="progress">
-      <p>Adding items: <span id="counter">0</span>/200</p>
+      <p>Adding items: <span id="counter">0</span>/<span id="total">0</span></p>
       <div class="progress-bar">
         <div class="progress-fill" id="progressFill"></div>
       </div>
@@ -76,12 +77,10 @@
     <pre id="log"></pre>
   </div>
 
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   
   <script>
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyC_SXeIsbmw97u2aklsjA0gM5WWO1_dArI",
       authDomain: "reunited-web.firebaseapp.com",
@@ -92,174 +91,169 @@
       appId: "1:1045353786748:web:df81f8d326d9508d0848f9"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Item data arrays
-    const itemTypes = [
-      { category: 'Uniform', items: [
-        'School Blazer', 'School Tie', 'PE Kit', 'Track Pants', 'Sports Jersey', 
-        'School Shirt', 'School Trousers', 'School Skirt', 'School Jumper', 'School Socks'
-      ]},
-      { category: 'Electronics', items: [
-        'iPhone', 'Samsung Galaxy', 'AirPods', 'Headphones', 'iPad', 
-        'Chromebook', 'Calculator', 'Smartwatch', 'Power Bank', 'USB Drive'
-      ]},
-      { category: 'Water Bottle', items: [
-        'Metal Water Bottle', 'Plastic Water Bottle', 'Sports Water Bottle', 
-        'Insulated Water Bottle', 'Glass Water Bottle'
-      ]},
-      { category: 'Others', items: [
-        'Pencil Pouch', 'Backpack', 'Textbook', 'Notebook', 'Pencil Case', 
-        'Glasses', 'Lunch Box', 'Umbrella', 'Wallet', 'ID Card'
-      ]}
+    const itemsToGenerate = [
+      { name: 'Nike Football Studs', category: 'Sports Equipment', brand: 'Nike', count: 15 },
+      { name: 'Adidas Football Studs', category: 'Sports Equipment', brand: 'Adidas', count: 15 },
+      { name: 'Puma Football Studs', category: 'Sports Equipment', brand: 'Puma', count: 10 },
+      { name: 'Inventure School Hoodie', category: 'Apparel', brand: 'Inventure', count: 15 },
+      { name: 'Inventure Track Pants', category: 'Apparel', brand: 'Inventure', count: 15, colors: ['Orange', 'Blue'] },
+      { name: 'Nike Hoodie', category: 'Apparel', brand: 'Nike', count: 10 },
+      { name: 'Adidas T-Shirt', category: 'Apparel', brand: 'Adidas', count: 10 },
+      { name: 'Puma Backpack', category: 'Accessories', brand: 'Puma', count: 10 },
+      { name: 'Apple AirPods', category: 'Electronics', brand: 'Apple', count: 10 },
+      { name: 'Generic Water Bottle', category: 'Water Bottle', brand: 'Generic', count: 20 }
     ];
 
-    const colors = ['Red', 'Blue', 'Green', 'Yellow', 'Black', 'White', 'Purple', 'Pink', 'Orange', 'Gray'];
+    const colors = ['Red', 'Blue', 'Green', 'Yellow', 'Black', 'White', 'Purple', 'Pink', 'Orange', 'Gray', 'Maroon'];
     const sizes = ['Small', 'Medium', 'Large', 'Extra Large'];
-    const brands = ['Nike', 'Adidas', 'Puma', 'Under Armour', 'Apple', 'Samsung', 'Dell', 'HP', 'Generic', 'School Brand'];
     const conditions = ['New', 'Like New', 'Good', 'Fair', 'Worn'];
-    const patterns = ['Solid', 'Striped', 'Checkered', 'Polka Dot', 'Plain'];
 
     const locations = [
-      'Main Building', 'Cafeteria', 'Library', 'Gymnasium',
-      'Lecture Hall', 'Parking Lot', 'Bus Stop', 'Park',
-      'Science Lab', 'Computer Lab', 'Music Room', 'Art Studio',
-      'Sports Field', 'Swimming Pool', 'Auditorium', 'Classroom 101',
-      'Classroom 102', 'Classroom 103', 'Classroom 201', 'Classroom 202'
+      'Main Building', 'Cafeteria', 'Library', 'Gymnasium', 'Lecture Hall', 'Parking Lot', 'Bus Stop', 
+      'Park', 'Sports Field', 'Swimming Pool', 'Auditorium'
     ];
 
-    // Function to generate random date within the last 90 days
     function getRandomDate() {
       const today = new Date();
-      const daysAgo = Math.floor(Math.random() * 90);
       const date = new Date(today);
-      date.setDate(today.getDate() - daysAgo);
       return date;
     }
 
-    // Function to generate random timestamp
-    function getRandomTimestamp() {
-      return firebase.firestore.Timestamp.fromDate(getRandomDate());
-    }
-
-    // Function to generate search terms
-    function generateSearchTerms(name, description) {
-      const combinedText = (name + ' ' + description).toLowerCase();
-      return combinedText
-        .split(/\s+/)
-        .filter(term => term.length > 2)
-        .filter((term, index, arr) => arr.indexOf(term) === index) // Remove duplicates
-        .slice(0, 10); // Limit to 10 terms
-    }
-
-    // Function to generate a unique item
-    function generateUniqueItem(index) {
-      // Choose random category and item
-      const typeObj = itemTypes[Math.floor(Math.random() * itemTypes.length)];
-      const category = typeObj.category;
-      const baseItem = typeObj.items[Math.floor(Math.random() * typeObj.items.length)];
-      
-      // Add details based on category
-      let color = colors[Math.floor(Math.random() * colors.length)];
-      let size = sizes[Math.floor(Math.random() * sizes.length)];
-      let brand = brands[Math.floor(Math.random() * brands.length)];
-      let condition = conditions[Math.floor(Math.random() * conditions.length)];
-      let pattern = patterns[Math.floor(Math.random() * patterns.length)];
-      
-      // Customize name based on category
-      let name;
-      if (category === 'Uniform') {
-        name = `${color} ${pattern} ${baseItem} (${size})`;
-      } else if (category === 'Electronics') {
-        name = `${brand} ${baseItem}`;
-      } else if (category === 'Water Bottle') {
-        name = `${color} ${brand} ${baseItem}`;
-      } else {
-        name = `${color} ${baseItem}`;
+    function generateClaimCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      
-      // Generate location
-      const location = locations[Math.floor(Math.random() * locations.length)];
-      
-      // Generate claimed status (20% are claimed)
-      const claimed = Math.random() < 0.2;
-      
-      // Generate description
-      const dateFound = getRandomDate();
-      const description = `Found a ${condition.toLowerCase()} ${color.toLowerCase()} ${baseItem.toLowerCase()} at the ${location.toLowerCase()} on ${dateFound.toLocaleDateString()}. ${
-        Math.random() > 0.5 ? 
-        `It's a ${brand} brand ${size.toLowerCase()} size with ${pattern.toLowerCase()} pattern.` : 
-        `If this item belongs to you, please claim it with proper identification.`
-      }`;
-      
-      // Generate placeholder image URL
-      const imageSize = 300;
-      const imageUrl = `https://placehold.co/${imageSize}x${imageSize}/6e7fff/ffffff?text=${encodeURIComponent(baseItem)}`;
-      
-      // Create item object
-      return {
-        name: name,
-        category: category,
-        dateFound: firebase.firestore.Timestamp.fromDate(dateFound),
-        location: location,
-        description: description,
-        image: imageUrl,
-        hasAdditionalImages: Math.random() > 0.7, // 30% have additional images
-        claimed: claimed,
-        claimId: claimed ? `mock-claim-${index}` : null,
-        createdAt: getRandomTimestamp(),
-        searchTerms: generateSearchTerms(name, description)
-      };
+      return code;
+    }
+    
+    function generateSearchTerms(itemData) {
+        const stopWords = new Set(['a', 'an', 'the', 'is', 'in', 'at', 'on', 'of', 'to', 'for', 'and', 'or', 'it', 'its', 'with']);
+        const nameWords = itemData.name.toLowerCase().split(/\s+/);
+        
+        const potentialTerms = [
+            ...nameWords,
+            itemData.category.toLowerCase(),
+            itemData.brand.toLowerCase(),
+            itemData.color.toLowerCase(),
+            itemData.location.toLowerCase(),
+        ];
+
+        const terms = potentialTerms
+            .map(term => term.replace(/[^a-z0-9]/gi, ''))
+            .filter(term => term && term.length > 2 && !stopWords.has(term));
+
+        return [...new Set(terms)].slice(0, 15);
+    }
+    
+    function createItemVariants() {
+      const allItems = [];
+      itemsToGenerate.forEach(baseItem => {
+        for (let i = 0; i < baseItem.count; i++) {
+          const color = baseItem.colors ? baseItem.colors[Math.floor(Math.random() * baseItem.colors.length)] : colors[Math.floor(Math.random() * colors.length)];
+          const size = sizes[Math.floor(Math.random() * sizes.length)];
+          const condition = conditions[Math.floor(Math.random() * conditions.length)];
+          const location = locations[Math.floor(Math.random() * locations.length)];
+          const dateFound = getRandomDate();
+          
+          let name = `${color} ${baseItem.name}`;
+          if (['Apparel', 'Sports Equipment'].includes(baseItem.category)) {
+            name += ` (${size})`;
+          }
+
+          const description = `A ${condition.toLowerCase()} ${name.toLowerCase()} was found in the ${location}. If this item belongs to you, please claim it with proper identification.`;
+          const claimed = Math.random() < 0.2;
+          
+          const placeholderText = `${baseItem.brand}\\n${baseItem.name}\\n${color}`;
+          const imageUrl = `https://placehold.co/600x400/292E3D/f8f9fa/png?text=${encodeURIComponent(placeholderText)}`;
+          
+          const itemData = {
+            name: name,
+            category: baseItem.category,
+            brand: baseItem.brand,
+            color: color,
+            location: location,
+            dateFound: firebase.firestore.Timestamp.fromDate(dateFound),
+            description: description,
+            image: imageUrl,
+            claimed: claimed,
+            claimId: claimed ? `mock-claim-${i}` : null,
+            status: claimed ? 'claimed' : 'available',
+            claimCode: generateClaimCode(),
+            createdAt: firebase.firestore.Timestamp.now(),
+          };
+          
+          itemData.searchTerms = generateSearchTerms(itemData);
+          allItems.push(itemData);
+        }
+      });
+      return allItems;
     }
 
-    // Function to add items to Firestore
     async function addItemsToFirestore() {
       const progressDiv = document.getElementById('progress');
       const progressFill = document.getElementById('progressFill');
-      const counter = document.getElementById('counter');
+      const counterSpan = document.getElementById('counter');
+      const totalSpan = document.getElementById('total');
       const log = document.getElementById('log');
       
       progressDiv.style.display = 'block';
-      log.textContent = 'Starting to add items...\n';
+      log.textContent = 'Generating item data...\n';
       
-      const batch = [];
-      const totalItems = 200;
-      
-      // Generate items
-      for (let i = 0; i < totalItems; i++) {
-        batch.push(generateUniqueItem(i));
-      }
-      
-      // Add items to Firestore in batches
-      const batchSize = 10;
-      for (let i = 0; i < batch.length; i += batchSize) {
-        const currentBatch = batch.slice(i, i + batchSize);
-        const promises = currentBatch.map(item => db.collection('items').add(item));
+      const allItems = createItemVariants();
+      const totalItems = allItems.length;
+      totalSpan.textContent = totalItems;
+      log.textContent += `Generated ${totalItems} items. Starting to upload...\n`;
+
+      const batchSize = 20;
+      for (let i = 0; i < totalItems; i += batchSize) {
+        const batch = db.batch();
+        const currentBatchItems = allItems.slice(i, i + batchSize);
         
-        await Promise.all(promises);
+        currentBatchItems.forEach(item => {
+          const docRef = db.collection('items').doc();
+          batch.set(docRef, item);
+        });
         
-        const progress = Math.min(100, Math.round(((i + currentBatch.length) / totalItems) * 100));
+        await batch.commit();
+        
+        const progress = Math.min(100, Math.round(((i + currentBatchItems.length) / totalItems) * 100));
         progressFill.style.width = `${progress}%`;
-        counter.textContent = Math.min(i + currentBatch.length, totalItems);
+        counterSpan.textContent = Math.min(i + currentBatchItems.length, totalItems);
         
-        log.textContent += `Added items ${i + 1} to ${i + currentBatch.length}\n`;
+        log.textContent += `Uploaded items ${i + 1} to ${i + currentBatchItems.length}\n`;
         log.scrollTop = log.scrollHeight;
       }
       
-      log.textContent += 'All 200 items added successfully!\n';
+      log.textContent += `All ${totalItems} items added successfully!\n`;
     }
 
-    // Add click event to button
-    document.getElementById('addItemsBtn').addEventListener('click', function() {
-      this.disabled = true;
-      addItemsToFirestore().catch(error => {
-        console.error('Error adding items:', error);
-        document.getElementById('log').textContent += `ERROR: ${error.message}\n`;
-      }).finally(() => {
-        this.disabled = false;
-      });
+    document.getElementById('addItemsBtn').addEventListener('click', async function() {
+        if (!confirm("This will delete all existing items in the 'items' collection and replace them with new dummy data. Are you sure you want to continue?")) {
+            return;
+        }
+
+        this.disabled = true;
+        const log = document.getElementById('log');
+        log.textContent = 'Deleting old items...\n';
+
+        try {
+            const snapshot = await db.collection('items').limit(500).get();
+            const deleteBatch = db.batch();
+            snapshot.docs.forEach(doc => deleteBatch.delete(doc.ref));
+            await deleteBatch.commit();
+            log.textContent += 'Old items deleted successfully.\n';
+            await addItemsToFirestore();
+        } catch (error) {
+            console.error('An error occurred:', error);
+            log.textContent += `ERROR: ${error.message}\n`;
+        } finally {
+            this.disabled = false;
+        }
     });
   </script>
 </body>

@@ -240,13 +240,6 @@
               <p>This item has already been claimed by another user. To dispute this claim, please use the contact form on the homepage.</p>
             </div>
             
-            <div v-if="!selectedItem.claimed && user" class="item-valuation" v-show="itemValuation">
-              <div class="valuation-badge">
-                <i class="fas fa-tag"></i> Estimated Value
-              </div>
-              <div class="valuation-amount">{{ itemValuation }}</div>
-            </div>
-            
             <div class="item-actions">
               <button class="btn" v-if="!selectedItem.claimed && user" @click="initiateClaimItem(selectedItem)">Claim This Item</button>
               <button class="btn btn-outlined" v-if="!selectedItem.claimed && user" @click="reportMatch(selectedItem.id)">Report Similar Loss</button>
@@ -308,7 +301,7 @@
           
           <div class="claim-code-container">
             <h4>Your Claim Code</h4>
-            <div class="claim-code">{{ generatedClaimCode }}</div>
+            <div class="claim-code">{{ claimItem.claimCode }}</div>
             <p class="claim-instructions">Please show this code at the Lost & Found area to collect your item</p>
           </div>
           
@@ -424,7 +417,7 @@
           <a href="index.html#contact">Contact</a>
         </div>
         <div class="copyright">
-          &copy; 2025 Reunited. All rights reserved.
+          © 2025 Reunited. All rights reserved.
         </div>
         <div class="made-with-love">
           Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav R</a>
