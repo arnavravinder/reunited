@@ -9,12 +9,12 @@ const getEnvVar = (key, defaultValue = null) => {
 };
 
 const firebaseConfig = {
-  apiKey: getEnvVar('FIREBASE_API_KEY', 'AIzaSy...fallback'),
-  authDomain: getEnvVar('FIREBASE_AUTH_DOMAIN', 'reunited-web.firebaseapp.com'),
-  projectId: getEnvVar('FIREBASE_PROJECT_ID', 'reunited-web'),
-  storageBucket: getEnvVar('FIREBASE_STORAGE_BUCKET', 'reunited-web.firebasestorage.app'),
-  messagingSenderId: getEnvVar('FIREBASE_MESSAGING_SENDER_ID', '1045353786748'),
-  appId: getEnvVar('FIREBASE_APP_ID', '1:1045353786748:web:df81f8d326d9508d0848f9')
+  apiKey: getEnvVar('FIREBASE_API_KEY'),
+  authDomain: getEnvVar('FIREBASE_AUTH_DOMAIN'),
+  projectId: getEnvVar('FIREBASE_PROJECT_ID'),
+  storageBucket: getEnvVar('FIREBASE_STORAGE_BUCKET'),
+  messagingSenderId: getEnvVar('FIREBASE_MESSAGING_SENDER_ID'),
+  appId: getEnvVar('FIREBASE_APP_ID')
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -40,7 +40,7 @@ const app = Vue.createApp({
       },
       user: null,
       authError: null,
-      formspreeUrl: getEnvVar('FORMSPREE_URL', 'https://formspree.io/f/your-form-id'),
+      formspreeUrl: getEnvVar('FORMSPREE_URL'),
       formSubmitting: false,
       formSubmitted: false,
       magicLinkMode: false,

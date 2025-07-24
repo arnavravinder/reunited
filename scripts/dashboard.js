@@ -1,5 +1,3 @@
-// In your dashboard.js file
-
 const getEnvVar = (key, defaultValue = null) => {
   if (window.env && window.env[key]) {
     return window.env[key];
