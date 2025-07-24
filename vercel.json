@@ -1,3 +1,4 @@
 {
-  "buildCommand": "bash replace-env.sh"
+  "buildCommand": "bash replace-env.sh",
+  "outputDirectory": "."
 }
