@@ -1,3 +1,5 @@
+// In your dashboard.js file
+
 const getEnvVar = (key, defaultValue = null) => {
   if (window.env && window.env[key]) {
     return window.env[key];
@@ -199,8 +201,8 @@ const app = Vue.createApp({
 
         try {
             const prompt = type === 'lost' 
-                ? `Enhance this lost item description to be more detailed and helpful for finding the item. Keep it concise but comprehensive. Original description: "${currentDescription}"`
-                : `Enhance this found item description to be more detailed and helpful for the owner to identify their item. Keep it concise but comprehensive. Original description: "${currentDescription}"`;
+                ? `Only reply with the answer, ZERO other text in your reply except the answer. Do not use text features/markdown, just plaintext. Do NOT make up stuff that isn't explicitly provided to you in the current description. Enhance this lost item description to be more detailed and helpful for finding the item. Keep it concise but comprehensive. Original description: "${currentDescription}"`
+                : `Only reply with the answer, ZERO other text in your reply except the answer. Do not use text features/markdown, justplaintext. Do NOT make up stuff that isn't explicitly provided to you in the current description. Enhance this found item description to be more detailed and helpful for the owner to identify their item. Keep it concise but comprehensive. Original description: "${currentDescription}"`;
 
             const response = await fetch('https://ai.hackclub.com/chat/completions', {
                 method: 'POST',
@@ -863,63 +865,33 @@ const app = Vue.createApp({
           this.showGenericMessagePopup("Error deleting item. Please try again.");
         });
     },
-    handleImageUpload(event) {
-      const files = event.target.files;
-      if (!files || files.length === 0) return;
-      const maxImages = 5;
-      if (this.lostItemForm.images.length + files.length > maxImages) {
-          this.showGenericMessagePopup(`You can upload a maximum of ${maxImages} images.`);
-          event.target.value = null;
-          return;
-      }
-      Array.from(files).forEach(file => {
-        if (!file.type.startsWith('image/')) {
-          this.showGenericMessagePopup("Please upload valid image files (e.g., JPG, PNG, GIF).");
-          return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            this.showGenericMessagePopup(`File ${file.name} is too large (max 5MB).`);
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.lostItemForm.images.push({
-            file: file,
-            preview: e.target.result
-          });
-        };
-        reader.onerror = (error) => {
-            console.error("FileReader error:", error);
-            this.showGenericMessagePopup(`Error reading file ${file.name}.`);
-        };
-        reader.readAsDataURL(file);
-      });
-      event.target.value = null;
-    },
-    handleFoundImageUpload(event) {
+    handleImageUpload(event, type) {
+        const form = type === 'lost' ? this.lostItemForm : this.foundItemForm;
         const files = event.target.files;
         if (!files || files.length === 0) return;
         const maxImages = 5;
-         if (this.foundItemForm.images.length + files.length > maxImages) {
-          this.showGenericMessagePopup(`You can upload a maximum of ${maxImages} images.`);
-          event.target.value = null;
-          return;
+
+        if (form.images.length + files.length > maxImages) {
+            this.showGenericMessagePopup(`You can upload a maximum of ${maxImages} images.`);
+            event.target.value = null;
+            return;
         }
+
         Array.from(files).forEach(file => {
             if (!file.type.startsWith('image/')) {
-            this.showGenericMessagePopup("Please upload valid image files (e.g., JPG, PNG, GIF).");
-            return;
+                this.showGenericMessagePopup("Please upload valid image files (e.g., JPG, PNG, GIF).");
+                return;
             }
-            if (file.size > 5 * 1024 * 1024) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB
                 this.showGenericMessagePopup(`File ${file.name} is too large (max 5MB).`);
                 return;
             }
             const reader = new FileReader();
             reader.onload = (e) => {
-            this.foundItemForm.images.push({
-                file: file,
-                preview: e.target.result
-            });
+                form.images.push({
+                    file: file,
+                    preview: e.target.result
+                });
             };
             reader.onerror = (error) => {
                 console.error("FileReader error:", error);
@@ -927,13 +899,11 @@ const app = Vue.createApp({
             };
             reader.readAsDataURL(file);
         });
-         event.target.value = null;
+        event.target.value = null; // Reset file input
     },
-    removeImage(index) {
-      this.lostItemForm.images.splice(index, 1);
-    },
-    removeFoundImage(index) {
-      this.foundItemForm.images.splice(index, 1);
+    removeImage(index, type) {
+        const form = type === 'lost' ? this.lostItemForm : this.foundItemForm;
+        form.images.splice(index, 1);
     },
     async submitLostItemReport() {
       if (!this.user) return;
@@ -1082,8 +1052,15 @@ const app = Vue.createApp({
         .filter(term => term.length > 1 && !commonWords.has(term));
       return [...new Set(terms)].slice(0, 20);
     },
+    getEffectiveClaimStatus(claim) {
+      if (!claim) return 'unknown';
+      if (claim.item && claim.item.status === 'collected') {
+        return 'collected';
+      }
+      return claim.status ? claim.status.replace('_', ' ') : 'unknown';
+    },
     getClaimStatusClass(status) {
-      return status ? status.toLowerCase() : 'unknown';
+      return status ? status.toLowerCase().replace('_', ' ') : 'unknown';
     },
     formatDate(dateValue) {
       try {
