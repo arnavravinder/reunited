@@ -388,12 +388,16 @@ const app = Vue.createApp({
         const prompt = this.buildAIPrompt(params, allItems);
         
         try {
-          const response = await fetch(`https://${getEnvVar('GEMINI_API_URL')}`, {
+          const response = await fetch('https://ai.hackclub.com/chat/completions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ prompt })
+            body: JSON.stringify({
+              messages: [{ role: 'user', content: prompt }],
+              model: 'qwen/qwen3-32b',
+              temperature: 0.7
+            })
           });
           
           if (!response.ok) {
@@ -403,10 +407,8 @@ const app = Vue.createApp({
           const data = await response.json();
           
           let aiResponse = "";
-          if (data && data.data && data.data.candidates && data.data.candidates.length > 0) {
-            aiResponse = data.data.candidates[0].content?.parts?.[0]?.text || "";
-          } else if (data && data.response) {
-            aiResponse = data.response;
+          if (data && data.choices && data.choices.length > 0) {
+            aiResponse = data.choices[0].message?.content || "";
           } else {
             throw new Error('Invalid API response format');
           }
@@ -735,17 +737,22 @@ const app = Vue.createApp({
     
     async getItemValuation(item) {
       try {
-        const response = await fetch(`https://${getEnvVar('GEMINI_API_URL')}`, {
+        const response = await fetch('https://ai.hackclub.com/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            prompt: `Please estimate the value of the following item in Indian Rupees (INR). Return only the numeric value with the currency symbol, e.g. "₹2000" or "₹8000-12000" for a range. No explanation needed.
+            messages: [{ 
+              role: 'user', 
+              content: `Please estimate the value of the following item in Indian Rupees (INR). Return only the numeric value with the currency symbol, e.g. "₹2000" or "₹8000-12000" for a range. No explanation needed.
             
 Item: ${item.name}
 Category: ${item.category}
 Description: ${item.description}`
+            }],
+            model: 'qwen/qwen3-32b',
+            temperature: 0.3
           })
         });
         
@@ -756,10 +763,8 @@ Description: ${item.description}`
         const data = await response.json();
         
         let aiResponse = "";
-        if (data && data.data && data.data.candidates && data.data.candidates.length > 0) {
-          aiResponse = data.data.candidates[0].content?.parts?.[0]?.text || "";
-        } else if (data && data.response) {
-          aiResponse = data.response;
+        if (data && data.choices && data.choices.length > 0) {
+          aiResponse = data.choices[0].message?.content || "";
         } else {
           throw new Error('Invalid API response format');
         }
