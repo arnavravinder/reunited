@@ -22,7 +22,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-const AI_API_ENDPOINT = 'https://api.reunited.co.in/api/completions';
+const AI_API_ENDPOINT = 'https://ai.hackclub.com/chat/completions';
 
 const app = Vue.createApp({
   data() {
