@@ -41,7 +41,7 @@ const app = Vue.createApp({
       passwordResetSending: false,
       passwordResetSent: false,
       showAppleComingSoon: false,
-      isLoading: false, // Only true during active searches, not initial load
+      isLoading: false,
       mobileMenuOpen: false,
       viewMode: 'grid',
       searchPerformed: false,
@@ -58,8 +58,8 @@ const app = Vue.createApp({
       itemsPerPage: 12,
       totalPages: 1,
       searchResults: [],
-      allItems: [], // This will hold the results for the current search
-      itemCache: [], // This will hold ALL items, pre-cached in the background
+      allItems: [],
+      itemCache: [],
       selectedItem: null,
       itemValuation: null,
       showClaimModal: false,
@@ -78,7 +78,7 @@ const app = Vue.createApp({
     };
   },
   mounted() {
-    this.precacheAllItems(); // Start fetching data in the background
+    this.precacheAllItems();
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
       if (user) {
@@ -282,7 +282,8 @@ const app = Vue.createApp({
       let filtered = this.itemCache.filter(item => {
         const inDate = this.isInDateRange(item.dateFound, params.dateRange);
         const inLocation = !params.location || item.location === params.location;
-        return inDate && inLocation;
+        const inType = !params.itemType || (item.category && item.category.toLowerCase() === params.itemType.toLowerCase());
+        return inDate && inLocation && inType;
       });
 
       if (params.query) {
@@ -293,8 +294,9 @@ const app = Vue.createApp({
     },
     async performAISearch(params) {
       let results = [];
+      let prefilteredItems = [];
       try {
-        const prefilteredItems = this.prefilterItemsForAI(params, this.itemCache);
+        prefilteredItems = this.prefilterItemsForAI(params, this.itemCache);
         
         if (prefilteredItems.length === 0) {
           return [];
@@ -337,9 +339,13 @@ const app = Vue.createApp({
         );
     },
     buildAIPrompt(params, items) {
-      let prompt = `From the provided list of items, find all that best match the query: "${params.query}". Analyze name, description, category. Return ONLY a comma-separated list of item IDs, ordered by relevance. Do not include explanation.
+      let prompt = `You are a search relevance API. Your only task is to return a comma-separated list of item IDs.
+CRITICAL RULE: Your entire response MUST be a single line of text containing a comma-separated list of the most relevant item IDs. DO NOT include any other text, explanations, or markdown like \`\`\`.
+Correct Output Example: idAbc123,idXyz789,idPqr456
 
----ITEM LIST---
+Search Query: "${params.query}"
+---
+Available Items to Rank:
 `;
       items.forEach(item => {
         prompt += `ID: ${item.id}, Name: ${item.name}, Description: ${item.description}, Category: ${item.category}\n`;
@@ -348,8 +354,10 @@ const app = Vue.createApp({
     },
     extractItemIds(aiResponse) {
       if (!aiResponse) return [];
-      const cleaned = aiResponse.replace(/json/g, '').replace(/```/g, '').trim();
-      return cleaned.split(',').map(id => id.trim()).filter(id => id.length > 5);
+      const cleanedResponse = aiResponse.replace(/[^a-zA-Z0-9,-]/g, '');
+      return cleanedResponse.split(',')
+        .map(id => id.trim())
+        .filter(id => id.length > 5);
     },
     fallbackSearch(params, allItems) {
       const query = params.query.toLowerCase();
@@ -409,7 +417,7 @@ const app = Vue.createApp({
       if (item.name && item.name.toLowerCase().includes(query)) score += 10;
       if (item.description && item.description.toLowerCase().includes(query)) score += 3;
       if (preferredType && item.category && item.category.toLowerCase() === preferredType.toLowerCase()) {
-        score += 20; // Major boost for matching the selected type
+        score += 20;
       }
       return score;
     },
@@ -477,7 +485,7 @@ const app = Vue.createApp({
         });
         if (!response.ok) throw new Error('AI valuation failed');
         const data = await response.json();
-        const content = (data && data.choices && data.choices && data.choices.message && data.choices.message.content.trim()) || "N/A";
+        const content = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content.trim()) || "N/A";
         this.itemValuation = content;
       } catch (error) {
         console.error("Error in AI valuation:", error);
@@ -510,8 +518,8 @@ const app = Vue.createApp({
         let estimatedValue = 0;
         if (this.itemValuation) {
           const valueMatch = this.itemValuation.match(/₹(\d+)/);
-          if (valueMatch && valueMatch) {
-            estimatedValue = parseInt(valueMatch, 10);
+          if (valueMatch && valueMatch[1]) {
+            estimatedValue = parseInt(valueMatch[1], 10);
           }
         }
         
@@ -542,7 +550,7 @@ const app = Vue.createApp({
           claimStatus: claimStatus
         });
         
-        const claimantFirstName = this.user.displayName ? this.user.displayName.split(' ') : 'User';
+        const claimantFirstName = this.user.displayName ? this.user.displayName.split(' ')[0] : 'User';
         await db.collection('log').add({
             itemName: this.claimItem.name,
             claimDate: firebase.firestore.FieldValue.serverTimestamp(),
