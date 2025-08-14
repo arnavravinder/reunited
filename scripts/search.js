@@ -319,7 +319,10 @@ const app = Vue.createApp({
         }
         
         const data = await response.json();
-        const aiResponse = data?.choices?.[0]?.message?.content || "";
+        
+        // ** THE FIX IS HERE **
+        // Replaced optional chaining with traditional, safe checks.
+        const aiResponse = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
         const itemIds = this.extractItemIds(aiResponse);
 
         if (itemIds.length > 0) {
@@ -370,9 +373,9 @@ const app = Vue.createApp({
     fallbackSearch(params, allItems) {
       const query = params.query.toLowerCase();
       return allItems.filter(item => {
-        const inName = item.name?.toLowerCase().includes(query);
-        const inDesc = item.description?.toLowerCase().includes(query);
-        const inType = !params.itemType || item.category?.toLowerCase() === params.itemType.toLowerCase();
+        const inName = item.name && item.name.toLowerCase().includes(query);
+        const inDesc = item.description && item.description.toLowerCase().includes(query);
+        const inType = !params.itemType || (item.category && item.category.toLowerCase() === params.itemType.toLowerCase());
         const inLocation = !params.location || item.location === params.location;
         const inDate = this.isInDateRange(item.dateFound, params.dateRange);
         return (inName || inDesc) && inType && inLocation && inDate;
@@ -404,10 +407,10 @@ const app = Vue.createApp({
         const toSort = items || [...this.allItems];
         switch (this.sortOption) {
             case 'date-desc':
-                toSort.sort((a, b) => (b.dateFound?.toDate() || 0) - (a.dateFound?.toDate() || 0));
+                toSort.sort((a, b) => (b.dateFound && b.dateFound.toDate ? b.dateFound.toDate() : 0) - (a.dateFound && a.dateFound.toDate ? a.dateFound.toDate() : 0));
                 break;
             case 'date-asc':
-                toSort.sort((a, b) => (a.dateFound?.toDate() || 0) - (b.dateFound?.toDate() || 0));
+                toSort.sort((a, b) => (a.dateFound && a.dateFound.toDate ? a.dateFound.toDate() : 0) - (b.dateFound && b.dateFound.toDate ? b.dateFound.toDate() : 0));
                 break;
             case 'relevance':
                 if (!this.aiAssisted && this.searchQuery) {
@@ -420,9 +423,9 @@ const app = Vue.createApp({
     },
     calculateRelevanceScore(item, query) {
       let score = 0;
-      if (item.name?.toLowerCase().includes(query)) score += 10;
-      if (item.category?.toLowerCase().includes(query)) score += 5;
-      if (item.description?.toLowerCase().includes(query)) score += 3;
+      if (item.name && item.name.toLowerCase().includes(query)) score += 10;
+      if (item.category && item.category.toLowerCase().includes(query)) score += 5;
+      if (item.description && item.description.toLowerCase().includes(query)) score += 3;
       return score;
     },
     resetFilters() {
@@ -432,7 +435,7 @@ const app = Vue.createApp({
       this.selectedLocation = '';
       this.selectedDate = '';
       this.searchDateRange = { from: '', to: '' };
-      if (this.$refs.datePicker?._flatpickr) {
+      if (this.$refs.datePicker && this.$refs.datePicker._flatpickr) {
         this.$refs.datePicker._flatpickr.clear();
       }
       this.searchResults = [];
@@ -489,7 +492,8 @@ const app = Vue.createApp({
         });
         if (!response.ok) throw new Error('AI valuation failed');
         const data = await response.json();
-        this.itemValuation = data?.choices?.?.message?.content.trim() || "N/A";
+        // ** THE FIX IS HERE **
+        this.itemValuation = (data && data.choices && data.choices && data.choices.message && data.choices.message.content.trim()) || "N/A";
       } catch (error) {
         console.error("Error in AI valuation:", error);
         this.itemValuation = "₹500-1500";
