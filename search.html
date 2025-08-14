@@ -45,15 +45,13 @@
             <div class="form-row">
               <div class="form-group search-input-group">
                 <label for="item-name">Item Name</label>
-                <input type="text" id="item-name" v-model="searchQuery" placeholder="What did you lose?">
+                <input type="text" id="item-name" v-model="searchQuery" placeholder="What did you lose? e.g., 'blue nike water bottle'">
               </div>
               <div class="form-group">
                 <label for="item-type">Item Type</label>
                 <select id="item-type" v-model="selectedItemType">
                   <option value="">All Types</option>
-                  <option value="Uniform">Uniform</option>
-                  <option value="Water Bottle">Water Bottle</option>
-                  <option value="Electronics">Electronics</option>
+                  <option v-for="type in itemTypes" :key="type" :value="type">{{ type }}</option>
                   <option value="Others">Others (Specify)</option>
                 </select>
               </div>
@@ -68,13 +66,13 @@
                 <label for="item-location">Where Lost</label>
                 <select id="item-location" v-model="selectedLocation">
                   <option value="">All Locations</option>
-                  <option v-for="(location, index) in locations" :key="'loc-'+index" :value="location">
+                  <option v-for="location in locations" :key="location" :value="location">
                     {{ location }}
                   </option>
                 </select>
               </div>
               <div class="form-group">
-                <label for="date-lost">Date Lost</label>
+                <label for="date-lost">Date Lost (approximate)</label>
                 <input type="text" id="date-lost" class="datepicker-input" placeholder="Select date" ref="datePicker">
               </div>
             </div>
@@ -91,7 +89,7 @@
             <div class="ai-badge">
               <i class="fas fa-robot"></i> AI Enhanced Search
             </div>
-            <p class="ai-info">We found {{ allItems.length }} items matching your description!</p>
+            <p class="ai-info">AI is helping to rank the most relevant items for you!</p>
           </div>
         </div>
       </div>
@@ -100,7 +98,7 @@
     <section class="search-results" v-if="searchPerformed">
       <div class="container">
         <div class="results-header">
-          <h2>{{ searchResults.length }} Items Found</h2>
+          <h2>{{ allItems.length }} Items Found</h2>
           <div class="view-options">
             <span>View:</span>
             <button @click="viewMode = 'grid'" :class="{active: viewMode === 'grid'}">
@@ -113,22 +111,22 @@
           
           <div class="sort-options">
             <label>Sort By:</label>
-            <select v-model="sortOption" @change="sortResults">
+            <select v-model="sortOption" @change="updatePagination(sortResults())">
+              <option value="relevance">Relevance</option>
               <option value="date-desc">Date (Newest)</option>
               <option value="date-asc">Date (Oldest)</option>
-              <option value="relevance">Relevance</option>
             </select>
           </div>
         </div>
         
-        <div class="no-results" v-if="searchResults.length === 0">
+        <div class="no-results" v-if="searchResults.length === 0 && !isLoading">
           <i class="fas fa-search-minus"></i>
           <h3>No items found</h3>
           <p>Try adjusting your search criteria or filters</p>
         </div>
         
         <div class="results-grid" v-if="viewMode === 'grid' && searchResults.length > 0">
-          <div class="item-card" v-for="(item, index) in searchResults" :key="index" 
+          <div class="item-card" v-for="item in searchResults" :key="item.id" 
                @click="openItemDetails(item)"
                :class="{'item-claimed': item.claimed}">
             <div class="item-image" :style="{ backgroundImage: `url(${item.image || 'images/no-image.png'})` }"></div>
@@ -147,7 +145,7 @@
         </div>
         
         <div class="results-list" v-if="viewMode === 'list' && searchResults.length > 0">
-          <div class="list-item" v-for="(item, index) in searchResults" :key="index" 
+          <div class="list-item" v-for="item in searchResults" :key="item.id" 
                 @click="openItemDetails(item)"
                 :class="{'item-claimed': item.claimed}">
             <div class="list-item-image" :style="{ backgroundImage: `url(${item.image || 'images/no-image.png'})` }"></div>
@@ -178,7 +176,7 @@
       </div>
     </section>
     
-    <section class="search-results" v-if="!searchPerformed && !user && !isLoading">
+    <section class="search-results" v-if="!searchPerformed && !user">
       <div class="container">
         <div class="no-results auth-required-message">
           <i class="fas fa-user-lock"></i>
@@ -436,4 +434,4 @@
   <script src="api/env.js"></script>
   <script src="scripts/search.js"></script>
 </body>
-</html> 
+</html>

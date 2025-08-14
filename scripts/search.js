@@ -41,7 +41,7 @@ const app = Vue.createApp({
       passwordResetSending: false,
       passwordResetSent: false,
       showAppleComingSoon: false,
-      isLoading: true,
+      isLoading: false, // Only true during active searches, not initial load
       mobileMenuOpen: false,
       viewMode: 'grid',
       searchPerformed: false,
@@ -58,7 +58,8 @@ const app = Vue.createApp({
       itemsPerPage: 12,
       totalPages: 1,
       searchResults: [],
-      allItems: [],
+      allItems: [], // This will hold the results for the current search
+      itemCache: [], // This will hold ALL items, pre-cached in the background
       selectedItem: null,
       itemValuation: null,
       showClaimModal: false,
@@ -66,19 +67,22 @@ const app = Vue.createApp({
       claimItem: null,
       claimForm: { description: '', contactInfo: '' },
       isSubmittingClaim: false,
+      itemTypes: [
+        'Apparel', 'Jacket', 'Electronics', 'Water Bottle', 
+        'Sports Equipment', 'Accessories', 'Uniform'
+      ],
       locations: [
-        'Main Building', 'Cafeteria', 'Library', 'Gymnasium',
-        'Lecture Hall', 'Parking Lot', 'Bus Stop', 'Park', 'Other'
+        'Classroom', 'Primary School Block', 'Middle School Block', 'Hub', 
+        'Hangout Areas', 'Sports Field', 'Football Field', 'Bus'
       ]
     };
   },
   mounted() {
+    this.precacheAllItems(); // Start fetching data in the background
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
       if (user) {
         this.loadUserProfile();
-      } else {
-        this.isLoading = false;
       }
     });
 
@@ -94,6 +98,14 @@ const app = Vue.createApp({
     }
   },
   methods: {
+    async precacheAllItems() {
+        try {
+            const snapshot = await db.collection('items').where('status', '==', 'available').get();
+            this.itemCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch(error) {
+            console.error("Failed to pre-cache items:", error);
+        }
+    },
     scrollToResults() {
       const resultsSection = document.querySelector('.search-results');
       if (resultsSection) {
@@ -110,10 +122,8 @@ const app = Vue.createApp({
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         }
-        this.isLoading = false;
       }).catch(error => {
         console.error("Error loading user profile:", error);
-        this.isLoading = false;
       });
     },
     initDatePicker() {
@@ -236,7 +246,7 @@ const app = Vue.createApp({
     toggleMobileMenu() {
       this.mobileMenuOpen = !this.mobileMenuOpen;
     },
-    performSearch() {
+    async performSearch() {
       if (!this.user) {
         this.showLoginModal = true;
         return;
@@ -244,63 +254,50 @@ const app = Vue.createApp({
       this.isLoading = true;
       this.searchPerformed = true;
       this.currentPage = 1;
+      
       const searchParams = {
         query: this.searchQuery,
         itemType: this.selectedItemType === 'Others' ? this.otherItemType : this.selectedItemType,
         location: this.selectedLocation,
         dateRange: this.searchDateRange
       };
+      
       this.aiAssisted = this.isComplexSearch(searchParams);
+
+      let results;
       if (this.aiAssisted) {
-        this.performAISearch(searchParams);
+        results = await this.performAISearch(searchParams);
       } else {
-        this.performBasicSearch(searchParams);
+        results = this.performBasicSearch(searchParams);
       }
+      
+      this.updatePagination(results);
+      this.isLoading = false;
       this.shouldScrollToResults = true;
     },
     isComplexSearch(params) {
       return params.query && params.query.length > 2;
     },
-    async performBasicSearch(params) {
-      let query = db.collection('items');
-      if (params.itemType) {
-        query = query.where('category', '==', params.itemType);
-      }
-      if (params.location) {
-        query = query.where('location', '==', params.location);
-      }
-      try {
-        const snapshot = await query.get();
-        let results = [];
-        snapshot.forEach(doc => {
-          const item = { id: doc.id, ...doc.data() };
-          if (this.isInDateRange(item.dateFound, params.dateRange)) {
-            results.push(item);
-          }
-        });
+    performBasicSearch(params) {
+      let filtered = this.itemCache.filter(item => {
+        const inDate = this.isInDateRange(item.dateFound, params.dateRange);
+        const inLocation = !params.location || item.location === params.location;
+        return inDate && inLocation;
+      });
 
-        if (params.query) {
-          results = this.fallbackSearch(params, results);
-        }
-
-        results = this.sortResults(results);
-        this.updatePagination(results);
-      } catch (error) {
-        console.error("Error searching items:", error);
-        this.searchResults = [];
-        this.totalPages = 0;
-      } finally {
-        this.isLoading = false;
+      if (params.query) {
+        filtered = this.fallbackSearch(params, filtered);
       }
+
+      return this.sortResults(filtered, params);
     },
     async performAISearch(params) {
-      let results = []; // Use 'let' to allow reassignment
-      let prefilteredItems = [];
+      let results = [];
       try {
-        prefilteredItems = await this.prefilterItemsForAI(params);
+        const prefilteredItems = this.prefilterItemsForAI(params, this.itemCache);
+        
         if (prefilteredItems.length === 0) {
-          this.updatePagination([]);
-          return;
+          return [];
         }
 
         const prompt = this.buildAIPrompt(params, prefilteredItems);
@@ -314,14 +311,9 @@ const app = Vue.createApp({
           })
         });
 
-        if (!response.ok) {
-          throw new Error(`AI search failed with status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`AI search failed: ${response.status}`);
         
         const data = await response.json();
-        
-        // ** THE FIX IS HERE **
-        // Replaced optional chaining with traditional, safe checks.
         const aiResponse = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
         const itemIds = this.extractItemIds(aiResponse);
 
@@ -333,27 +325,16 @@ const app = Vue.createApp({
         }
       } catch (error) {
         console.error("Error in AI search, running fallback:", error);
-        results = this.fallbackSearch(params, prefilteredItems);
-      } finally {
-        results = this.sortResults(results);
-        this.updatePagination(results);
-        this.isLoading = false;
+        results = this.fallbackSearch(params, this.itemCache);
       }
+      return this.sortResults(results, params);
     },
-    async prefilterItemsForAI(params) {
-      const searchTerms = this.generateSearchTerms(params.query);
-      if (searchTerms.length === 0) return [];
-      
-      let query = db.collection('items');
-      if (params.itemType) {
-        query = query.where('category', '==', params.itemType);
-      }
-      query = query.where('searchTerms', 'array-contains-any', searchTerms);
-
-      const snapshot = await query.get();
-      const items = [];
-      snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
-      return items;
+    prefilterItemsForAI(params, items) {
+        const searchTerms = this.generateSearchTerms(params.query);
+        if (searchTerms.length === 0) return items;
+        return items.filter(item => 
+            item.searchTerms && item.searchTerms.some(term => searchTerms.includes(term))
+        );
     },
     buildAIPrompt(params, items) {
       let prompt = `From the provided list of items, find all that best match the query: "${params.query}". Analyze name, description, category. Return ONLY a comma-separated list of item IDs, ordered by relevance. Do not include explanation.
@@ -403,8 +384,10 @@ const app = Vue.createApp({
         this.currentPage = 1;
         this.searchResults = this.allItems.slice(0, this.itemsPerPage);
     },
-    sortResults(items = null) {
+    sortResults(items = null, params = null) {
         const toSort = items || [...this.allItems];
+        const currentParams = params || { query: this.searchQuery, itemType: this.selectedItemType };
+
         switch (this.sortOption) {
             case 'date-desc':
                 toSort.sort((a, b) => (b.dateFound && b.dateFound.toDate ? b.dateFound.toDate() : 0) - (a.dateFound && a.dateFound.toDate ? a.dateFound.toDate() : 0));
@@ -413,19 +396,21 @@ const app = Vue.createApp({
                 toSort.sort((a, b) => (a.dateFound && a.dateFound.toDate ? a.dateFound.toDate() : 0) - (b.dateFound && b.dateFound.toDate ? b.dateFound.toDate() : 0));
                 break;
             case 'relevance':
-                if (!this.aiAssisted && this.searchQuery) {
-                    const query = this.searchQuery.toLowerCase();
-                    toSort.sort((a, b) => this.calculateRelevanceScore(b, query) - this.calculateRelevanceScore(a, query));
+                if (currentParams.query) {
+                    const query = currentParams.query.toLowerCase();
+                    toSort.sort((a, b) => this.calculateRelevanceScore(b, query, currentParams.itemType) - this.calculateRelevanceScore(a, query, currentParams.itemType));
                 }
                 break;
         }
         return toSort;
     },
-    calculateRelevanceScore(item, query) {
+    calculateRelevanceScore(item, query, preferredType) {
       let score = 0;
       if (item.name && item.name.toLowerCase().includes(query)) score += 10;
-      if (item.category && item.category.toLowerCase().includes(query)) score += 5;
       if (item.description && item.description.toLowerCase().includes(query)) score += 3;
+      if (preferredType && item.category && item.category.toLowerCase() === preferredType.toLowerCase()) {
+        score += 20; // Major boost for matching the selected type
+      }
       return score;
     },
     resetFilters() {
@@ -492,8 +477,8 @@ const app = Vue.createApp({
         });
         if (!response.ok) throw new Error('AI valuation failed');
         const data = await response.json();
-        // ** THE FIX IS HERE **
-        this.itemValuation = (data && data.choices && data.choices && data.choices.message && data.choices.message.content.trim()) || "N/A";
+        const content = (data && data.choices && data.choices && data.choices.message && data.choices.message.content.trim()) || "N/A";
+        this.itemValuation = content;
       } catch (error) {
         console.error("Error in AI valuation:", error);
         this.itemValuation = "₹500-1500";

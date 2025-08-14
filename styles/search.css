@@ -208,7 +208,6 @@
 
 .item-claimed {
   opacity: 0.7;
-  position: relative;
 }
 
 .claimed-badge {
@@ -268,6 +267,7 @@
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
+  position: relative;
 }
 
 .item-card:hover {
@@ -291,6 +291,7 @@
   font-size: 1.2rem;
   margin-bottom: 0.8rem;
   font-family: 'Kanit', sans-serif;
+  padding-right: 80px; /* Add padding to prevent text from going under the badge */
 }
 
 .item-meta {
@@ -332,6 +333,7 @@
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
+  position: relative;
 }
 
 .list-item:hover {
@@ -341,6 +343,7 @@
 
 .list-item-image {
   width: 150px;
+  flex-shrink: 0;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -350,12 +353,14 @@
 .list-item-info {
   flex: 1;
   padding: 1.2rem;
+  position: relative;
 }
 
 .list-item-info h3 {
   font-size: 1.2rem;
   margin-bottom: 0.5rem;
   font-family: 'Kanit', sans-serif;
+  padding-right: 80px; /* Add padding to prevent text from going under the badge */
 }
 
 .item-description {
@@ -400,6 +405,10 @@
 
 .pagination span {
   color: var(--text-secondary);
+}
+
+.modal-close {
+  z-index: 10; /* THE FIX: Ensure the close button is always on top */
 }
 
 .item-detail-modal {
