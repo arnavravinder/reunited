@@ -388,7 +388,7 @@ const app = Vue.createApp({
         const prompt = this.buildAIPrompt(params, allItems);
         
         try {
-          const response = await fetch('https://api.reunited.co.in/api/chat/completions', {
+          const response = await fetch('https://api.reunited.co.in/api/completions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -737,7 +737,7 @@ const app = Vue.createApp({
     
     async getItemValuation(item) {
       try {
-        const response = await fetch('https://api.reunited.co.in/api/chat/completions', {
+        const response = await fetch('https://api.reunited.co.in/api/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
