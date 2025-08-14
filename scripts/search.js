@@ -53,7 +53,7 @@ const app = Vue.createApp({
       selectedLocation: '',
       selectedDate: '',
       searchDateRange: { from: '', to: '' },
-      sortOption: 'date-desc',
+      sortOption: 'relevance',
       currentPage: 1,
       itemsPerPage: 12,
       totalPages: 1,
@@ -244,13 +244,18 @@ const app = Vue.createApp({
       this.isLoading = true;
       this.searchPerformed = true;
       this.currentPage = 1;
+      this.searchResults = [];
+      this.allItems = [];
+      
       const searchParams = {
         query: this.searchQuery,
         itemType: this.selectedItemType === 'Others' ? this.otherItemType : this.selectedItemType,
         location: this.selectedLocation,
         dateRange: this.searchDateRange
       };
+      
       this.aiAssisted = this.isComplexSearch(searchParams);
+      
       if (this.aiAssisted) {
         this.performAISearch(searchParams);
       } else {
@@ -259,16 +264,18 @@ const app = Vue.createApp({
       this.shouldScrollToResults = true;
     },
     isComplexSearch(params) {
-      return (params.query && params.query.length > 3);
+      return params.query && params.query.length > 2;
     },
     async performBasicSearch(params) {
       let query = db.collection('items');
+      
       if (params.itemType) {
         query = query.where('category', '==', params.itemType);
       }
       if (params.location) {
         query = query.where('location', '==', params.location);
       }
+      
       try {
         const snapshot = await query.get();
         let results = [];
@@ -294,53 +301,89 @@ const app = Vue.createApp({
       }
     },
     async performAISearch(params) {
-      let results = [];
+      let prefilteredItems = [];
+      let itemsMap = new Map();
+      
       try {
-        const prefilteredItems = await this.prefilterItemsForAI(params);
+        this.searchResults = [];
+        this.allItems = [];
+        prefilteredItems = await this.prefilterItemsForAI(params);
+        itemsMap = new Map(prefilteredItems.map(item => [item.id, item]));
+
         if (prefilteredItems.length === 0) {
-          this.updatePagination([]);
-          return;
+            this.isLoading = false;
+            this.updatePagination([]);
+            return;
         }
 
         const prompt = this.buildAIPrompt(params, prefilteredItems);
         const response = await fetch(AI_API_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: prompt }],
-            model: 'qwen/qwen3-32b',
-            temperature: 0.2
-          })
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messages: [{ role: 'user', content: prompt }],
+                model: 'qwen/qwen3-32b',
+                temperature: 0.1,
+                stream: true,
+            })
         });
 
         if (!response.ok) {
-          throw new Error(`AI search failed with status: ${response.status}`);
+            throw new Error(`AI search failed with status: ${response.status}`);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            const ids = buffer.split(',').map(id => id.trim());
+            
+            if (ids.length > 1) {
+                const completeIds = ids.slice(0, -1);
+                buffer = ids[ids.length - 1];
+
+                for (const id of completeIds) {
+                    if (id && itemsMap.has(id) && !this.allItems.some(item => item.id === id)) {
+                        const newItem = itemsMap.get(id);
+                        this.allItems.push(newItem);
+                        this.updatePagination(this.allItems);
+                    }
+                }
+            }
         }
         
-        const data = await response.json();
-        const aiResponse = data?.choices?.[0]?.message?.content || "";
-        const itemIds = this.extractItemIds(aiResponse);
-
-        if (itemIds.length > 0) {
-          const itemsMap = new Map(prefilteredItems.map(item => [item.id, item]));
-          results = itemIds.map(id => itemsMap.get(id)).filter(Boolean);
-        } else {
-          results = this.fallbackSearch(params, prefilteredItems);
+        if (buffer && itemsMap.has(buffer) && !this.allItems.some(item => item.id === buffer)) {
+            const finalItem = itemsMap.get(buffer);
+            this.allItems.push(finalItem);
         }
+        
+        if (this.allItems.length === 0) {
+            this.allItems = this.fallbackSearch(params, prefilteredItems);
+        }
+
       } catch (error) {
         console.error("Error in AI search, running fallback:", error);
-        const allItems = await this.fetchAllItems();
-        results = this.fallbackSearch(params, allItems);
+        this.allItems = this.fallbackSearch(params, prefilteredItems);
       } finally {
-        results = this.sortResults(results);
-        this.updatePagination(results);
+        this.updatePagination(this.allItems);
         this.isLoading = false;
       }
     },
     async prefilterItemsForAI(params) {
       const searchTerms = this.generateSearchTerms(params.query);
       if (searchTerms.length === 0) return [];
-      let query = db.collection('items').where('searchTerms', 'array-contains-any', searchTerms);
+      
+      let query = db.collection('items');
+      if (params.itemType) {
+        query = query.where('category', '==', params.itemType);
+      }
+      query = query.where('searchTerms', 'array-contains-any', searchTerms);
+
       const snapshot = await query.get();
       const items = [];
       snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
@@ -353,14 +396,14 @@ const app = Vue.createApp({
         return items;
     },
     buildAIPrompt(params, items) {
-      let prompt = `From the provided list of items, find the ones that best match the following search query: "${params.query}". \n`;
-      if (params.itemType) prompt += `The item should be a '${params.itemType}'.\n`;
-      if (params.location) prompt += `It was found in the '${params.location}'.\n`;
-      prompt += "Analyze the name, description, and category of each item. Return ONLY a comma-separated list of the item IDs that are the most relevant matches, ordered by relevance. Do not include any explanation or extra text.\n\n---ITEM LIST---\n";
-      items.forEach(item => {
-        prompt += `ID: ${item.id}, Name: ${item.name}, Description: ${item.description}, Category: ${item.category}\n`;
-      });
-      return prompt;
+        let prompt = `From this list of items, find ALL that match the query: "${params.query}". Analyze name, description, category. Return ONLY a stream of comma-separated item IDs of the most relevant matches, ordered by relevance. Example: id1,id2,id3,
+
+---ITEM LIST---
+`;
+        items.forEach(item => {
+            prompt += `ID: ${item.id}, Name: ${item.name}, Description: ${item.description}, Category: ${item.category}\n`;
+        });
+        return prompt;
     },
     extractItemIds(aiResponse) {
       if (!aiResponse) return [];
@@ -394,29 +437,28 @@ const app = Vue.createApp({
       return [...new Set(query.toLowerCase().split(/\s+/).filter(term => term.length > 2))];
     },
     updatePagination(results) {
-      this.allItems = results;
-      this.totalPages = Math.ceil(results.length / this.itemsPerPage);
-      this.currentPage = 1;
-      const startIndex = 0;
-      this.searchResults = results.slice(startIndex, startIndex + this.itemsPerPage);
+        this.allItems = results;
+        this.totalPages = Math.ceil(this.allItems.length / this.itemsPerPage);
+        this.currentPage = 1;
+        this.searchResults = this.allItems.slice(0, this.itemsPerPage);
     },
     sortResults(items = null) {
-      const toSort = items || [...this.allItems];
-      switch (this.sortOption) {
-        case 'date-desc':
-          toSort.sort((a, b) => (b.dateFound?.toDate() || 0) - (a.dateFound?.toDate() || 0));
-          break;
-        case 'date-asc':
-          toSort.sort((a, b) => (a.dateFound?.toDate() || 0) - (b.dateFound?.toDate() || 0));
-          break;
-        case 'relevance':
-          if (!this.aiAssisted && this.searchQuery) {
-            const query = this.searchQuery.toLowerCase();
-            toSort.sort((a, b) => this.calculateRelevanceScore(b, query) - this.calculateRelevanceScore(a, query));
-          }
-          break;
-      }
-      return toSort;
+        const toSort = items || [...this.allItems];
+        switch (this.sortOption) {
+            case 'date-desc':
+                toSort.sort((a, b) => (b.dateFound?.toDate() || 0) - (a.dateFound?.toDate() || 0));
+                break;
+            case 'date-asc':
+                toSort.sort((a, b) => (a.dateFound?.toDate() || 0) - (b.dateFound?.toDate() || 0));
+                break;
+            case 'relevance':
+                if (!this.aiAssisted && this.searchQuery) {
+                    const query = this.searchQuery.toLowerCase();
+                    toSort.sort((a, b) => this.calculateRelevanceScore(b, query) - this.calculateRelevanceScore(a, query));
+                }
+                break;
+        }
+        return toSort;
     },
     calculateRelevanceScore(item, query) {
       let score = 0;
@@ -518,7 +560,18 @@ const app = Vue.createApp({
       }
       this.isSubmittingClaim = true;
       try {
-        const claimRef = await db.collection('claims').add({
+        let estimatedValue = 0;
+        if (this.itemValuation) {
+          const valueMatch = this.itemValuation.match(/₹(\d+)/);
+          if (valueMatch && valueMatch[1]) {
+            estimatedValue = parseInt(valueMatch[1], 10);
+          }
+        }
+        
+        const isHighValue = estimatedValue >= 5000;
+        const claimStatus = isHighValue ? 'pending' : 'approved';
+        
+        const claimData = {
           itemId: this.claimItem.id,
           userId: this.user.uid,
           userName: this.user.displayName || this.user.email,
@@ -526,35 +579,73 @@ const app = Vue.createApp({
           claimDate: firebase.firestore.FieldValue.serverTimestamp(),
           description: this.claimForm.description,
           contactInfo: this.claimForm.contactInfo,
-          status: 'approved',
-          itemName: this.claimItem.name
-        });
+          status: claimStatus,
+          itemName: this.claimItem.name,
+          itemCategory: this.claimItem.category,
+          itemLocation: this.claimItem.location,
+          estimatedValue: estimatedValue,
+          claimCode: this.claimItem.claimCode || null
+        };
+        
+        const claimRef = await db.collection('claims').add(claimData);
+        
         await db.collection('items').doc(this.claimItem.id).update({
           claimed: true,
           claimId: claimRef.id,
-          claimStatus: 'approved'
+          claimStatus: claimStatus
         });
-        try {
-          await fetch('https://api.reunited.co.in/api/send-claim-email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: this.user.email,
-              userName: this.user.displayName || this.user.email,
-              itemName: this.claimItem.name,
-              claimCode: this.claimItem.claimCode,
-              itemLocation: this.claimItem.location,
-              claimDate: new Date().toISOString()
-            })
-          });
-        } catch (emailError) {
-          console.error("Error sending claim email:", emailError);
+        
+        const claimantFirstName = this.user.displayName ? this.user.displayName.split(' ')[0] : 'User';
+        await db.collection('log').add({
+            itemName: this.claimItem.name,
+            claimDate: firebase.firestore.FieldValue.serverTimestamp(),
+            claimantFirstName: claimantFirstName,
+            itemId: this.claimItem.id,
+            claimId: claimRef.id
+        });
+        
+        await db.collection('notifications').add({
+          userId: this.user.uid,
+          title: isHighValue ? 'Claim Submitted for Review' : 'Item Claimed Successfully',
+          message: isHighValue 
+            ? `Your claim for ${this.claimItem.name} is pending review. Please use the contact form for follow-up.` 
+            : `Your claim for ${this.claimItem.name} has been approved. Use code ${this.claimItem.claimCode} to collect your item.`,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          type: 'claim',
+          read: false,
+          actionable: true,
+          itemId: this.claimItem.id,
+          claimId: claimRef.id
+        });
+        
+        if (isHighValue) {
+          this.showClaimModal = false;
+          const contactUrl = `index.html#contact?claim=${claimRef.id}&item=${this.claimItem.name}`;
+          alert(`This item's estimated value (₹${estimatedValue}) requires verification. Please use the contact form to complete your claim.`);
+          setTimeout(() => { window.location.href = contactUrl; }, 1500);
+        } else {
+          try {
+            await fetch('https://api.reunited.co.in/api/send-claim-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: this.user.email,
+                userName: this.user.displayName || this.user.email,
+                itemName: this.claimItem.name,
+                claimCode: this.claimItem.claimCode,
+                itemLocation: this.claimItem.location,
+                claimDate: new Date().toISOString()
+              })
+            });
+          } catch (emailError) {
+            console.error("Error sending claim email:", emailError);
+          }
+          this.showClaimModal = false;
+          this.showClaimCodeModal = true;
         }
-        this.showClaimModal = false;
-        this.showClaimCodeModal = true;
       } catch (error) {
         console.error("Error submitting claim:", error);
-        alert("An error occurred. Please try again.");
+        alert("An error occurred while submitting your claim. Please try again.");
       } finally {
         this.isSubmittingClaim = false;
       }
@@ -562,11 +653,49 @@ const app = Vue.createApp({
     goToClaimLog() {
       window.location.href = 'dashboard.html#claims';
     },
+    reportMatch(itemId) {
+      if (!this.user) {
+        this.showLoginModal = true;
+        return;
+      }
+      window.location.href = 'dashboard.html#lost';
+    },
+    disputeClaim(itemId) {
+      window.location.href = 'index.html#contact';
+    },
     formatDate(dateString) {
-      if (!dateString) return "No date";
-      const date = dateString.toDate ? dateString.toDate() : new Date(dateString);
-      if (isNaN(date.getTime())) return "Invalid date";
-      return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
+      try {
+        if (dateString && typeof dateString.toDate === 'object') {
+          return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(dateString.toDate());
+        }
+        if (dateString) {
+          const date = new Date(dateString);
+          if (!isNaN(date.getTime())) {
+            return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
+          }
+        }
+        return "No date available";
+      } catch (error) {
+        console.error("Error formatting date:", error);
+        return "Date format error";
+      }
+    },
+    formatDateTime(dateString) {
+      try {
+        if (dateString && typeof dateString.toDate === 'object') {
+          return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }).format(dateString.toDate());
+        }
+        if (dateString) {
+          const date = new Date(dateString);
+          if (!isNaN(date.getTime())) {
+            return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }).format(date);
+          }
+        }
+        return "No date available";
+      } catch (error) {
+        console.error("Error formatting date and time:", error);
+        return "Date format error";
+      }
     },
     truncateDescription(text, maxLength = 100) {
       if (!text || text.length <= maxLength) return text || '';
