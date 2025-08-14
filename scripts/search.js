@@ -244,18 +244,13 @@ const app = Vue.createApp({
       this.isLoading = true;
       this.searchPerformed = true;
       this.currentPage = 1;
-      this.searchResults = [];
-      this.allItems = [];
-      
       const searchParams = {
         query: this.searchQuery,
         itemType: this.selectedItemType === 'Others' ? this.otherItemType : this.selectedItemType,
         location: this.selectedLocation,
         dateRange: this.searchDateRange
       };
-      
       this.aiAssisted = this.isComplexSearch(searchParams);
-      
       if (this.aiAssisted) {
         this.performAISearch(searchParams);
       } else {
@@ -268,14 +263,12 @@ const app = Vue.createApp({
     },
     async performBasicSearch(params) {
       let query = db.collection('items');
-      
       if (params.itemType) {
         query = query.where('category', '==', params.itemType);
       }
       if (params.location) {
         query = query.where('location', '==', params.location);
       }
-      
       try {
         const snapshot = await query.get();
         let results = [];
@@ -301,76 +294,46 @@ const app = Vue.createApp({
       }
     },
     async performAISearch(params) {
+      let results = []; // Use 'let' to allow reassignment
       let prefilteredItems = [];
-      let itemsMap = new Map();
-      
       try {
-        this.searchResults = [];
-        this.allItems = [];
         prefilteredItems = await this.prefilterItemsForAI(params);
-        itemsMap = new Map(prefilteredItems.map(item => [item.id, item]));
-
         if (prefilteredItems.length === 0) {
-            this.isLoading = false;
-            this.updatePagination([]);
-            return;
+          this.updatePagination([]);
+          return;
         }
 
         const prompt = this.buildAIPrompt(params, prefilteredItems);
         const response = await fetch(AI_API_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                messages: [{ role: 'user', content: prompt }],
-                model: 'qwen/qwen3-32b',
-                temperature: 0.1,
-                stream: true,
-            })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [{ role: 'user', content: prompt }],
+            model: 'qwen/qwen3-32b',
+            temperature: 0.1
+          })
         });
 
         if (!response.ok) {
-            throw new Error(`AI search failed with status: ${response.status}`);
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            
-            buffer += decoder.decode(value, { stream: true });
-            const ids = buffer.split(',').map(id => id.trim());
-            
-            if (ids.length > 1) {
-                const completeIds = ids.slice(0, -1);
-                buffer = ids[ids.length - 1];
-
-                for (const id of completeIds) {
-                    if (id && itemsMap.has(id) && !this.allItems.some(item => item.id === id)) {
-                        const newItem = itemsMap.get(id);
-                        this.allItems.push(newItem);
-                        this.updatePagination(this.allItems);
-                    }
-                }
-            }
+          throw new Error(`AI search failed with status: ${response.status}`);
         }
         
-        if (buffer && itemsMap.has(buffer) && !this.allItems.some(item => item.id === buffer)) {
-            const finalItem = itemsMap.get(buffer);
-            this.allItems.push(finalItem);
-        }
-        
-        if (this.allItems.length === 0) {
-            this.allItems = this.fallbackSearch(params, prefilteredItems);
-        }
+        const data = await response.json();
+        const aiResponse = data?.choices?.[0]?.message?.content || "";
+        const itemIds = this.extractItemIds(aiResponse);
 
+        if (itemIds.length > 0) {
+          const itemsMap = new Map(prefilteredItems.map(item => [item.id, item]));
+          results = itemIds.map(id => itemsMap.get(id)).filter(Boolean);
+        } else {
+          results = this.fallbackSearch(params, prefilteredItems);
+        }
       } catch (error) {
         console.error("Error in AI search, running fallback:", error);
-        this.allItems = this.fallbackSearch(params, prefilteredItems);
+        results = this.fallbackSearch(params, prefilteredItems);
       } finally {
-        this.updatePagination(this.allItems);
+        results = this.sortResults(results);
+        this.updatePagination(results);
         this.isLoading = false;
       }
     },
@@ -389,25 +352,20 @@ const app = Vue.createApp({
       snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
       return items;
     },
-    async fetchAllItems() {
-        const snapshot = await db.collection('items').get();
-        const items = [];
-        snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
-        return items;
-    },
     buildAIPrompt(params, items) {
-        let prompt = `From this list of items, find ALL that match the query: "${params.query}". Analyze name, description, category. Return ONLY a stream of comma-separated item IDs of the most relevant matches, ordered by relevance. Example: id1,id2,id3,
+      let prompt = `From the provided list of items, find all that best match the query: "${params.query}". Analyze name, description, category. Return ONLY a comma-separated list of item IDs, ordered by relevance. Do not include explanation.
 
 ---ITEM LIST---
 `;
-        items.forEach(item => {
-            prompt += `ID: ${item.id}, Name: ${item.name}, Description: ${item.description}, Category: ${item.category}\n`;
-        });
-        return prompt;
+      items.forEach(item => {
+        prompt += `ID: ${item.id}, Name: ${item.name}, Description: ${item.description}, Category: ${item.category}\n`;
+      });
+      return prompt;
     },
     extractItemIds(aiResponse) {
       if (!aiResponse) return [];
-      return aiResponse.split(',').map(id => id.trim()).filter(id => id.length > 0);
+      const cleaned = aiResponse.replace(/json/g, '').replace(/```/g, '').trim();
+      return cleaned.split(',').map(id => id.trim()).filter(id => id.length > 5);
     },
     fallbackSearch(params, allItems) {
       const query = params.query.toLowerCase();
@@ -531,7 +489,7 @@ const app = Vue.createApp({
         });
         if (!response.ok) throw new Error('AI valuation failed');
         const data = await response.json();
-        this.itemValuation = data?.choices?.[0]?.message?.content.trim() || "N/A";
+        this.itemValuation = data?.choices?.?.message?.content.trim() || "N/A";
       } catch (error) {
         console.error("Error in AI valuation:", error);
         this.itemValuation = "₹500-1500";
@@ -563,8 +521,8 @@ const app = Vue.createApp({
         let estimatedValue = 0;
         if (this.itemValuation) {
           const valueMatch = this.itemValuation.match(/₹(\d+)/);
-          if (valueMatch && valueMatch[1]) {
-            estimatedValue = parseInt(valueMatch[1], 10);
+          if (valueMatch && valueMatch) {
+            estimatedValue = parseInt(valueMatch, 10);
           }
         }
         
@@ -595,7 +553,7 @@ const app = Vue.createApp({
           claimStatus: claimStatus
         });
         
-        const claimantFirstName = this.user.displayName ? this.user.displayName.split(' ')[0] : 'User';
+        const claimantFirstName = this.user.displayName ? this.user.displayName.split(' ') : 'User';
         await db.collection('log').add({
             itemName: this.claimItem.name,
             claimDate: firebase.firestore.FieldValue.serverTimestamp(),
@@ -665,7 +623,7 @@ const app = Vue.createApp({
     },
     formatDate(dateString) {
       try {
-        if (dateString && typeof dateString.toDate === 'object') {
+        if (dateString && dateString.toDate) {
           return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(dateString.toDate());
         }
         if (dateString) {
@@ -682,7 +640,7 @@ const app = Vue.createApp({
     },
     formatDateTime(dateString) {
       try {
-        if (dateString && typeof dateString.toDate === 'object') {
+        if (dateString && dateString.toDate) {
           return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }).format(dateString.toDate());
         }
         if (dateString) {
