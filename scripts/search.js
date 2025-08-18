@@ -354,7 +354,16 @@ Available Items to Rank:
     },
     extractItemIds(aiResponse) {
       if (!aiResponse) return [];
-      const cleanedResponse = aiResponse.replace(/[^a-zA-Z0-9,-]/g, '');
+      let content = aiResponse;
+      
+      const thinkEndTag = "</think>";
+      const thinkEndIndex = content.lastIndexOf(thinkEndTag);
+      if (thinkEndIndex !== -1) {
+          content = content.substring(thinkEndIndex + thinkEndTag.length);
+      }
+      
+      const cleanedResponse = content.replace(/[^a-zA-Z0-9,-]/g, '');
+      
       return cleanedResponse.split(',')
         .map(id => id.trim())
         .filter(id => id.length > 5);
