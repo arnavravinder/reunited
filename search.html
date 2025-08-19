@@ -28,11 +28,13 @@
         </button>
         <div class="nav-links">
           <a href="search.html" class="active">Search Items</a>
+          <a v-if="user" href="dashboard.html">Dashboard</a>
+          <a href="claim-log.html">Claim Log</a>
           <a href="index.html#guidelines">Guidelines</a>
           <a href="index.html#faqs">FAQs</a>
           <a href="index.html#contact">Contact</a>
           <a v-if="!user" href="#" class="btn btn-outlined" @click.prevent="showLoginModal = true">Login / Sign Up</a>
-          <a v-else href="dashboard.html" class="btn btn-outlined">Dashboard</a>
+          <a v-else href="#" class="btn btn-outlined" @click.prevent="signOut">Sign Out</a>
         </div>
       </div>
     </header>

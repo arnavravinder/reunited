@@ -1,0 +1,471 @@
+
+dnoapa<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reunited User Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background-color: #1a1f2e;
+            color: #f8f9fa;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #6e7fff;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #b8c5d1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background-color: #292E3D;
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #6e7fff;
+            margin-bottom: 1.5rem;
+        }
+
+        .section h3 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #f8f9fa;
+            margin-bottom: 1rem;
+        }
+
+        .section p {
+            font-size: 1.1rem;
+            color: #b8c5d1;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Search Bar Clone */
+        .search-container {
+            background-color: #1a1f2e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background-color: #292E3D;
+            border: 2px solid #404756;
+            border-radius: 6px;
+            color: #f8f9fa;
+            font-size: 1rem;
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .search-btn {
+            background-color: #6e7fff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 0.5rem;
+            background-color: #292E3D;
+            border: 1px solid #404756;
+            border-radius: 4px;
+            color: #f8f9fa;
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        /* Item Cards Grid */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .item-card {
+            background-color: #1a1f2e;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .item-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .item-card.claimed {
+            opacity: 0.6;
+            position: relative;
+        }
+
+        .item-card.claimed::after {
+            content: 'CLAIMED';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #6e7fff;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .item-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .item-info {
+            padding: 1rem;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-meta {
+            color: #b8c5d1;
+            font-size: 0.9rem;
+        }
+
+        .item-meta span {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Report Button */
+        .report-btn {
+            background-color: #6e7fff;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-block;
+            margin: 1rem 0;
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        /* Modal Clone */
+        .modal-clone {
+            background-color: #1a1f2e;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            border: 2px solid #404756;
+        }
+
+        .modal-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .modal-image {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .modal-details h3 {
+            color: #6e7fff;
+            margin-bottom: 1rem;
+        }
+
+        .modal-details p {
+            margin-bottom: 0.75rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #f8f9fa;
+        }
+
+        .detail-value {
+            color: #b8c5d1;
+        }
+
+        .claim-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        /* Feedback Button */
+        .feedback-btn {
+            background-color: #404756;
+            color: #f8f9fa;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .search-bar {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Welcome to the Reunited User Guide</h1>
+            <p>This guide will walk you through everything you need to know about finding your lost items and helping others reunite with theirs. Let's get you back together with your belongings!</p>
+        </div>
+
+        <!-- Step 1: Search First -->
+        <div class="section">
+            <h2>Step 1: Search First! (The Most Important Step)</h2>
+            <p>Before reporting a lost item, always search our database first! This is the fastest way to get your item back. Many items are found and logged before students even realize they're missing.</p>
+            
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" class="search-input" value="Blue Nike bottle" placeholder="Describe your item...">
+                    <button class="search-btn">Search</button>
+                </div>
+                <div class="filters">
+                    <select class="filter-select">
+                        <option>All Categories</option>
+                        <option>Water Bottle</option>
+                        <option>Jacket</option>
+                        <option>Electronics</option>
+                    </select>
+                    <select class="filter-select">
+                        <option>All Locations</option>
+                        <option>Sports Field</option>
+                        <option>Library</option>
+                        <option>Middle School Block</option>
+                    </select>
+                    <select class="filter-select">
+                        <option>Last 30 Days</option>
+                        <option>Last 7 Days</option>
+                        <option>Today</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Viewing Results -->
+        <div class="section">
+            <h2>Browsing Found Items</h2>
+            <p>When you search, you'll see item cards showing photos, descriptions, and where items were found. Items marked as "Claimed" have already been returned to their owners.</p>
+            
+            <div class="items-grid">
+                <div class="item-card">
+                    <img src="https://placehold.co/400x300/292E3D/f8f9fa?text=Bottle" alt="Blue Nike Water Bottle" class="item-image">
+                    <div class="item-info">
+                        <div class="item-name">Blue Nike Water Bottle</div>
+                        <div class="item-meta">
+                            <span><strong>Location:</strong> Sports Field</span>
+                            <span><strong>Found:</strong> Aug 16, 2025</span>
+                            <span><strong>Category:</strong> Water Bottle</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="item-card claimed">
+                    <img src="https://placehold.co/400x300/292E3D/f8f9fa?text=iPad" alt="Apple iPad" class="item-image">
+                    <div class="item-info">
+                        <div class="item-name">Apple iPad (10th Gen)</div>
+                        <div class="item-meta">
+                            <span><strong>Location:</strong> Library</span>
+                            <span><strong>Found:</strong> Aug 14, 2025</span>
+                            <span><strong>Category:</strong> Electronics</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="item-card">
+                    <img src="https://placehold.co/400x300/292E3D/f8f9fa?text=Jacket" alt="IA Hoodie Jacket" class="item-image">
+                    <div class="item-info">
+                        <div class="item-name">IA Hoodie Jacket | Size 30</div>
+                        <div class="item-meta">
+                            <span><strong>Location:</strong> Middle School Block</span>
+                            <span><strong>Found:</strong> Aug 15, 2025</span>
+                            <span><strong>Category:</strong> Jacket</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Report Lost Item -->
+        <div class="section">
+            <h2>Step 2: Can't Find It? Report It.</h2>
+            <p>If you can't find your item in the search results, don't worry! Report it as lost and our AI matching system will work in the background. When someone finds and logs an item that matches your description, you'll be notified automatically.</p>
+            
+            <button class="report-btn">Report Lost Item</button>
+            
+            <p style="margin-top: 1rem; font-size: 0.95rem;">=� <strong>Pro tip:</strong> The more detailed your description, the better our AI can match your item when it's found!</p>
+        </div>
+
+        <!-- How to Claim -->
+        <div class="section">
+            <h2>How to Claim an Item</h2>
+            <p>Found your item? Great! Click on any item card to open a detailed view where you can see a larger photo and full description. If you're confident it's yours, hit the "Claim This Item" button.</p>
+            
+            <div class="modal-clone">
+                <div class="modal-content">
+                    <div>
+                        <img src="https://placehold.co/600x400/292E3D/f8f9fa?text=Jacket" alt="IA Hoodie Jacket" class="modal-image">
+                    </div>
+                    <div class="modal-details">
+                        <h3>IA Hoodie Jacket | Size 30</h3>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Location Found:</span>
+                            <span class="detail-value">Middle School Block</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Date Found:</span>
+                            <span class="detail-value">Aug 15, 2025</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Category:</span>
+                            <span class="detail-value">Jacket</span>
+                        </div>
+                        
+                        <p style="margin-top: 1rem;"><strong>Description:</strong> Jacket with Inventure Orange detailing on the inner side of the hood. No unique markings.</p>
+                        
+                        <button class="claim-btn">Claim This Item</button>
+                    </div>
+                </div>
+            </div>
+            
+            <p style="margin-top: 1rem;"><strong>What happens next?</strong> After claiming, you'll receive instructions on where and when to pick up your item. You may need to verify ownership by describing additional details about the item.</p>
+        </div>
+
+        <!-- Conclusion -->
+        <div class="section">
+            <h2>You're All Set!</h2>
+            <p>That's everything you need to know about using Reunited! Remember: search first, report if needed, and claim when you find your items. We're here to help bring you and your belongings back together.</p>
+            
+            <p>Have questions or suggestions for improving the system? We'd love to hear from you!</p>
+            
+            <button class="feedback-btn">Send Feedback</button>
+        </div>
+    </div>
+
+    <script>
+        // Add some subtle interactions for demo purposes
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hover effects for buttons
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-1px)';
+                    this.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+            
+            // Click feedback for buttons
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 100);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

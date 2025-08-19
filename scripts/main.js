@@ -26,6 +26,7 @@ const app = Vue.createApp({
       mobileMenuOpen: false,
       showLoginModal: false,
       isSigningUp: false,
+      heroSearchQuery: '',
       floatingItems: [],
       contactForm: {
         name: '',
@@ -82,20 +83,54 @@ const app = Vue.createApp({
       const queryString = window.location.hash.split('?')[1];
       const params = new URLSearchParams(queryString);
       const claim = params.get('claim');
+      const claimId = params.get('claimId');
       const item = params.get('item');
+      const issue = params.get('issue');
       let prefilledMessage = "";
-      if (claim) {
-        prefilledMessage += "Hi, I'd like to claim this *high value* item! " +  "\n";
-        prefilledMessage += "Claim ID: " + claim + "\n";
+      
+      if (claim || claimId) {
+        const id = claim || claimId;
+        if (issue === 'pickup_dispute') {
+          prefilledMessage += "Hi, I need assistance with a pickup dispute.\n";
+          this.contactForm.subject = "Pickup Dispute - " + (item ? decodeURIComponent(item) : "Item");
+        } else {
+          prefilledMessage += "Hi, I'd like to claim this item!\n";
+          this.contactForm.subject = "Item Claim - " + (item ? decodeURIComponent(item) : "Item");
+        }
+        prefilledMessage += "Claim ID: " + id + "\n";
       }
+      
       if (item) {
-        prefilledMessage += "Item name: " + decodeURIComponent(item);
+        prefilledMessage += "Item: " + decodeURIComponent(item) + "\n";
       }
+      
+      if (issue && issue !== 'pickup_dispute') {
+        prefilledMessage += "Issue type: " + issue.replace(/_/g, ' ') + "\n";
+      }
+      
       this.contactForm.message = prefilledMessage;
+      
+      if (window.location.hash.includes('contact')) {
+        this.$nextTick(() => {
+          const contactSection = document.getElementById('contact');
+          if (contactSection) {
+            contactSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      }
     }
     this.generateFloatingItems();
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
+      if (user) {
+        const pendingQuery = localStorage.getItem('pendingSearchQuery');
+        if (pendingQuery) {
+          localStorage.removeItem('pendingSearchQuery');
+          setTimeout(() => {
+            window.location.href = `/search.html?q=${encodeURIComponent(pendingQuery)}`;
+          }, 1000);
+        }
+      }
     });
     this.startLoadingAnimation();
   },
@@ -107,11 +142,10 @@ const app = Vue.createApp({
       const splashDotWrapper = this.$refs.splashDotWrapper;
       const navLogo = this.$refs.navLogo;
       if (!splashLogo || !splashText || !splashDot || !splashDotWrapper || !navLogo) {
-        setTimeout(() => { this.loading = false; }, 2000);
+        setTimeout(() => { this.loading = false; }, 500);
         return;
       }
-      const ORBIT_RADIUS = 99;
-      splashDot.style.left = ORBIT_RADIUS + 'px';
+      splashDot.style.left = '0px';
       splashDotWrapper.classList.add('animate-orbit');
       setTimeout(() => {
         splashDotWrapper.classList.remove('animate-orbit');
@@ -149,7 +183,7 @@ const app = Vue.createApp({
             this.loading = false;
           }, 300);
         }, 1000);
-      }, 2500);
+      }, 1500);
     },
     generateFloatingItems() {
       const items = [];
@@ -312,6 +346,18 @@ const app = Vue.createApp({
     },
     goToSearchPage() {
       window.location.href = "/search.html";
+    },
+    initiateSearch() {
+      if (!this.heroSearchQuery.trim()) {
+        return;
+      }
+      
+      if (this.user) {
+        window.location.href = `/search.html?q=${encodeURIComponent(this.heroSearchQuery)}`;
+      } else {
+        localStorage.setItem('pendingSearchQuery', this.heroSearchQuery);
+        this.showLoginModal = true;
+      }
     }
   }
 }).mount('#app');

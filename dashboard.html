@@ -490,7 +490,9 @@
           <div class="nav-links">
             <a href="search.html">Search Items</a>
             <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="claim-log.html">Claim Log</a>
             <a href="index.html#guidelines">Guidelines</a>
+            <a href="index.html#faqs">FAQs</a>
             <a href="index.html#contact">Contact</a>
             <a href="#" class="btn btn-outlined" @click.prevent="signOut">Sign Out</a>
           </div>
@@ -511,9 +513,6 @@
           <div class="dashboard-actions">
             <button class="btn" @click="openReportLostPopup()"> 
               <i class="fas fa-search"></i> Report Lost Item
-            </button>
-            <button class="btn btn-secondary" @click="openReportFoundPopup()"> 
-              <i class="fas fa-hand-holding"></i> Report Found Item
             </button>
           </div>
         </div>
@@ -599,34 +598,6 @@
             </div>
           </div>
 
-          <div class="tab-content" v-if="activeTab === 'found'">
-            <div class="section-header">
-              <h2>My Found Item Reports</h2>
-              <button class="btn-tiny" @click="openReportFoundPopup()"> 
-                <i class="fas fa-plus"></i> Report New
-              </button>
-            </div>
-            <div class="empty-state" v-if="foundItems.length === 0">
-              <i class="fas fa-hand-holding"></i>
-              <h3>No Found Item Reports</h3>
-              <p>You haven't reported any found items yet</p>
-              <button class="btn" @click="openReportFoundPopup()">Report a Found Item</button> 
-            </div>
-            <div class="items-grid" v-else>
-              <div class="item-card" v-for="(item, index) in foundItems" :key="index">
-                <div class="item-status" :class="getClaimStatusClass(item.status)">{{ item.status.replace('_', ' ') }}</div>
-                <div class="item-image" :style="{ backgroundImage: `url(${item.image || 'images/no-image.png'})` }"></div>
-                <div class="item-info">
-                  <h3>{{ item.name }}</h3>
-                  <div class="item-meta">
-                    <span><i class="fas fa-calendar-alt"></i> {{ formatDate(item.dateFound) }}</span>
-                    <span><i class="fas fa-map-marker-alt"></i> {{ item.location }}</span>
-                  </div>
-                  <div class="item-description">{{ truncateDescription(item.description) }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <div class="tab-content" v-if="activeTab === 'claims'">
             <div class="section-header">
@@ -813,9 +784,9 @@
             <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
           </select>
           <textarea v-model="lostItemForm.description" placeholder="Detailed Description (color, brand, identifying features, where you last saw it, etc.)" required></textarea>
-          <button type="button" class="ai-enhance-button" @click="enhanceDescription('lost')" :disabled="isEnhancingDescription">
+          <button type="button" class="ai-enhance-button" @click="enhanceDescription()" :disabled="isEnhancingDescription">
             <span v-if="isEnhancingDescription" class="spinner spinner-tiny"></span>
-            <span v-else>✨ Enhance with AI</span>
+            <span v-else><i class="fas fa-magic"></i> Enhance with AI</span>
           </button>
           <div v-if="aiError" class="ai-error-message">{{ aiError }}</div>
           <div style="clear:both;"></div>
@@ -842,52 +813,6 @@
       </div>
     </div>
 
-    <div id="reportFoundItemPopup" class="popup-container">
-      <div class="popup-content report-modal"> 
-        <span class="popup-close-btn" @click="closeReportFoundPopup()">×</span>
-        <h2 v-if="!foundItemForm.id">Report Found Item</h2>
-        <h2 v-else>Edit Found Item Report</h2>
-        <form @submit.prevent="submitFoundItemReport">
-          <input type="text" v-model="foundItemForm.name" placeholder="Item Name" required>
-          <select v-model="foundItemForm.category" required>
-            <option disabled value="">Select Category</option>
-            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-          </select>
-          <label class="input-label" for="foundDatePopupFlatpickr">Date Found</label> 
-          <input id="foundDatePopupFlatpickr" type="text" placeholder="Select Date Found" readonly required>
-          <select v-model="foundItemForm.location" required>
-            <option disabled value="">Select Location Found</option>
-            <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
-          </select>
-          <textarea v-model="foundItemForm.description" placeholder="Detailed Description (color, brand, condition, where exactly you found it, etc.)" required></textarea>
-          <button type="button" class="ai-enhance-button" @click="enhanceDescription('found')" :disabled="isEnhancingDescription">
-             <span v-if="isEnhancingDescription" class="spinner spinner-tiny"></span>
-             <span v-else>✨ Enhance with AI</span>
-          </button>
-          <div v-if="aiError" class="ai-error-message">{{ aiError }}</div>
-           <div style="clear:both;"></div>
-
-          <div class="image-upload-container" style="margin-top: 1rem;">
-            <label class="image-upload">
-              <input type="file" multiple @change="handleImageUpload($event, 'found')" accept="image/*">
-              <div class="upload-placeholder">
-                <i class="fas fa-upload"></i>
-                <span>Upload Images (Optional, Max 5)</span>
-              </div>
-            </label>
-            <div class="upload-preview" v-if="foundItemForm.images.length">
-              <div class="preview-thumbnail" v-for="(img, index) in foundItemForm.images" :key="index">
-                <img :src="img.preview" alt="Image Preview">
-                <button type="button" class="remove-image" @click="removeImage(index, 'found')">×</button>
-              </div>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-full" :disabled="isSubmitting || isEnhancingDescription"> 
-            {{ isSubmitting ? 'Submitting...' : (foundItemForm.id ? 'Update Report' : 'Submit Report') }}
-          </button>
-        </form>
-      </div>
-    </div>
 
     <div id="changePasswordPopup" class="popup-container">
       <div class="popup-content"> 

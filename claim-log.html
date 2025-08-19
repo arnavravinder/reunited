@@ -27,9 +27,10 @@
         </button>
         <div class="nav-links">
           <a href="search.html">Search Items</a>
+          <a v-if="user" href="dashboard.html">Dashboard</a>
           <a href="claim-log.html" class="active">Claim Log</a>
-          <a href="dashboard.html" v-if="user">Dashboard</a>
           <a href="index.html#guidelines">Guidelines</a>
+          <a href="index.html#faqs">FAQs</a>
           <a href="index.html#contact">Contact</a>
           <a v-if="!user" href="#" class="btn btn-outlined" @click.prevent="showLoginModal = true">Login / Sign Up</a>
           <a v-else href="#" class="btn btn-outlined" @click.prevent="signOut">Sign Out</a>

@@ -43,6 +43,13 @@ const app = Vue.createApp({
       passwordResetSent: false,
       showAppleComingSoon: false,
       isLoading: true,
+      cache: {
+        userProfile: null,
+        notifications: null,
+        lostItems: null,
+        claims: null,
+        lastUpdate: null
+      },
       mobileMenuOpen: false,
       activeTab: 'notifications',
       userProfile: {
@@ -68,12 +75,10 @@ const app = Vue.createApp({
       isDeleting: false,
       notifications: [],
       lostItems: [],
-      foundItems: [],
       claims: [],
       selectedItem: null,
       selectedItemType: null,
       lostItemForm: this.getInitialLostItemForm(),
-      foundItemForm: this.getInitialFoundItemForm(),
       isSubmitting: false,
       isEnhancingDescription: false,
       aiError: null,
@@ -88,7 +93,6 @@ const app = Vue.createApp({
       tabs: [
         { id: 'notifications', name: 'Notifications', icon: 'fas fa-bell' },
         { id: 'lost', name: 'Lost Items', icon: 'fas fa-search' },
-        { id: 'found', name: 'Found Items', icon: 'fas fa-hand-holding' },
         { id: 'claims', name: 'My Claims', icon: 'fas fa-clipboard-check' },
         { id: 'settings', name: 'Settings', icon: 'fas fa-cog' }
       ],
@@ -102,19 +106,40 @@ const app = Vue.createApp({
 
       if (user) {
         this.resetDashboardData();
-        Promise.all([
-            this.loadUserProfile(),
-            this.loadNotifications(),
-            this.loadLostItems(),
-            this.loadFoundItems(),
-            this.loadClaims()
-        ]).finally(() => {
-            this.isLoading = false;
-            this.hideInitialLoader();
-            this.$nextTick(() => {
-                this.initializeFlatpickr();
-            });
-        });
+        
+        // Check if we have cached data less than 5 minutes old
+        const cacheAge = this.cache.lastUpdate ? Date.now() - this.cache.lastUpdate : Infinity;
+        const isCacheValid = cacheAge < 300000; // 5 minutes
+        
+        if (isCacheValid && this.cache.userProfile) {
+          // Use cached data for immediate display
+          this.userProfile = { ...this.cache.userProfile };
+          this.notifications = [...(this.cache.notifications || [])];
+          this.lostItems = [...(this.cache.lostItems || [])];
+          this.claims = [...(this.cache.claims || [])];
+          this.isLoading = false;
+          this.hideInitialLoader();
+          this.$nextTick(() => {
+              this.initializeFlatpickr();
+          });
+          
+          // Still load fresh data in background
+          this.refreshDataInBackground();
+        } else {
+          // Load fresh data
+          Promise.all([
+              this.loadUserProfile(),
+              this.loadNotifications(),
+              this.loadLostItems(),
+              this.loadClaims()
+          ]).finally(() => {
+              this.isLoading = false;
+              this.hideInitialLoader();
+              this.$nextTick(() => {
+                  this.initializeFlatpickr();
+              });
+          });
+        }
       } else {
         this.resetDashboardData();
         Object.values(this.flatpickrInstances).forEach(fp => fp.destroy());
@@ -167,16 +192,6 @@ const app = Vue.createApp({
             });
         }
 
-        const foundDateElem = document.getElementById('foundDatePopupFlatpickr');
-        if (foundDateElem && !this.flatpickrInstances.foundDate) {
-            this.flatpickrInstances.foundDate = flatpickr(foundDateElem, {
-                ...commonConfig,
-                defaultDate: this.foundItemForm.dateFound || "today",
-                onChange: (selectedDates, dateStr) => {
-                    this.foundItemForm.dateFound = dateStr;
-                }
-            });
-        }
     },
     destroyFlatpickrInstance(key) {
         if (this.flatpickrInstances[key]) {
@@ -184,12 +199,13 @@ const app = Vue.createApp({
             delete this.flatpickrInstances[key];
         }
     },
-    async enhanceDescription(type) {
+    async enhanceDescription() {
         this.isEnhancingDescription = true;
         this.aiError = null;
         
-        const form = type === 'lost' ? this.lostItemForm : this.foundItemForm;
+        const form = this.lostItemForm;
         const currentDescription = form.description;
+        const currentName = form.name;
         
         if (!currentDescription || currentDescription.trim().length < 10) {
             this.aiError = "Please write at least a basic description before enhancing with AI.";
@@ -198,9 +214,26 @@ const app = Vue.createApp({
         }
 
         try {
-            const prompt = type === 'lost' 
-                ? `Only reply with the answer, ZERO other text in your reply except the answer. Do not use text features/markdown, just plaintext. Do NOT make up stuff that isn't explicitly provided to you in the current description. Enhance this lost item description to be more detailed and helpful for finding the item. Keep it concise but comprehensive. Original description: "${currentDescription}"`
-                : `Only reply with the answer, ZERO other text in your reply except the answer. Do not use text features/markdown, justplaintext. Do NOT make up stuff that isn't explicitly provided to you in the current description. Enhance this found item description to be more detailed and helpful for the owner to identify their item. Keep it concise but comprehensive. Original description: "${currentDescription}"`;
+            const prompt = `You are helping someone create a better lost item report. Based on the information provided, enhance the description and suggest an improved item name if needed.
+
+Current item name: "${currentName}"
+Current description: "${currentDescription}"
+Category: "${form.category}"
+Location lost: "${form.location}"
+
+Please respond ONLY with a JSON object in this exact format:
+{
+  "name": "improved item name if current is generic/empty, or keep current name if it's good",
+  "description": "enhanced description that's more detailed and helpful for finding the item"
+}
+
+Rules:
+- Only use information explicitly provided
+- Don't make up details not mentioned
+- Keep descriptions concise but comprehensive
+- Focus on identifying features, colors, brands, distinctive marks
+- If the current name is already specific and good, keep it unchanged
+- Make the description more searchable and detailed`;
 
             const response = await fetch('https://ai.hackclub.com/chat/completions', {
                 method: 'POST',
@@ -214,7 +247,7 @@ const app = Vue.createApp({
                             content: prompt
                         }
                     ],
-                    max_tokens: 200,
+                    max_tokens: 300,
                     temperature: 0.7
                 })
             });
@@ -226,8 +259,20 @@ const app = Vue.createApp({
             const data = await response.json();
             
             if (data.choices && data.choices[0] && data.choices[0].message) {
-                const enhancedDescription = data.choices[0].message.content.trim();
-                form.description = enhancedDescription;
+                const aiResponse = data.choices[0].message.content.trim();
+                
+                try {
+                    const parsedResponse = JSON.parse(aiResponse);
+                    if (parsedResponse.name && parsedResponse.description) {
+                        form.name = parsedResponse.name;
+                        form.description = parsedResponse.description;
+                    } else {
+                        throw new Error('Invalid AI response format');
+                    }
+                } catch (parseError) {
+                    // Fallback to just enhancing description if JSON parsing fails
+                    form.description = aiResponse.replace(/^[^{]*{|}[^}]*$/g, '').trim() || aiResponse;
+                }
             } else {
                 throw new Error('Unexpected response format from AI service');
             }
@@ -276,30 +321,6 @@ const app = Vue.createApp({
       const popup = document.getElementById('reportLostItemPopup');
       if (popup) popup.style.display = 'none';
       this.lostItemForm = this.getInitialLostItemForm();
-      this.aiError = null;
-    },
-    openReportFoundPopup() {
-      if (!this.foundItemForm.id) {
-          this.foundItemForm = this.getInitialFoundItemForm();
-      }
-      this.aiError = null;
-       this.$nextTick(() => {
-          if (this.flatpickrInstances.foundDate) {
-              this.flatpickrInstances.foundDate.setDate(this.foundItemForm.dateFound || "today", true);
-          } else {
-              this.initializeFlatpickr();
-              if(this.flatpickrInstances.foundDate) {
-                 this.flatpickrInstances.foundDate.setDate(this.foundItemForm.dateFound || "today", true);
-              }
-          }
-      });
-      const popup = document.getElementById('reportFoundItemPopup');
-      if (popup) popup.style.display = 'flex';
-    },
-    closeReportFoundPopup() {
-      const popup = document.getElementById('reportFoundItemPopup');
-      if (popup) popup.style.display = 'none';
-      this.foundItemForm = this.getInitialFoundItemForm();
       this.aiError = null;
     },
     openChangePasswordPopup() {
@@ -364,28 +385,15 @@ const app = Vue.createApp({
         images: []
       };
     },
-    getInitialFoundItemForm() {
-       return {
-        id: null,
-        name: '',
-        category: '',
-        dateFound: this.formatDateForInput(new Date()),
-        location: '',
-        description: '',
-        images: []
-      };
-    },
     resetDashboardData() {
         this.notifications = [];
         this.lostItems = [];
-        this.foundItems = [];
         this.claims = [];
         this.userProfile = { displayName: '', email: '', phone: '' };
         this.userPreferences = { emailNotifications: true, matchAlerts: true, statusUpdates: true };
         this.selectedItem = null;
         this.selectedClaim = null;
         this.lostItemForm = this.getInitialLostItemForm();
-        this.foundItemForm = this.getInitialFoundItemForm();
         this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
         this.passwordError = null;
         this.passwordSuccess = null;
@@ -396,6 +404,13 @@ const app = Vue.createApp({
         this.magicLinkMode = false;
         this.forgotPassword = false;
         this.aiError = null;
+        this.cache = {
+            userProfile: null,
+            notifications: null,
+            lostItems: null,
+            claims: null,
+            lastUpdate: null
+        };
     },
     formatDateForInput(date) {
       if (!date) return '';
@@ -422,8 +437,6 @@ const app = Vue.createApp({
           return this.notifications.filter(notification => !notification.read).length;
         case 'lost':
           return this.lostItems.length;
-        case 'found':
-          return this.foundItems.length;
         case 'claims':
           return this.claims.length;
         default:
@@ -447,6 +460,14 @@ const app = Vue.createApp({
         default:
           return 'fas fa-bell';
       }
+    },
+    refreshDataInBackground() {
+      Promise.all([
+          this.loadUserProfile(),
+          this.loadNotifications(),
+          this.loadLostItems(),
+          this.loadClaims()
+      ]);
     },
     loadUserProfile() {
       if (!this.user) return Promise.resolve();
@@ -482,6 +503,8 @@ const app = Vue.createApp({
               preferences: this.userPreferences
             }).catch(error => console.error("Error creating user profile doc:", error));
           }
+          this.cache.userProfile = { ...this.userProfile };
+          this.cache.lastUpdate = Date.now();
         })
         .catch(error => {
           console.error("Error loading user profile:", error);
@@ -500,6 +523,7 @@ const app = Vue.createApp({
             ...doc.data(),
             timestamp: doc.data().timestamp
           }));
+          this.cache.notifications = [...this.notifications];
         })
         .catch(error => {
           console.error("Error loading notifications:", error);
@@ -517,26 +541,10 @@ const app = Vue.createApp({
             ...doc.data(),
             dateLost: doc.data().dateLost
           }));
+          this.cache.lostItems = [...this.lostItems];
         })
         .catch(error => {
           console.error("Error loading lost items:", error);
-        });
-    },
-    loadFoundItems() {
-      if (!this.user) return Promise.resolve();
-      return db.collection('items')
-        .where('reportedBy', '==', this.user.uid)
-        .orderBy('dateFound', 'desc')
-        .get()
-        .then(snapshot => {
-          this.foundItems = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            dateFound: doc.data().dateFound
-          }));
-        })
-        .catch(error => {
-          console.error("Error loading found items:", error);
         });
     },
     loadClaims() {
@@ -578,6 +586,7 @@ const app = Vue.createApp({
           });
           const claimsWithItems = await Promise.all(itemPromises);
           this.claims = [...claimsData, ...claimsWithItems.filter(c => c !== null)];
+          this.cache.claims = [...this.claims];
         })
         .catch(error => {
           console.error("Error loading claims:", error);
@@ -647,10 +656,6 @@ const app = Vue.createApp({
             this.activeTab = 'lost';
             const item = this.lostItems.find(i => i.id === notification.itemId);
             if(item) this.openItemDetailsPopup(item, 'lost');
-          } else if (notification.itemType === 'found' && notification.itemId) {
-            this.activeTab = 'found';
-            const item = this.foundItems.find(i => i.id === notification.itemId);
-            if(item) this.openItemDetailsPopup(item, 'found');
           }
           break;
         case 'system_message':
@@ -817,7 +822,7 @@ const app = Vue.createApp({
             });
         }
     },
-    editItem(item, type) {
+    editItem(item) {
         this.closeItemDetailsPopup();
         if (type === 'lost') {
             this.lostItemForm = {
@@ -830,32 +835,17 @@ const app = Vue.createApp({
             images: []
             };
             this.openReportLostPopup();
-        } else {
-            this.foundItemForm = {
-            id: item.id,
-            name: item.name,
-            category: item.category,
-            dateFound: this.formatDateForInput(item.dateFound),
-            location: item.location,
-            description: item.description,
-            images: []
-            };
-            this.openReportFoundPopup();
         }
     },
-    deleteItem(itemId, type) {
+    deleteItem(itemId) {
       this.closeItemDetailsPopup();
       if (!confirm("Are you sure you want to delete this item? This action cannot be undone.")) {
         return;
       }
-      const collection = type === 'lost' ? 'lostItems' : 'items';
+      const collection = 'lostItems';
       db.collection(collection).doc(itemId).delete()
         .then(() => {
-          if (type === 'lost') {
-            this.lostItems = this.lostItems.filter(item => item.id !== itemId);
-          } else {
-            this.foundItems = this.foundItems.filter(item => item.id !== itemId);
-          }
+          this.lostItems = this.lostItems.filter(item => item.id !== itemId);
           this.showGenericMessagePopup("Item deleted successfully!");
         })
         .catch(error => {
@@ -863,8 +853,8 @@ const app = Vue.createApp({
           this.showGenericMessagePopup("Error deleting item. Please try again.");
         });
     },
-    handleImageUpload(event, type) {
-        const form = type === 'lost' ? this.lostItemForm : this.foundItemForm;
+    handleImageUpload(event) {
+        const form = this.lostItemForm;
         const files = event.target.files;
         if (!files || files.length === 0) return;
         const maxImages = 5;
@@ -899,8 +889,8 @@ const app = Vue.createApp({
         });
         event.target.value = null; // Reset file input
     },
-    removeImage(index, type) {
-        const form = type === 'lost' ? this.lostItemForm : this.foundItemForm;
+    removeImage(index) {
+        const form = this.lostItemForm;
         form.images.splice(index, 1);
     },
     async submitLostItemReport() {
@@ -952,60 +942,6 @@ const app = Vue.createApp({
       } catch (error) {
         console.error("Error reporting lost item:", error);
         this.showGenericMessagePopup(`Error reporting lost item: ${error.message}. Please try again.`);
-      } finally {
-        this.isSubmitting = false;
-      }
-    },
-    async submitFoundItemReport() {
-      if (!this.user) return;
-      this.isSubmitting = true;
-      try {
-         if (!this.foundItemForm.name || !this.foundItemForm.category || !this.foundItemForm.dateFound || !this.foundItemForm.location || !this.foundItemForm.description) {
-            throw new Error("Please fill in all required fields.");
-        }
-        const searchTerms = this.generateSearchTerms(
-           `${this.foundItemForm.name} ${this.foundItemForm.category} ${this.foundItemForm.location} ${this.foundItemForm.description}`
-        );
-        const dateFoundObject = new Date(this.foundItemForm.dateFound);
-         if (isNaN(dateFoundObject.getTime())) {
-            throw new Error("Invalid date selected for 'Date Found'.");
-        }
-        const itemData = {
-          name: this.foundItemForm.name.trim(),
-          category: this.foundItemForm.category,
-          dateFound: firebase.firestore.Timestamp.fromDate(dateFoundObject),
-          location: this.foundItemForm.location,
-          description: this.foundItemForm.description.trim(),
-          reportedBy: this.user.uid,
-          reportedByName: this.userProfile.displayName || this.user.email,
-          status: 'available',
-          claimed: false,
-          searchTerms: searchTerms,
-          image: null,
-          hasImages: this.foundItemForm.images.length > 0,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        };
-        let docRef;
-        const isEditing = !!this.foundItemForm.id;
-        if (isEditing) {
-          docRef = db.collection('items').doc(this.foundItemForm.id);
-          await docRef.update(itemData);
-        } else {
-          itemData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-          docRef = await db.collection('items').add(itemData);
-        }
-        if (this.foundItemForm.images.length > 0) {
-          const mainImageUrl = await this.uploadImages(docRef.id, this.foundItemForm.images, 'found');
-           if (mainImageUrl) {
-               await docRef.update({ image: mainImageUrl });
-           }
-        }
-        await this.loadFoundItems();
-        this.closeReportFoundPopup();
-        this.showGenericMessagePopup(isEditing ? "Found item updated successfully!" : "Found item reported successfully! It will now appear in the search results.");
-      } catch (error) {
-        console.error("Error reporting found item:", error);
-        this.showGenericMessagePopup(`Error reporting found item: ${error.message}. Please try again.`);
       } finally {
         this.isSubmitting = false;
       }

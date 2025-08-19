@@ -78,11 +78,25 @@ const app = Vue.createApp({
     };
   },
   mounted() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryParam = urlParams.get('q');
+    if (queryParam) {
+      this.searchQuery = decodeURIComponent(queryParam);
+      this.$nextTick(() => {
+        if (this.user) {
+          this.performSearch();
+        }
+      });
+    }
+    
     this.precacheAllItems();
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
       if (user) {
         this.loadUserProfile();
+        if (queryParam && !this.searchPerformed) {
+          this.performSearch();
+        }
       }
     });
 
@@ -664,6 +678,9 @@ Available Items to Rank:
     truncateDescription(text, maxLength = 100) {
       if (!text || text.length <= maxLength) return text || '';
       return text.substring(0, maxLength) + '...';
+    },
+    signOut() {
+      firebase.auth().signOut().catch(() => {});
     }
   }
 }).mount('#searchApp');
