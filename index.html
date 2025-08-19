@@ -45,13 +45,8 @@
       <div class="hero-content">
         <h1>Find What You've Lost</h1>
         <p class="hero-subtitle">Reunited is a platform that helps you find your lost items and reconnect with what matters most to you.</p>
-        <div class="hero-search">
-          <div class="search-input-container">
-            <input type="text" v-model="heroSearchQuery" placeholder="What did you lose? (e.g., 'blue nike water bottle')" @keyup.enter="initiateSearch">
-            <button @click="initiateSearch" class="btn search-btn">
-              <i class="fas fa-search"></i> Search
-            </button>
-          </div>
+        <div class="hero-btns">
+          <a href="#" @click.prevent="goToSearchPage" class="btn">Search for my item</a>
         </div>
       </div>
     </section>

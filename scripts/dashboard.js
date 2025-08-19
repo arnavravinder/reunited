@@ -214,26 +214,13 @@ const app = Vue.createApp({
         }
 
         try {
-            const prompt = `You are helping someone create a better lost item report. Based on the information provided, enhance the description and suggest an improved item name if needed.
+            const descriptionPrompt = `Enhance this lost item description to be more detailed and searchable. Only use information explicitly provided - don't make up details. Focus on identifying features, colors, brands, distinctive marks. Keep it concise but comprehensive.
 
-Current item name: "${currentName}"
-Current description: "${currentDescription}"
-Category: "${form.category}"
-Location lost: "${form.location}"
+Original: "${currentDescription}"
+Category: ${form.category}
+Location: ${form.location}
 
-Please respond ONLY with a JSON object in this exact format:
-{
-  "name": "improved item name if current is generic/empty, or keep current name if it's good",
-  "description": "enhanced description that's more detailed and helpful for finding the item"
-}
-
-Rules:
-- Only use information explicitly provided
-- Don't make up details not mentioned
-- Keep descriptions concise but comprehensive
-- Focus on identifying features, colors, brands, distinctive marks
-- If the current name is already specific and good, keep it unchanged
-- Make the description more searchable and detailed`;
+Enhanced description:`;
 
             const response = await fetch('https://ai.hackclub.com/chat/completions', {
                 method: 'POST',
@@ -244,10 +231,10 @@ Rules:
                     messages: [
                         {
                             role: 'user',
-                            content: prompt
+                            content: descriptionPrompt
                         }
                     ],
-                    max_tokens: 300,
+                    max_tokens: 150,
                     temperature: 0.7
                 })
             });
@@ -259,19 +246,40 @@ Rules:
             const data = await response.json();
             
             if (data.choices && data.choices[0] && data.choices[0].message) {
-                const aiResponse = data.choices[0].message.content.trim();
+                const enhancedDescription = data.choices[0].message.content.trim();
+                form.description = enhancedDescription;
                 
-                try {
-                    const parsedResponse = JSON.parse(aiResponse);
-                    if (parsedResponse.name && parsedResponse.description) {
-                        form.name = parsedResponse.name;
-                        form.description = parsedResponse.description;
-                    } else {
-                        throw new Error('Invalid AI response format');
+                if (!currentName || currentName.length < 3 || currentName.toLowerCase().includes('item') || currentName.toLowerCase().includes('thing')) {
+                    const namePrompt = `Based on this description, suggest a better specific item name (2-4 words max): "${enhancedDescription}"
+
+Item name:`;
+                    
+                    const nameResponse = await fetch('https://ai.hackclub.com/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            messages: [
+                                {
+                                    role: 'user',
+                                    content: namePrompt
+                                }
+                            ],
+                            max_tokens: 20,
+                            temperature: 0.5
+                        })
+                    });
+                    
+                    if (nameResponse.ok) {
+                        const nameData = await nameResponse.json();
+                        if (nameData.choices && nameData.choices[0] && nameData.choices[0].message) {
+                            const suggestedName = nameData.choices[0].message.content.trim().replace(/['"]/g, '');
+                            if (suggestedName.length > 2 && suggestedName.length < 50) {
+                                form.name = suggestedName;
+                            }
+                        }
                     }
-                } catch (parseError) {
-                    // Fallback to just enhancing description if JSON parsing fails
-                    form.description = aiResponse.replace(/^[^{]*{|}[^}]*$/g, '').trim() || aiResponse;
                 }
             } else {
                 throw new Error('Unexpected response format from AI service');

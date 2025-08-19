@@ -111,7 +111,7 @@
   .splash-dot-wrapper {
     position: absolute;
     top: 50%;
-    left: calc(50% + 110px);
+    left: 50%;
     transform: translate(-50%, -50%);
   }
   .splash-dot {
@@ -128,10 +128,10 @@
   }
   @keyframes orbit {
     0% {
-      transform: translate(calc(-50% - 110px), -50%) rotate(0deg);
+      transform: translate(-50%, -50%) rotate(0deg);
     }
     100% {
-      transform: translate(calc(-50% - 110px), -50%) rotate(360deg);
+      transform: translate(-50%, -50%) rotate(360deg);
     }
   }
   .splash-screen.animate-pink {
@@ -225,38 +225,6 @@
     gap: 1rem;
     justify-content: center;
     margin-top: 2rem;
-  }
-  .hero-search {
-    margin-top: 2rem;
-  }
-  .search-input-container {
-    display: flex;
-    max-width: 600px;
-    margin: 0 auto;
-    gap: 1rem;
-    align-items: center;
-  }
-  .search-input-container input {
-    flex: 1;
-    padding: 1rem 1.5rem;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50px;
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-color);
-    font-size: 1.1rem;
-    backdrop-filter: blur(10px);
-  }
-  .search-input-container input:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    background: rgba(255, 255, 255, 0.15);
-  }
-  .search-input-container input::placeholder {
-    color: var(--text-secondary);
-  }
-  .search-btn {
-    padding: 1rem 2rem !important;
-    white-space: nowrap;
   }
   .floating-item {
     position: absolute;
@@ -554,9 +522,21 @@
     }
     .hero-subtitle {
       font-size: 1rem;
+      margin-bottom: 1.5rem;
+      padding: 0 1rem;
+    }
+    .hero-content {
+      padding: 0 1rem;
     }
     .hero-btns {
       flex-direction: column;
+      margin-top: 1.5rem;
+    }
+    .btn {
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
     }
     .nav-links {
       display: none;
@@ -596,6 +576,32 @@
       max-width: 500px;
     }
     .splash-logo {
-      font-size: 2.5rem;
+      font-size: 2rem;
+    }
+    .floating-item {
+      display: none;
+    }
+    .hero {
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 1.8rem;
+    }
+    .hero-subtitle {
+      font-size: 0.9rem;
+    }
+    .btn {
+      padding: 0.8rem 1.5rem;
+      font-size: 0.9rem;
+    }
+    .splash-logo {
+      font-size: 1.5rem;
+    }
+    .hero-content {
+      padding: 0 0.5rem;
     }
   } 

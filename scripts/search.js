@@ -78,25 +78,11 @@ const app = Vue.createApp({
     };
   },
   mounted() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const queryParam = urlParams.get('q');
-    if (queryParam) {
-      this.searchQuery = decodeURIComponent(queryParam);
-      this.$nextTick(() => {
-        if (this.user) {
-          this.performSearch();
-        }
-      });
-    }
-    
     this.precacheAllItems();
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
       if (user) {
         this.loadUserProfile();
-        if (queryParam && !this.searchPerformed) {
-          this.performSearch();
-        }
       }
     });
 

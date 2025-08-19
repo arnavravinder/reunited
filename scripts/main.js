@@ -26,7 +26,6 @@ const app = Vue.createApp({
       mobileMenuOpen: false,
       showLoginModal: false,
       isSigningUp: false,
-      heroSearchQuery: '',
       floatingItems: [],
       contactForm: {
         name: '',
@@ -122,15 +121,6 @@ const app = Vue.createApp({
     this.generateFloatingItems();
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
-      if (user) {
-        const pendingQuery = localStorage.getItem('pendingSearchQuery');
-        if (pendingQuery) {
-          localStorage.removeItem('pendingSearchQuery');
-          setTimeout(() => {
-            window.location.href = `/search.html?q=${encodeURIComponent(pendingQuery)}`;
-          }, 1000);
-        }
-      }
     });
     this.startLoadingAnimation();
   },
@@ -145,7 +135,8 @@ const app = Vue.createApp({
         setTimeout(() => { this.loading = false; }, 500);
         return;
       }
-      splashDot.style.left = '0px';
+      const ORBIT_RADIUS = 99;
+      splashDot.style.left = ORBIT_RADIUS + 'px';
       splashDotWrapper.classList.add('animate-orbit');
       setTimeout(() => {
         splashDotWrapper.classList.remove('animate-orbit');
@@ -183,7 +174,7 @@ const app = Vue.createApp({
             this.loading = false;
           }, 300);
         }, 1000);
-      }, 1500);
+      }, 2500);
     },
     generateFloatingItems() {
       const items = [];
@@ -346,18 +337,6 @@ const app = Vue.createApp({
     },
     goToSearchPage() {
       window.location.href = "/search.html";
-    },
-    initiateSearch() {
-      if (!this.heroSearchQuery.trim()) {
-        return;
-      }
-      
-      if (this.user) {
-        window.location.href = `/search.html?q=${encodeURIComponent(this.heroSearchQuery)}`;
-      } else {
-        localStorage.setItem('pendingSearchQuery', this.heroSearchQuery);
-        this.showLoginModal = true;
-      }
     }
   }
 }).mount('#app');
