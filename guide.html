@@ -1,0 +1,2026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reunited Platform Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <style>
+    :root {
+      --dark-bg: #1a1a1a;
+      --darker-bg: #121212;
+      --light-bg: #2a2a2a;
+      --accent-color: #6e7fff;
+      --secondary-accent: #ff7eb3;
+      --text-color: #f8f8f8;
+      --text-secondary: #b0b0b0;
+      --success-color: #4caf50;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Work Sans', sans-serif;
+      background-color: var(--dark-bg);
+      color: var(--text-color);
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      background-color: var(--dark-bg);
+      margin: 0;
+      padding: 0;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Kanit', sans-serif;
+      font-weight: 500;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      color: var(--text-color);
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+      color: var(--accent-color);
+      text-align: center;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--secondary-accent);
+    }
+
+    p {
+      font-family: 'Raleway', sans-serif;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+
+    .container {
+      width: 85%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 0;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 2rem;
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .btn:hover {
+      background-color: #5867ff;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(94, 114, 228, 0.3);
+    }
+
+    .btn-outlined {
+      background-color: transparent;
+      border: 2px solid var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    .btn-outlined:hover {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-accent);
+    }
+
+    .btn-secondary:hover {
+      background-color: #ff6ba3;
+    }
+
+    .btn-tiny {
+      padding: 0.4rem 1rem;
+      font-size: 0.8rem;
+      border-radius: 20px;
+    }
+
+    .pdf-download-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: linear-gradient(135deg, var(--accent-color), var(--secondary-accent));
+      border: none;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(110, 127, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .pdf-download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(110, 127, 255, 0.4);
+    }
+
+    .pdf-options-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .pdf-options-content {
+      background: var(--light-bg);
+      border-radius: 15px;
+      padding: 2rem;
+      text-align: center;
+      min-width: 300px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .pdf-options-content h4 {
+      margin-bottom: 1.5rem;
+      color: var(--accent-color);
+    }
+
+    .pdf-options-content .btn {
+      display: block;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    @media print {
+      .pdf-download-btn, .pdf-options-modal {
+        display: none !important;
+      }
+      
+      * {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      
+      html, body {
+        background: var(--dark-bg) !important;
+        color: var(--text-color) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      
+      .guide-section {
+        page-break-inside: avoid;
+        margin-bottom: 20px;
+        background: var(--dark-bg) !important;
+      }
+      
+      h1, h2, h3 {
+        page-break-after: avoid;
+        color: var(--accent-color) !important;
+      }
+      
+      .mockup-container,
+      .feature-card,
+      .instruction-card {
+        background: var(--light-bg) !important;
+        color: var(--text-color) !important;
+        page-break-inside: avoid;
+        box-shadow: none !important;
+      }
+      
+      .form-control, input, select, textarea {
+        background: var(--dark-bg) !important;
+        border: 1px solid var(--light-bg) !important;
+        color: var(--text-color) !important;
+      }
+    }
+
+    .hero {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--dark-bg);
+      text-align: center;
+      padding: 4rem 0;
+    }
+
+    .hero-content h1 {
+      color: var(--text-color);
+      position: relative;
+    }
+
+    .hero-content h1::after {
+      content: ".";
+      color: var(--secondary-accent);
+      font-size: 4rem;
+      position: absolute;
+      bottom: -10px;
+      margin-left: 5px;
+    }
+
+    .hero-subtitle {
+      font-family: 'Raleway', sans-serif;
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Guide sections */
+    .guide-section {
+      padding: 3rem 0;
+      border-bottom: 1px solid var(--light-bg);
+    }
+
+    .guide-section:nth-child(even) {
+      background-color: var(--darker-bg);
+    }
+
+    .mockup-container {
+      background-color: var(--light-bg);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin: 0;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .mockup-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-color), var(--secondary-accent));
+    }
+
+    .mockup-header {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      background-color: var(--darker-bg);
+      border-radius: 8px 8px 0 0;
+      margin: -1.5rem -1.5rem 1rem -1.5rem;
+    }
+
+    .mockup-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .mockup-dot:nth-child(1) { background-color: #ff5f57; }
+    .mockup-dot:nth-child(2) { background-color: #ffbd2e; }
+    .mockup-dot:nth-child(3) { background-color: #28ca42; }
+
+    .mockup-content {
+      background-color: var(--dark-bg);
+      border-radius: 8px;
+      padding: 1.5rem;
+      width: 100%;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .mockup-content.portrait {
+      aspect-ratio: 9/16;
+      max-width: 300px;
+    }
+
+    .mockup-content.mobile {
+      aspect-ratio: 9/19.5;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+      max-width: 100%;
+    }
+
+    .feature-card {
+      background-color: var(--light-bg);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-color), var(--secondary-accent));
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .feature-card:hover::before {
+      transform: translateX(0);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      color: var(--accent-color);
+      margin-bottom: 0.8rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .feature-card p {
+      font-size: 0.95rem;
+      margin-bottom: 0;
+      line-height: 1.4;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-family: 'Work Sans', sans-serif;
+      color: var(--text-secondary);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      background-color: var(--dark-bg);
+      border: 1px solid var(--light-bg);
+      color: var(--text-color);
+      border-radius: 5px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 1rem;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(110, 127, 255, 0.2);
+      background-color: var(--dark-bg);
+    }
+
+    .mockup-content .form-control {
+      font-size: inherit;
+      padding: inherit;
+      background-color: var(--dark-bg);
+    }
+
+    input.form-control, select.form-control, textarea.form-control {
+      background-color: var(--dark-bg) !important;
+    }
+
+    select.form-control {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-color: var(--dark-bg) !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23aaa'%3E%3Cpath d='M7 10L2 5h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 3rem;
+    }
+
+    textarea.form-control {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .search-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .item-card {
+      background-color: var(--light-bg);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    .item-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .item-image {
+      height: 150px;
+      background-color: var(--darker-bg);
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23333"/><text x="50" y="50" text-anchor="middle" dy="0.3em" fill="%23666" font-size="12">Image</text></svg>');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+    }
+
+    .item-info {
+      padding: 1rem;
+    }
+
+    .item-info h4 {
+      margin-bottom: 0.5rem;
+      color: var(--text-color);
+    }
+
+    .item-meta {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .item-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* Modal styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal {
+      background-color: var(--dark-bg);
+      border-radius: 15px;
+      width: 90%;
+      max-width: 450px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 2rem;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .modal-title {
+      font-family: 'Kanit', sans-serif;
+      font-size: 1.8rem;
+      color: var(--text-color);
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .social-login {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+    }
+
+    .social-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.8rem;
+      border-radius: 5px;
+      background-color: var(--light-bg);
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+    }
+
+    .social-btn:hover {
+      background-color: var(--accent-color);
+    }
+
+    .or-divider {
+      display: flex;
+      align-items: center;
+      margin: 1rem 0;
+      color: var(--text-secondary);
+    }
+
+    .or-divider::before,
+    .or-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background-color: var(--light-bg);
+    }
+
+    .or-divider span {
+      padding: 0 1rem;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin: 2rem 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    .status-pending {
+      background-color: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+    }
+
+    .status-approved {
+      background-color: rgba(76, 175, 80, 0.2);
+      color: #4caf50;
+    }
+
+    .status-collected {
+      background-color: rgba(33, 150, 243, 0.2);
+      color: #2196f3;
+    }
+
+    footer {
+      background-color: var(--darker-bg);
+      padding: 3rem 0;
+      text-align: center;
+      margin-top: 4rem;
+    }
+
+    .footer-logo {
+      font-family: 'Lora', serif;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: inline-block;
+      position: relative;
+    }
+
+    .footer-logo::after {
+      content: ".";
+      font-size: 2rem;
+      color: var(--secondary-accent);
+      position: absolute;
+      bottom: -5px;
+    }
+
+    .made-with-love {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .made-with-love a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    .heart {
+      color: var(--secondary-accent);
+      display: inline-block;
+      animation: heartbeat 1.5s infinite;
+    }
+
+    @keyframes heartbeat {
+      0% { transform: scale(1); }
+      5% { transform: scale(1.25); }
+      10% { transform: scale(1); }
+      15% { transform: scale(1.25); }
+      20% { transform: scale(1); }
+      100% { transform: scale(1); }
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 2.5rem; }
+      h2 { font-size: 1.5rem; }
+      .hero-subtitle { font-size: 1.1rem; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .container { width: 95%; }
+      
+      .mockup-with-steps {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        max-width: 100%;
+      }
+      
+      .mockup-content {
+        max-width: 100%;
+        aspect-ratio: 16/10;
+      }
+      
+      .mockup-content.mobile {
+        aspect-ratio: 9/16;
+        max-width: 280px;
+      }
+      
+      .instructions-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .pdf-download-btn {
+        top: 10px;
+        right: 10px;
+        padding: 8px 15px;
+        font-size: 0.8rem;
+      }
+      
+      .steps-sidebar .instruction-card p {
+        font-size: 0.85rem;
+        line-height: 1.4;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container { width: 95%; padding: 1rem 0; }
+      .mockup-with-steps { gap: 1.5rem; }
+      .feature-card { padding: 1.2rem; }
+      .steps-sidebar { padding: 1.2rem; min-height: auto; }
+    }
+
+    .demo-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .demo-table th,
+    .demo-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--light-bg);
+    }
+
+    .demo-table th {
+      background-color: var(--darker-bg);
+      color: var(--accent-color);
+      font-weight: 500;
+    }
+
+    .demo-table td {
+      color: var(--text-color);
+    }
+
+    .claim-code {
+      font-family: 'Kanit', sans-serif;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      background-color: var(--darker-bg);
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      text-align: center;
+      letter-spacing: 0.2rem;
+      margin: 1rem 0;
+      border: 2px dashed var(--accent-color);
+    }
+
+    .instructions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+      max-width: 100%;
+    }
+
+    .mockup-with-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin: 2rem 0;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .mockup-section {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .instructions-section {
+      width: 100%;
+    }
+
+    .steps-sidebar {
+      padding: 0;
+      background: none;
+      border: none;
+      height: fit-content;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .instruction-step-card {
+      background: linear-gradient(135deg, var(--light-bg) 0%, rgba(42, 42, 42, 0.8) 100%);
+      border-radius: 20px;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+
+    .instruction-step-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(110, 127, 255, 0.2);
+    }
+
+    .steps-sidebar h4 {
+      color: var(--accent-color);
+      margin-bottom: 1.5rem;
+      font-size: 1.3rem;
+    }
+
+    .instruction-card {
+      background-color: var(--light-bg);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .instruction-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .steps-sidebar .instruction-card {
+      background-color: var(--darker-bg);
+      padding: 1.2rem;
+      margin-bottom: 1.2rem;
+      text-align: left;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .steps-sidebar .instruction-card:hover {
+      transform: none;
+      background-color: var(--dark-bg);
+    }
+
+    .steps-sidebar .step-number {
+      width: 28px;
+      height: 28px;
+      font-size: 1rem;
+      margin: 0 0 0.8rem 0;
+      font-weight: 600;
+    }
+
+    .steps-sidebar .instruction-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.8rem;
+      color: var(--text-color);
+      line-height: 1.3;
+    }
+
+    .steps-sidebar .instruction-card p {
+      font-size: 0.9rem;
+      margin: 0;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .instruction-icon {
+      font-size: 2rem;
+      color: var(--secondary-accent);
+      margin-bottom: 1rem;
+    }
+
+    .step-number {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      background-color: var(--accent-color);
+      color: white;
+      border-radius: 50%;
+      font-weight: 600;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="pdf-download-btn" onclick="showPDFOptions()">
+    <i class="fas fa-download"></i> Download PDF Guide
+  </div>
+  
+  <div id="pdfOptions" class="pdf-options-modal" style="display: none;">
+    <div class="pdf-options-content">
+      <h4>Choose PDF Method</h4>
+      <button class="btn" onclick="downloadPDF(); hidePDFOptions();">
+        <i class="fas fa-print"></i> Browser Print (Recommended)
+      </button>
+      <button class="btn btn-outlined" onclick="downloadPDFAlternative(); hidePDFOptions();">
+        <i class="fas fa-file-pdf"></i> Direct PDF Download
+      </button>
+      <button class="btn-tiny btn-outlined" onclick="hidePDFOptions();">Cancel</button>
+    </div>
+  </div>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Reunited Platform Guide</h1>
+      <p class="hero-subtitle">Lost something? Found something? You're in the right place. This guide walks you through everything you need to know about using Reunited to get your stuff back or help others find theirs.</p>
+    </div>
+  </section>
+
+  <section id="overview" class="guide-section">
+    <div class="container">
+      <h2>What's Reunited All About?</h2>
+      <p>Think of Reunited as your personal lost and found superhero. We've built this platform because losing stuff sucks, and finding it shouldn't be a nightmare. Whether you left your phone in the library or found someone's wallet in the cafeteria, Reunited makes the whole process actually work.</p>
+      
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h3>Actually Smart Search</h3>
+          <p>No more endless scrolling. Our AI helps match your search with what's actually been found, so you spend less time looking and more time getting your stuff back.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3>Easy Login (No Hassle)</h3>
+          <p>Sign in with Google, X, or just get a magic link sent to your email. We've got options because nobody likes password drama.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <h3>Track Everything</h3>
+          <p>Know exactly where your claim stands. No more wondering if your request got lost in the void - you'll see updates in real time.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-eye"></i>
+          </div>
+          <h3>Keep It Real</h3>
+          <p>Everyone can see what's been claimed (without personal details, obviously). It's all about trust and making sure the system actually works for everyone.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="login" class="guide-section">
+    <div class="container">
+      <h2>Getting Into Your Account</h2>
+      <p>We know you've got better things to do than remember another password. That's why we've made logging in as painless as possible. Here's how it works:</p>
+      
+      <div class="instructions-section">
+        <h4 style="color: var(--accent-color); margin-bottom: 1.5rem; text-align: center;">How to Login</h4>
+        <div class="steps-grid">
+          <div class="instruction-step-card">
+            <div class="step-number">1</div>
+            <h3>Pick Your Way In</h3>
+            <p>Google account? Perfect. Want a magic link? We've got you. Old school email and password? That works too.</p>
+          </div>
+          <div class="instruction-step-card">
+            <div class="step-number">2</div>
+            <h3>Click and Go</h3>
+            <p>Seriously, it's that simple. No security questions about your first pet's middle name or anything crazy like that.</p>
+          </div>
+          <div class="instruction-step-card">
+            <div class="step-number">3</div>
+            <h3>You're In!</h3>
+            <p>Welcome to your dashboard where all the magic happens. Now you can search, claim, and track your stuff.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mockup-section">
+        <div class="mockup-container">
+          <div class="mockup-header">
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+          </div>
+          <div class="mockup-content" style="padding: 1rem; display: flex; gap: 1.5rem;">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 1rem;">
+              <div style="text-align: center; margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.5rem; margin-bottom: 0.3rem; color: var(--accent-color);">Reunited</h2>
+                <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">Welcome back! Sign in to your account</p>
+              </div>
+              
+              <div class="social-login" style="margin-bottom: 1rem;">
+                <button class="social-btn" style="padding: 0.7rem; font-size: 0.9rem;">
+                  <i class="fab fa-google"></i>
+                </button>
+                <button class="social-btn" style="padding: 0.7rem; font-size: 0.9rem;">
+                  <i class="fab fa-apple"></i>
+                </button>
+                <button class="social-btn" style="padding: 0.7rem; font-size: 0.9rem;">
+                  <i class="fab fa-x-twitter"></i>
+                </button>
+              </div>
+              
+              <div class="or-divider" style="margin: 0.8rem 0;">
+                <span style="font-size: 0.8rem;">or continue with email</span>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label style="font-size: 0.7rem;">Email Address</label>
+                  <input type="email" class="form-control" style="padding: 0.6rem; font-size: 0.8rem;" placeholder="john@example.com" value="john@example.com">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label style="font-size: 0.7rem;">Password</label>
+                  <input type="password" class="form-control" style="padding: 0.6rem; font-size: 0.8rem;" placeholder="••••••••" value="••••••••">
+                </div>
+              </div>
+              
+              <button class="btn" style="width: 100%; padding: 0.8rem; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+              </button>
+              
+              <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-secondary);">
+                <a href="#" style="color: var(--accent-color);">Forgot password?</a>
+                <a href="#" style="color: var(--accent-color);">Create account</a>
+              </div>
+            </div>
+            
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center; background-color: var(--darker-bg); border-radius: 10px; padding: 1.5rem;">
+              <div style="text-align: center; color: var(--text-secondary);">
+                <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 0.8rem; color: var(--accent-color);"></i>
+                <h3 style="margin-bottom: 0.8rem; font-size: 1.1rem;">Find Your Lost Items</h3>
+                <p style="font-size: 0.8rem; line-height: 1.4;">Access our smart search engine and AI-powered matching to quickly locate your belongings.</p>
+                <div style="margin-top: 1rem; padding: 0.8rem; background-color: var(--light-bg); border-radius: 5px;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem;">
+                    <i class="fas fa-check-circle" style="color: var(--accent-color);"></i>
+                    <span>Smart AI matching</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; margin-top: 0.3rem;">
+                    <i class="fas fa-check-circle" style="color: var(--accent-color);"></i>
+                    <span>Real-time notifications</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="search" class="guide-section">
+    <div class="container">
+      <h2>Finding Your Lost Stuff</h2>
+      <p>This is where the real magic happens. Instead of digging through endless lists or posting on random bulletin boards, you can actually search like a normal human being. Here's how to find what you're looking for:</p>
+      
+      <div class="instructions-section">
+        <h4 style="color: var(--accent-color); margin-bottom: 1.5rem; text-align: center;">Search Tips</h4>
+        <div class="steps-grid">
+          <div class="instruction-step-card">
+            <div class="step-number">1</div>
+            <h3>Be Specific</h3>
+            <p>The more details you add, the better. "Blue water bottle" beats just "bottle" every time.</p>
+          </div>
+          <div class="instruction-step-card">
+            <div class="step-number">2</div>
+            <h3>Use Filters</h3>
+            <p>Narrow down by location and date to save time scrolling through everything.</p>
+          </div>
+          <div class="instruction-step-card">
+            <div class="step-number">3</div>
+            <h3>Let AI Help</h3>
+            <p>Our AI ranks results by relevance, so your stuff usually shows up near the top.</p>
+          </div>
+          <div class="instruction-step-card">
+            <div class="step-number">4</div>
+            <h3>Quick Actions</h3>
+            <p>Found your item? Click to claim it instantly. Want to report something similar? Use the "Report Similar Loss" feature.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mockup-section">
+          <div class="mockup-container">
+            <div class="mockup-header">
+              <div class="mockup-dot"></div>
+              <div class="mockup-dot"></div>
+              <div class="mockup-dot"></div>
+            </div>
+            <div class="mockup-content" style="padding: 0.8rem; overflow-y: auto;">
+              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--light-bg);">
+                <h3 style="margin: 0; font-size: 1rem;">Find Your Lost Items</h3>
+                <div style="margin-left: auto; display: flex; gap: 0.5rem; align-items: center; font-size: 0.7rem; color: var(--text-secondary);">
+                  <i class="fas fa-user-circle"></i>
+                  <span>John Doe</span>
+                  <i class="fas fa-bell" style="margin-left: 0.5rem;"></i>
+                </div>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 0.6rem; margin-bottom: 0.8rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label style="font-size: 0.6rem;">Search for lost items</label>
+                  <input type="text" class="form-control" style="font-size: 0.7rem; padding: 0.3rem;" placeholder="e.g. blue iPhone with clear case" value="iPhone 13 Pro blue">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label style="font-size: 0.6rem;">Category</label>
+                  <select class="form-control" style="font-size: 0.7rem; padding: 0.3rem;">
+                    <option selected>Electronics</option>
+                    <option>Clothing</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label style="font-size: 0.6rem;">Location</label>
+                  <select class="form-control" style="font-size: 0.7rem; padding: 0.3rem;">
+                    <option selected>Library</option>
+                    <option>Cafeteria</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label style="font-size: 0.6rem;">Date Range</label>
+                  <input type="date" class="form-control" style="font-size: 0.7rem; padding: 0.3rem;" value="2025-01-15">
+                </div>
+              </div>
+              
+              <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.8rem;">
+                <button class="btn" style="padding: 0.4rem 1rem; font-size: 0.7rem;">
+                  <i class="fas fa-search"></i> Search
+                </button>
+                <button class="btn btn-outlined" style="padding: 0.4rem 0.8rem; font-size: 0.7rem;">
+                  <i class="fas fa-filter"></i> Filters
+                </button>
+                <button class="btn btn-outlined" style="padding: 0.4rem 0.8rem; font-size: 0.7rem;">
+                  <i class="fas fa-plus"></i> Report Lost Item
+                </button>
+              </div>
+              
+              <div style="padding: 0.5rem; background-color: var(--darker-bg); border-radius: 5px; border-left: 3px solid var(--accent-color); margin-bottom: 0.8rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <i class="fas fa-robot" style="color: var(--accent-color); font-size: 0.8rem;"></i>
+                  <small style="color: var(--accent-color); font-size: 0.6rem;">AI Enhanced Search</small>
+                  <span style="font-size: 0.6rem; color: var(--text-secondary); margin-left: auto;">Found 8 results</span>
+                </div>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem;">
+                <div class="item-card" style="padding: 0.6rem;">
+                  <div class="item-image" style="height: 40px; display: flex; align-items: center; justify-content: center; background-color: var(--darker-bg); border-radius: 3px; margin-bottom: 0.4rem;">
+                    <i class="fas fa-mobile-alt" style="font-size: 1.2rem; color: var(--accent-color);"></i>
+                  </div>
+                  <div class="item-info">
+                    <h4 style="font-size: 0.7rem; margin-bottom: 0.2rem;">iPhone 13 Pro</h4>
+                    <div style="font-size: 0.5rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.1rem;">
+                      <span><i class="fas fa-map-marker-alt"></i> Library</span>
+                      <span><i class="fas fa-calendar-alt"></i> Jan 15</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="item-card" style="padding: 0.6rem;">
+                  <div class="item-image" style="height: 40px; display: flex; align-items: center; justify-content: center; background-color: var(--darker-bg); border-radius: 3px; margin-bottom: 0.4rem;">
+                    <i class="fas fa-clock" style="font-size: 1.2rem; color: var(--secondary-accent);"></i>
+                  </div>
+                  <div class="item-info">
+                    <h4 style="font-size: 0.7rem; margin-bottom: 0.2rem;">Apple Watch</h4>
+                    <div style="font-size: 0.5rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.1rem;">
+                      <span><i class="fas fa-map-marker-alt"></i> Gym</span>
+                      <span><i class="fas fa-calendar-alt"></i> Jan 14</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="item-card" style="padding: 0.6rem;">
+                  <div class="item-image" style="height: 40px; display: flex; align-items: center; justify-content: center; background-color: var(--darker-bg); border-radius: 3px; margin-bottom: 0.4rem;">
+                    <i class="fas fa-backpack" style="font-size: 1.2rem; color: var(--accent-color);"></i>
+                  </div>
+                  <div class="item-info">
+                    <h4 style="font-size: 0.7rem; margin-bottom: 0.2rem;">Backpack</h4>
+                    <div style="font-size: 0.5rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.1rem;">
+                      <span><i class="fas fa-map-marker-alt"></i> Gym</span>
+                      <span><i class="fas fa-calendar-alt"></i> Jan 13</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="item-card" style="padding: 0.6rem;">
+                  <div class="item-image" style="height: 40px; display: flex; align-items: center; justify-content: center; background-color: var(--darker-bg); border-radius: 3px; margin-bottom: 0.4rem;">
+                    <i class="fas fa-headphones" style="font-size: 1.2rem; color: var(--secondary-accent);"></i>
+                  </div>
+                  <div class="item-info">
+                    <h4 style="font-size: 0.7rem; margin-bottom: 0.2rem;">AirPods Pro</h4>
+                    <div style="font-size: 0.5rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.1rem;">
+                      <span><i class="fas fa-map-marker-alt"></i> Cafeteria</span>
+                      <span><i class="fas fa-calendar-alt"></i> Jan 12</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="margin-top: 0.8rem; display: flex; justify-content: center; align-items: center; gap: 1rem;">
+                <button style="background: none; border: none; color: var(--text-secondary); font-size: 0.7rem;"><i class="fas fa-chevron-left"></i></button>
+                <span style="font-size: 0.7rem; color: var(--text-secondary);">Page 1 of 3</span>
+                <button style="background: none; border: none; color: var(--accent-color); font-size: 0.7rem;"><i class="fas fa-chevron-right"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </section>
+
+  <section id="dashboard" class="guide-section">
+    <div class="container">
+      <h2>Your Personal Command Center</h2>
+      <p>Think of your dashboard as mission control for all your lost and found adventures. Everything you need to know is right here - what you've lost, what you've claimed, and what's happening with both.</p>
+      
+      <div class="steps-sidebar">
+        <h4>Dashboard Overview</h4>
+        <div class="instruction-card">
+          <div class="step-number">1</div>
+          <h3>Check Notifications</h3>
+          <p>See updates on your claims and any matches for items you've reported lost.</p>
+        </div>
+        <div class="instruction-card">
+          <div class="step-number">2</div>
+          <h3>Track Your Stuff</h3>
+          <p>Keep tabs on what you've lost and what you've claimed. Everything's organized for you.</p>
+        </div>
+        <div class="instruction-card">
+          <div class="step-number">3</div>
+          <h3>Report New Items</h3>
+          <p>Lost something else? Click the "Report Lost Item" button to add it to your list.</p>
+        </div>
+      </div>
+      
+      <div class="mockup-container">
+        <div class="mockup-header">
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+        </div>
+        <div class="mockup-content" style="padding: 0.8rem; overflow-y: auto;">
+          <!-- Header with user info and main actions -->
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.6rem; background-color: var(--darker-bg); border-radius: 6px; margin-bottom: 0.8rem;">
+              <div style="display: flex; align-items: center; gap: 0.8rem;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--accent-color); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem;">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div>
+                  <h3 style="margin: 0; font-size: 0.9rem;">Welcome, John Doe</h3>
+                  <p style="margin: 0; color: var(--text-secondary); font-size: 0.7rem;">Dashboard • 3 active items</p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-tiny" style="font-size: 0.6rem; padding: 0.25rem 0.5rem;">
+                  <i class="fas fa-plus"></i> Report
+                </button>
+                <button class="btn btn-outlined btn-tiny" style="font-size: 0.6rem; padding: 0.25rem 0.5rem;">
+                  <i class="fas fa-cog"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.6rem; margin-bottom: 0.8rem;">
+              <div style="background-color: var(--darker-bg); padding: 0.5rem; border-radius: 4px; text-align: center;">
+                <div style="font-size: 0.7rem; font-weight: 600;">2</div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary);">Notifications</div>
+              </div>
+              <div style="background-color: var(--darker-bg); padding: 0.5rem; border-radius: 4px; text-align: center;">
+                <div style="font-size: 0.7rem; font-weight: 600;">1</div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary);">Lost Items</div>
+              </div>
+              <div style="background-color: var(--darker-bg); padding: 0.5rem; border-radius: 4px; text-align: center;">
+                <div style="font-size: 0.7rem; font-weight: 600;">2</div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary);">Claims</div>
+              </div>
+              <div style="background-color: var(--darker-bg); padding: 0.5rem; border-radius: 4px; text-align: center;">
+                <div style="font-size: 0.7rem; font-weight: 600;">3</div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary);">Total</div>
+              </div>
+              <div style="background-color: var(--darker-bg); padding: 0.5rem; border-radius: 4px; text-align: center;">
+                <div style="font-size: 0.7rem; font-weight: 600; color: var(--success-color);">1</div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary);">Approved</div>
+              </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                  <h4 style="margin: 0; font-size: 0.8rem;">My Lost Item Reports</h4>
+                  <button class="btn btn-tiny btn-outlined" style="font-size: 0.6rem; padding: 0.2rem 0.4rem;">View All</button>
+                </div>
+                <div style="background-color: var(--darker-bg); border-radius: 6px; padding: 0.6rem; margin-bottom: 0.5rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1;">
+                      <h5 style="margin: 0 0 0.2rem; font-size: 0.8rem;">AirPods Pro</h5>
+                      <div style="font-size: 0.6rem; color: var(--text-secondary); margin-bottom: 0.3rem;">
+                        <i class="fas fa-calendar-alt"></i> Jan 10 • <i class="fas fa-map-marker-alt"></i> Cafeteria
+                      </div>
+                      <p style="font-size: 0.6rem; margin: 0; color: var(--text-secondary);">White AirPods Pro with case</p>
+                    </div>
+                    <span class="status-badge status-pending" style="font-size: 0.5rem; padding: 0.15rem 0.4rem;">Active</span>
+                  </div>
+                </div>
+                
+                <div style="margin-top: 0.8rem;">
+                  <h4 style="margin: 0 0 0.5rem; font-size: 0.8rem;">Recent Activity</h4>
+                  <div style="font-size: 0.6rem; color: var(--text-secondary); background-color: var(--darker-bg); padding: 0.4rem; border-radius: 4px;">
+                    <div style="margin-bottom: 0.3rem;">🔔 New match found for your AirPods Pro</div>
+                    <div>📧 Claim approved for iPhone 13 Pro</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                  <h4 style="margin: 0; font-size: 0.8rem;">My Claims</h4>
+                  <button class="btn btn-tiny btn-outlined" style="font-size: 0.6rem; padding: 0.2rem 0.4rem;">View All</button>
+                </div>
+                <div style="background-color: var(--darker-bg); border-radius: 6px; padding: 0.6rem; margin-bottom: 0.5rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1;">
+                      <h5 style="margin: 0 0 0.2rem; font-size: 0.8rem;">iPhone 13 Pro</h5>
+                      <div style="font-size: 0.6rem; color: var(--text-secondary); margin-bottom: 0.3rem;">
+                        Claimed Jan 16 • Claim ID: RC-7X9K-2M5P
+                      </div>
+                      <button class="btn btn-tiny btn-outlined" style="font-size: 0.5rem; padding: 0.15rem 0.4rem;">View Details</button>
+                    </div>
+                    <span class="status-badge status-approved" style="font-size: 0.5rem; padding: 0.15rem 0.4rem;">Ready</span>
+                  </div>
+                </div>
+                
+                <div style="background-color: var(--darker-bg); border-radius: 6px; padding: 0.6rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1;">
+                      <h5 style="margin: 0 0 0.2rem; font-size: 0.8rem;">Backpack</h5>
+                      <div style="font-size: 0.6rem; color: var(--text-secondary); margin-bottom: 0.3rem;">
+                        Claimed Jan 14 • Under review
+                      </div>
+                      <button class="btn btn-tiny btn-outlined" style="font-size: 0.5rem; padding: 0.15rem 0.4rem;">Check Status</button>
+                    </div>
+                    <span class="status-badge status-pending" style="font-size: 0.5rem; padding: 0.15rem 0.4rem;">Review</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="claim" class="guide-section">
+    <div class="container">
+      <h2>Getting Your Stuff Back</h2>
+      <p>Found your item in the system? Awesome! Now comes the part where you prove it's actually yours and get it back. Don't worry - we've made this as straightforward as possible.</p>
+      
+      <div class="instructions-grid">
+        <div class="instruction-card">
+          <div class="instruction-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h3>1. Spot Your Stuff</h3>
+          <p>Search through what's been found. When you see your item, click on it to get started with your claim.</p>
+        </div>
+        <div class="instruction-card">
+          <div class="instruction-icon">
+            <i class="fas fa-clipboard-list"></i>
+          </div>
+          <h3>2. Prove It's Yours</h3>
+          <p>Tell us something only you would know about the item. Like that tiny scratch you made or what's in the case.</p>
+        </div>
+        <div class="instruction-card">
+          <div class="instruction-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <h3>3. Get Your Code</h3>
+          <p>Once approved, you'll get a unique claim code. Think of it as your golden ticket to get your stuff back.</p>
+        </div>
+        <div class="instruction-card">
+          <div class="instruction-icon">
+            <i class="fas fa-hand-holding"></i>
+          </div>
+          <h3>4. Pick It Up</h3>
+          <p>Head to the Lost & Found office, show your code, and boom - you're reunited with your belongings!</p>
+        </div>
+      </div>
+      
+      <h3 style="margin-top: 3rem;">Claiming an Item</h3>
+      <div class="mockup-container">
+        <div class="mockup-header">
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+        </div>
+        <div class="mockup-content" style="padding: 0.6rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--light-bg);">
+            <div>
+              <h3 style="margin: 0; font-size: 0.9rem;">Claim Item</h3>
+              <p style="margin: 0; font-size: 0.6rem; color: var(--text-secondary);">Found Items > iPhone 13 Pro > Claim</p>
+            </div>
+            <button style="background: none; border: none; color: var(--text-secondary); font-size: 1rem;">×</button>
+          </div>
+          
+          <div style="background-color: var(--darker-bg); border-radius: 6px; padding: 0.6rem; margin-bottom: 0.8rem;">
+            <div style="display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.5rem;">
+              <div style="width: 40px; height: 40px; background-color: var(--light-bg); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                📱
+              </div>
+              <div style="flex: 1;">
+                <h4 style="margin: 0 0 0.2rem; font-size: 0.8rem;">iPhone 13 Pro</h4>
+                <div style="display: flex; gap: 1rem; font-size: 0.6rem; color: var(--text-secondary);">
+                  <span><i class="fas fa-map-marker-alt"></i> Library, 2nd Floor</span>
+                  <span><i class="fas fa-calendar-alt"></i> Jan 15, 2025</span>
+                  <span><i class="fas fa-clock"></i> 3:45 PM</span>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 0.6rem; color: var(--accent-color);">Item #LF2025-0115</div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary);">Status: Available</div>
+              </div>
+            </div>
+            <div style="padding: 0.4rem; background-color: var(--light-bg); border-radius: 4px; font-size: 0.6rem; color: var(--text-secondary);">
+              Description: Blue iPhone 13 Pro, appears to be in good condition, found near study tables
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-size: 0.6rem; margin-bottom: 0.2rem;">Verification Details *</label>
+              <textarea class="form-control" placeholder="Describe unique features only you would know..." style="min-height: 50px; font-size: 0.6rem; padding: 0.3rem;">Blue iPhone 13 Pro with clear MagSafe case. Small scratch on bottom left corner from keys. Lock screen wallpaper is a photo of my golden retriever, Max. Phone case has "J.D." initials written inside in black sharpie.</textarea>
+            </div>
+            <div>
+              <div class="form-group" style="margin-bottom: 0.4rem;">
+                <label style="font-size: 0.6rem; margin-bottom: 0.2rem;">Contact Method</label>
+                <select class="form-control" style="font-size: 0.6rem; padding: 0.3rem;">
+                  <option>Email notification</option>
+                  <option>SMS notification</option>
+                  <option>Phone call</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.6rem; margin-bottom: 0.2rem;">Contact Info *</label>
+                <input type="text" class="form-control" style="font-size: 0.6rem; padding: 0.3rem;" placeholder="Email or phone" value="john.doe@email.com">
+              </div>
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-size: 0.6rem; margin-bottom: 0.2rem;">When did you lose it?</label>
+              <input type="date" class="form-control" style="font-size: 0.6rem; padding: 0.3rem;" value="2025-01-15">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-size: 0.6rem; margin-bottom: 0.2rem;">Where were you?</label>
+              <input type="text" class="form-control" style="font-size: 0.6rem; padding: 0.3rem;" placeholder="Specific location" value="Library study area, table near windows">
+            </div>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; padding: 0.4rem; background-color: var(--darker-bg); border-radius: 4px;">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <button class="btn btn-outlined btn-tiny" style="font-size: 0.5rem; padding: 0.2rem 0.4rem;">
+                <i class="fas fa-paperclip"></i> Add Photos
+              </button>
+              <span style="font-size: 0.6rem; color: var(--text-secondary);">Upload proof of ownership (optional)</span>
+            </div>
+            <div style="font-size: 0.5rem; color: var(--text-secondary);">Max 5MB per file</div>
+          </div>
+          
+          <div style="margin-bottom: 0.6rem;">
+            <label style="display: flex; align-items: center; font-size: 0.6rem; color: var(--text-secondary);">
+              <input type="checkbox" checked style="margin-right: 0.4rem;">
+              I confirm this item belongs to me and I provide accurate information
+            </label>
+          </div>
+          
+          <div style="display: flex; gap: 0.6rem;">
+            <button class="btn btn-outlined" style="flex: 1; font-size: 0.6rem; padding: 0.4rem;">Cancel</button>
+            <button class="btn" style="flex: 1; font-size: 0.6rem; padding: 0.4rem;"><i class="fas fa-paper-plane"></i> Submit Claim</button>
+          </div>
+          
+          <div style="margin-top: 0.6rem; padding: 0.4rem; background-color: var(--darker-bg); border-radius: 4px; font-size: 0.6rem; color: var(--text-secondary);">
+            <i class="fas fa-info-circle" style="color: var(--accent-color); margin-right: 0.3rem;"></i>
+            Claims are typically reviewed within 2-4 hours. You'll be notified once approved.
+          </div>
+        </div>
+      </div>
+      
+      <h3 style="margin-top: 3rem;">Claim Code</h3>
+      <div class="mockup-container">
+        <div class="mockup-header">
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+        </div>
+        <div class="mockup-content" style="padding: 0.6rem;">
+          <!-- Header with success state -->
+          <div style="text-align: center; margin-bottom: 0.8rem;">
+            <div style="color: var(--success-color); font-size: 1.5rem; margin-bottom: 0.4rem;">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 style="margin: 0; font-size: 1rem; color: var(--success-color);">Claim Approved!</h3>
+            <p style="margin: 0.2rem 0 0; font-size: 0.6rem; color: var(--text-secondary);">Approved on Jan 16, 2025 at 11:30 AM</p>
+          </div>
+          
+          <!-- Claim code section -->
+          <div style="text-align: center; background-color: var(--darker-bg); border-radius: 8px; padding: 0.8rem; margin-bottom: 0.8rem; border: 2px dashed var(--accent-color);">
+            <h4 style="margin: 0 0 0.3rem; font-size: 0.7rem;">Your Claim Code</h4>
+            <div style="font-family: 'Kanit', sans-serif; font-size: 1.2rem; font-weight: 600; color: var(--accent-color); letter-spacing: 0.1rem; margin: 0.3rem 0;">RC-7X9K-2M5P</div>
+            <p style="font-size: 0.6rem; color: var(--text-secondary); margin: 0.3rem 0 0;">
+              Show this code at the Lost & Found office
+            </p>
+          </div>
+          
+          <!-- Item details and pickup info -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.8rem;">
+            <div style="background-color: var(--darker-bg); border-radius: 6px; padding: 0.5rem;">
+              <h4 style="margin: 0 0 0.3rem; font-size: 0.7rem;">Item Details</h4>
+              <div style="display: flex; gap: 0.4rem; align-items: center; margin-bottom: 0.3rem;">
+                <div style="width: 24px; height: 24px; background-color: var(--light-bg); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">
+                  📱
+                </div>
+                <div>
+                  <div style="font-size: 0.7rem; font-weight: 600;">iPhone 13 Pro</div>
+                  <div style="font-size: 0.5rem; color: var(--text-secondary);">Item #LF2025-0115</div>
+                </div>
+              </div>
+              <div style="font-size: 0.5rem; color: var(--text-secondary);">
+                <div><i class="fas fa-map-marker-alt"></i> Found at: Library, 2nd floor</div>
+                <div><i class="fas fa-calendar-alt"></i> Date found: Jan 15, 2025</div>
+              </div>
+            </div>
+            
+            <div style="background-color: var(--darker-bg); border-radius: 6px; padding: 0.5rem;">
+              <h4 style="margin: 0 0 0.3rem; font-size: 0.7rem;">Pickup Information</h4>
+              <div style="font-size: 0.6rem; color: var(--text-secondary); line-height: 1.3;">
+                <div style="margin-bottom: 0.2rem;"><strong style="color: var(--text-color);">Location:</strong> Lost & Found Office</div>
+                <div style="margin-bottom: 0.2rem;"><strong style="color: var(--text-color);">Hours:</strong> Mon-Fri, 9 AM - 5 PM</div>
+                <div style="margin-bottom: 0.2rem;"><strong style="color: var(--text-color);">Building:</strong> Main Hall, Room 101</div>
+                <div><strong style="color: var(--text-color);">Hold until:</strong> Feb 15, 2025</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Instructions -->
+          <div style="background-color: var(--light-bg); border-radius: 6px; padding: 0.5rem; margin-bottom: 0.8rem;">
+            <h4 style="margin: 0 0 0.3rem; font-size: 0.7rem;">What to bring for pickup:</h4>
+            <ul style="margin: 0; padding-left: 1rem; font-size: 0.6rem; color: var(--text-secondary);">
+              <li>This claim code (screenshot or printed)</li>
+              <li>Valid photo ID (student ID, driver's license, etc.)</li>
+              <li>Any additional proof of ownership if requested</li>
+            </ul>
+          </div>
+          
+          <!-- Quick actions -->
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0.6rem;">
+            <button class="btn btn-tiny" style="font-size: 0.5rem; padding: 0.3rem;"><i class="fas fa-download"></i> Save</button>
+            <button class="btn btn-outlined btn-tiny" style="font-size: 0.5rem; padding: 0.3rem;"><i class="fas fa-share"></i> Share</button>
+            <button class="btn btn-outlined btn-tiny" style="font-size: 0.5rem; padding: 0.3rem;"><i class="fas fa-print"></i> Print</button>
+          </div>
+          
+          <!-- Bottom actions -->
+          <div style="display: flex; gap: 0.6rem;">
+            <button class="btn" style="flex: 1; font-size: 0.6rem; padding: 0.4rem;"><i class="fas fa-home"></i> Go to Dashboard</button>
+            <button class="btn btn-outlined" style="flex: 1; font-size: 0.6rem; padding: 0.4rem;">Close</button>
+          </div>
+          
+          <!-- Help contact -->
+          <div style="text-align: center; margin-top: 0.6rem; padding: 0.4rem; border-top: 1px solid var(--light-bg);">
+            <p style="margin: 0; font-size: 0.5rem; color: var(--text-secondary);">
+              Questions? Contact us at <a href="#" style="color: var(--accent-color);">lostandfound@example.com</a> or (555) 123-4567
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <h3 style="margin-top: 3rem;">The Public Claim Log</h3>
+      <p>We believe in keeping things transparent. That's why everyone can see what's been claimed recently (don't worry, no personal info is shared - just first names and item details):</p>
+      
+      <div class="mockup-container">
+        <div class="mockup-header">
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+        </div>
+        <div class="mockup-content">
+          <h3 style="margin-bottom: 1rem;">Public Claim Log</h3>
+          <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">For transparency, this is a public log of recently claimed items.</p>
+          
+          <table class="demo-table">
+            <thead>
+              <tr>
+                <th>Claim Date</th>
+                <th>Item Name</th>
+                <th>Claimed By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Jan 16, 2025</td>
+                <td>iPhone 13 Pro</td>
+                <td>John</td>
+              </tr>
+              <tr>
+                <td>Jan 15, 2025</td>
+                <td>Apple Watch</td>
+                <td>Sarah</td>
+              </tr>
+              <tr>
+                <td>Jan 14, 2025</td>
+                <td>Backpack</td>
+                <td>Mike</td>
+              </tr>
+              <tr>
+                <td>Jan 13, 2025</td>
+                <td>AirPods</td>
+                <td>Emma</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="guide-section">
+    <div class="container">
+      <h2>Need Help? We've Got You</h2>
+      <p>Stuck on something? Have a question? Think we messed up? No problem - just drop us a message and we'll sort it out. Real humans actually read these, so don't be shy.</p>
+      
+      <div class="mockup-with-steps">
+        <div class="mockup-container">
+          <div class="mockup-header">
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+          </div>
+          <div class="mockup-content" style="padding: 0.8rem;">
+            <!-- Header with breadcrumb and help info -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--light-bg);">
+              <div>
+                <h3 style="margin: 0; font-size: 1rem;">Contact Support</h3>
+                <p style="margin: 0; font-size: 0.7rem; color: var(--text-secondary);">Home > Help > Contact Us</p>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-outlined btn-tiny" style="font-size: 0.6rem; padding: 0.25rem 0.5rem;">
+                  <i class="fas fa-question-circle"></i> FAQ
+                </button>
+                <button class="btn btn-outlined btn-tiny" style="font-size: 0.6rem; padding: 0.25rem 0.5rem;">
+                  <i class="fas fa-phone"></i> Call
+                </button>
+              </div>
+            </div>
+            
+            <!-- Quick help options -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+              <div style="background-color: var(--darker-bg); padding: 0.4rem; border-radius: 4px; text-align: center; font-size: 0.6rem;">
+                <i class="fas fa-search" style="color: var(--accent-color); margin-bottom: 0.2rem;"></i>
+                <div>Search Help</div>
+              </div>
+              <div style="background-color: var(--darker-bg); padding: 0.4rem; border-radius: 4px; text-align: center; font-size: 0.6rem;">
+                <i class="fas fa-clipboard-list" style="color: var(--accent-color); margin-bottom: 0.2rem;"></i>
+                <div>Claim Issues</div>
+              </div>
+              <div style="background-color: var(--darker-bg); padding: 0.4rem; border-radius: 4px; text-align: center; font-size: 0.6rem;">
+                <i class="fas fa-user-cog" style="color: var(--accent-color); margin-bottom: 0.2rem;"></i>
+                <div>Account Help</div>
+              </div>
+            </div>
+            
+            <!-- Form fields in compact layout -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.8rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.7rem; margin-bottom: 0.3rem;">Full Name</label>
+                <input type="text" class="form-control" placeholder="Your name" value="John Doe" style="font-size: 0.7rem; padding: 0.4rem;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.7rem; margin-bottom: 0.3rem;">Email Address</label>
+                <input type="email" class="form-control" placeholder="your@email.com" value="john@example.com" style="font-size: 0.7rem; padding: 0.4rem;">
+              </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.8rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.7rem; margin-bottom: 0.3rem;">Phone Number</label>
+                <input type="tel" class="form-control" placeholder="(555) 123-4567" value="+1 (555) 123-4567" style="font-size: 0.7rem; padding: 0.4rem;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.7rem; margin-bottom: 0.3rem;">Subject</label>
+                <select class="form-control" style="font-size: 0.7rem; padding: 0.4rem;">
+                  <option>Question about claim process</option>
+                  <option>Report a bug</option>
+                  <option>Account issues</option>
+                  <option>General inquiry</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Priority and category -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.8rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.7rem; margin-bottom: 0.3rem;">Priority</label>
+                <select class="form-control" style="font-size: 0.7rem; padding: 0.4rem;">
+                  <option>Normal</option>
+                  <option>High</option>
+                  <option>Urgent</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.7rem; margin-bottom: 0.3rem;">Related Claim ID (optional)</label>
+                <input type="text" class="form-control" placeholder="RC-XXXX-XXXX" value="RC-7X9K-2M5P" style="font-size: 0.7rem; padding: 0.4rem;">
+              </div>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0.8rem;">
+              <label style="font-size: 0.7rem; margin-bottom: 0.3rem;">Message</label>
+              <textarea class="form-control" placeholder="Describe your issue in detail..." style="min-height: 60px; font-size: 0.7rem; padding: 0.4rem; resize: vertical;">Hi, I have a question about the claim process for my lost iPhone. I submitted a claim yesterday (ID: RC-7X9K-2M5P) but haven't received a response yet. 
+
+Claim details:
+• Item: iPhone 13 Pro (Blue)
+• Location: Library, 2nd floor
+• Date lost: January 15, 2025
+• Verification provided: Lock screen photo, case details
+
+Could you please provide a status update? Thanks!</textarea>
+            </div>
+            
+            <!-- Attachment and send options -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="btn btn-outlined btn-tiny" style="font-size: 0.6rem; padding: 0.25rem 0.4rem;">
+                  <i class="fas fa-paperclip"></i> Attach
+                </button>
+                <span style="font-size: 0.6rem; color: var(--text-secondary);">0 files attached</span>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <label style="font-size: 0.6rem; color: var(--text-secondary); display: flex; align-items: center;">
+                  <input type="checkbox" checked style="margin-right: 0.3rem;"> Email copy to me
+                </label>
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 0.6rem;">
+              <button class="btn" style="flex: 1; font-size: 0.7rem; padding: 0.5rem;">Send Message</button>
+              <button class="btn btn-outlined" style="font-size: 0.7rem; padding: 0.5rem 0.8rem;">Save Draft</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="steps-sidebar">
+          <h4>Getting Help</h4>
+          <div class="instruction-card">
+            <div class="step-number">1</div>
+            <h3>Be Specific</h3>
+            <p>The more details you give us, the faster we can help. Include claim codes, item names, dates, etc.</p>
+          </div>
+          <div class="instruction-card">
+            <div class="step-number">2</div>
+            <h3>Choose Right Subject</h3>
+            <p>Pick a clear subject line so we know what type of help you need right away.</p>
+          </div>
+          <div class="instruction-card">
+            <div class="step-number">3</div>
+            <h3>We'll Respond Fast</h3>
+            <p>Real humans read these messages. We usually get back to you within a few hours.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="feature-grid" style="margin-top: 2rem;">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-question-circle"></i>
+          </div>
+          <h3>How Does This Work?</h3>
+          <p>New to the platform and need the basics? Ask away. We love helping people get started.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-clipboard-question"></i>
+          </div>
+          <h3>Claim Troubles</h3>
+          <p>Something weird happening with your claim? Can't prove ownership? We'll help you figure it out.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <h3>Something's Broken</h3>
+          <p>Found a bug? Site not working? Someone being sketchy? Let us know and we'll fix it.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-handshake"></i>
+          </div>
+          <h3>Make It Better</h3>
+          <p>Got ideas for how we can improve? We're always looking for ways to make this thing work better for everyone.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <script>
+    function downloadPDF() {
+      // Use browser's native print functionality with custom CSS
+      const originalTitle = document.title;
+      document.title = 'Reunited Platform Guide';
+      
+      // Create a temporary print stylesheet
+      const printStyle = document.createElement('style');
+      printStyle.textContent = `
+        @media print {
+          * { 
+            -webkit-print-color-adjust: exact !important; 
+            color-adjust: exact !important; 
+            box-shadow: none !important;
+          }
+          
+          @page { 
+            size: A4;
+            margin: 0.5in; 
+            background: #1a1a1a;
+          }
+          
+          body { 
+            margin: 0 !important; 
+            background: #1a1a1a !important; 
+            font-size: 12pt;
+          }
+          
+          .container {
+            width: 95% !important;
+            max-width: none !important;
+            padding: 1rem 0 !important;
+          }
+          
+          .pdf-download-btn, .pdf-options-modal { 
+            display: none !important; 
+          }
+          
+          .guide-section { 
+            page-break-inside: avoid;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+          }
+          
+          .mockup-with-steps {
+            page-break-inside: avoid;
+            display: flex !important;
+            flex-direction: column !important;
+            height: auto;
+            min-height: auto;
+          }
+          
+          .mockup-section {
+            height: auto !important;
+            margin-bottom: 1rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+          
+          .mockup-container {
+            width: 90% !important;
+            max-width: 1000px !important;
+            margin: 0 auto !important;
+            transform: none !important;
+          }
+          
+          .mockup-content {
+            aspect-ratio: 16/9 !important;
+            max-width: 100% !important;
+            height: 100% !important;
+            min-height: 300px !important;
+          }
+          
+          
+          .instructions-section {
+            height: auto !important;
+            overflow: visible !important;
+          }
+          
+          .steps-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 1rem !important;
+            height: auto !important;
+          }
+          
+          .instruction-step-card {
+            height: fit-content !important;
+            padding: 1.5rem !important;
+            background: var(--light-bg) !important;
+            break-inside: avoid;
+          }
+          
+          .feature-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 1rem !important;
+            page-break-inside: avoid;
+          }
+          
+          .feature-card {
+            padding: 1.2rem !important;
+            break-inside: avoid;
+          }
+          
+          .form-control, input, select, textarea {
+            background: #1a1a1a !important;
+            border: 1px solid #444 !important;
+            color: #f8f8f8 !important;
+            font-size: 10pt !important;
+          }
+          
+          h1 { font-size: 32pt !important; }
+          h2 { font-size: 24pt !important; }
+          h3 { font-size: 18pt !important; }
+          h4 { font-size: 16pt !important; }
+          p { font-size: 12pt !important; }
+        }
+      `;
+      document.head.appendChild(printStyle);
+      
+      // Hide download button temporarily
+      const downloadBtn = document.querySelector('.pdf-download-btn');
+      downloadBtn.style.display = 'none';
+      
+      // Trigger print
+      setTimeout(() => {
+        window.print();
+        
+        // Cleanup
+        setTimeout(() => {
+          document.head.removeChild(printStyle);
+          document.title = originalTitle;
+          downloadBtn.style.display = 'block';
+        }, 1000);
+      }, 100);
+    }
+
+    // Alternative PDF function using html2pdf with simpler config
+    function downloadPDFAlternative() {
+      const downloadBtn = document.querySelector('.pdf-download-btn');
+      downloadBtn.style.display = 'none';
+      
+      const options = {
+        margin: [0.3, 0.3, 0.3, 0.3],
+        filename: 'Reunited-Platform-Guide.pdf',
+        image: { type: 'jpeg', quality: 0.85 },
+        html2canvas: { 
+          scale: 1,
+          backgroundColor: '#1a1a1a',
+          useCORS: true
+        },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+      
+      // Clone and modify the body for PDF
+      const element = document.body.cloneNode(true);
+      element.querySelector('.pdf-download-btn').remove();
+      
+      html2pdf().set(options).from(element).save().then(() => {
+        downloadBtn.style.display = 'block';
+      }).catch(() => {
+        downloadBtn.style.display = 'block';
+        alert('PDF generation failed. Using browser print instead.');
+        downloadPDF(); // Fallback to print
+      });
+    }
+
+    function showPDFOptions() {
+      document.getElementById('pdfOptions').style.display = 'flex';
+    }
+
+    function hidePDFOptions() {
+      document.getElementById('pdfOptions').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(event) {
+      const modal = document.getElementById('pdfOptions');
+      if (event.target === modal) {
+        hidePDFOptions();
+      }
+    });
+
+    // Smooth scrolling for any hash links
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+    });
+
+    // Add some hover effects to mockup containers
+    document.addEventListener('DOMContentLoaded', function() {
+      const mockups = document.querySelectorAll('.mockup-container');
+      mockups.forEach(mockup => {
+        mockup.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateY(-5px)';
+        });
+        mockup.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateY(0)';
+        });
+      });
+    });
+  </script>
+</body>
+</html>
