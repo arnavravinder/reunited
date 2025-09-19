@@ -34,8 +34,19 @@
           <a href="#guidelines">Guidelines</a>
           <a href="#faqs">FAQs</a>
           <a href="#contact">Contact</a>
-          <a v-if="!user" href="#" class="btn btn-outlined" @click.prevent="showLoginModal = true">Login / Sign Up</a>
-          <a v-else href="#" class="btn btn-outlined" @click.prevent="signOut">Logout</a>
+          <div v-if="!user" class="nav-user-section">
+            <a href="#" class="btn btn-outlined" @click.prevent="showLoginModal = true">Login / Sign Up</a>
+          </div>
+          <div v-else class="nav-user-section">
+            <div
+              class="profile-picture small"
+              :style="{ backgroundColor: getProfilePictureColor(userProfile.displayName) }"
+              :title="userProfile.displayName || user.email"
+            >
+              {{ getProfileInitials(userProfile.displayName) }}
+            </div>
+            <a href="#" class="btn btn-outlined" @click.prevent="signOut">Logout</a>
+          </div>
         </div>
       </div>
     </header>
@@ -255,10 +266,12 @@
         </div>
       </div>
     </div>
+    <SpeedInsights />
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
   <script src="api/env.js"></script>
   <script src="scripts/main.js"></script>

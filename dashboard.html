@@ -506,7 +506,15 @@
               <img :src="user.photoURL || 'images/default-avatar.png'" alt="User Avatar">
             </div>
             <div class="user-info">
-              <h1>Welcome, {{ user.displayName || user.email }}</h1>
+              <div class="welcome-header">
+                <div
+                  class="profile-picture large"
+                  :style="{ backgroundColor: getProfilePictureColor(userProfile.displayName) }"
+                >
+                  {{ getProfileInitials(userProfile.displayName) }}
+                </div>
+                <h1>Welcome, {{ userProfile.displayName || user.email }}</h1>
+              </div>
               <p>Manage your lost and found items</p>
             </div>
           </div>
@@ -951,7 +959,45 @@
         </div>
       </div>
     </div>
+    <SpeedInsights />
+  </div>
 
+  <!-- Name Collection Modal -->
+  <div class="modal-overlay" v-if="showNameCollectionModal" @click.self="false">
+    <div class="modal name-collection-modal">
+      <div class="modal-header">
+        <h3>Complete Your Profile</h3>
+        <p>Please provide your name to complete your profile setup</p>
+      </div>
+      <form @submit.prevent="submitNameCollection" class="modal-form">
+        <div class="form-group">
+          <label for="firstName">First Name *</label>
+          <input
+            type="text"
+            id="firstName"
+            v-model="nameCollectionForm.firstName"
+            required
+            placeholder="Enter your first name"
+          >
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name *</label>
+          <input
+            type="text"
+            id="lastName"
+            v-model="nameCollectionForm.lastName"
+            required
+            placeholder="Enter your last name"
+          >
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn" :disabled="isUpdating">
+            <span v-if="isUpdating" class="spinner-tiny"></span>
+            Complete Profile
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>

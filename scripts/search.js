@@ -60,6 +60,10 @@ const app = Vue.createApp({
       searchResults: [],
       allItems: [],
       itemCache: [],
+      userProfile: {
+        displayName: '',
+        email: ''
+      },
       selectedItem: null,
       itemValuation: null,
       showClaimModal: false,
@@ -115,10 +119,20 @@ const app = Vue.createApp({
     loadUserProfile() {
       if (!this.user) return;
       db.collection('users').doc(this.user.uid).get().then(doc => {
-        if (!doc.exists) {
-          db.collection('users').doc(this.user.uid).set({
+        if (doc.exists) {
+          const data = doc.data();
+          this.userProfile = {
+            displayName: data.displayName || this.user.displayName || '',
+            email: this.user.email
+          };
+        } else {
+          this.userProfile = {
             displayName: this.user.displayName || '',
-            email: this.user.email,
+            email: this.user.email
+          };
+          db.collection('users').doc(this.user.uid).set({
+            displayName: this.userProfile.displayName,
+            email: this.userProfile.email,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         }
@@ -680,8 +694,36 @@ Available Items to Rank:
       if (!text || text.length <= maxLength) return text || '';
       return text.substring(0, maxLength) + '...';
     },
+    getProfileInitials(displayName) {
+      if (!displayName || displayName.trim().length === 0) {
+        return this.user?.email?.charAt(0).toUpperCase() || '?';
+      }
+      const names = displayName.trim().split(' ');
+      if (names.length === 1) {
+        return names[0].charAt(0).toUpperCase();
+      }
+      return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+    },
+    getProfilePictureColor(displayName) {
+      const colors = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
+        '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
+        '#10AC84', '#EE5A24', '#0984E3', '#A29BFE', '#FD79A8'
+      ];
+      const name = displayName || this.user?.email || '';
+      const charSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      return colors[charSum % colors.length];
+    },
     signOut() {
       firebase.auth().signOut().catch(() => {});
     }
   }
-}).mount('#searchApp');
+});
+
+if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+  import('@vercel/speed-insights/vue').then(({ SpeedInsights }) => {
+    app.component('SpeedInsights', SpeedInsights);
+  });
+}
+
+app.mount('#searchApp');

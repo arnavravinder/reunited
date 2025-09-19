@@ -52,7 +52,11 @@ const app = Vue.createApp({
       itemsPerPage: 10,
       totalPages: 1,
       
-      logs: []
+      logs: [],
+      userProfile: {
+        displayName: '',
+        email: ''
+      }
     };
   },
   computed: {
@@ -84,10 +88,13 @@ const app = Vue.createApp({
   mounted() {
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
+      if (user) {
+        this.loadUserProfile();
+      }
     });
-    
+
     this.loadPublicLog();
-    
+
     this.checkMagicLinkSignIn();
   },
   methods: {
@@ -309,6 +316,53 @@ const app = Vue.createApp({
           });
         }
       }
+    },
+    loadUserProfile() {
+      if (!this.user) return;
+      db.collection('users').doc(this.user.uid).get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          this.userProfile = {
+            displayName: data.displayName || this.user.displayName || '',
+            email: this.user.email
+          };
+        } else {
+          this.userProfile = {
+            displayName: this.user.displayName || '',
+            email: this.user.email
+          };
+        }
+      }).catch(error => {
+        console.error("Error loading user profile:", error);
+      });
+    },
+    getProfileInitials(displayName) {
+      if (!displayName || displayName.trim().length === 0) {
+        return this.user?.email?.charAt(0).toUpperCase() || '?';
+      }
+      const names = displayName.trim().split(' ');
+      if (names.length === 1) {
+        return names[0].charAt(0).toUpperCase();
+      }
+      return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+    },
+    getProfilePictureColor(displayName) {
+      const colors = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
+        '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
+        '#10AC84', '#EE5A24', '#0984E3', '#A29BFE', '#FD79A8'
+      ];
+      const name = displayName || this.user?.email || '';
+      const charSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      return colors[charSum % colors.length];
     }
   }
-}).mount('#claimLogApp');
+});
+
+if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+  import('@vercel/speed-insights/vue').then(({ SpeedInsights }) => {
+    app.component('SpeedInsights', SpeedInsights);
+  });
+}
+
+app.mount('#claimLogApp');

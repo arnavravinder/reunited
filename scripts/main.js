@@ -18,6 +18,7 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 const app = Vue.createApp({
   data() {
@@ -52,6 +53,10 @@ const app = Vue.createApp({
       passwordResetSending: false,
       passwordResetSent: false,
       showAppleComingSoon: false,
+      userProfile: {
+        displayName: '',
+        email: ''
+      },
       faqs: [
         {
           question: "How can I post about a lost item on the website?",
@@ -121,6 +126,9 @@ const app = Vue.createApp({
     this.generateFloatingItems();
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
+      if (user) {
+        this.loadUserProfile();
+      }
     });
     this.startLoadingAnimation();
   },
@@ -335,11 +343,58 @@ const app = Vue.createApp({
     signOut() {
       firebase.auth().signOut().catch(() => {});
     },
+    loadUserProfile() {
+      if (!this.user) return;
+      db.collection('users').doc(this.user.uid).get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          this.userProfile = {
+            displayName: data.displayName || this.user.displayName || '',
+            email: this.user.email
+          };
+        } else {
+          this.userProfile = {
+            displayName: this.user.displayName || '',
+            email: this.user.email
+          };
+        }
+      }).catch(error => {
+        console.error("Error loading user profile:", error);
+      });
+    },
+    getProfileInitials(displayName) {
+      if (!displayName || displayName.trim().length === 0) {
+        return this.user?.email?.charAt(0).toUpperCase() || '?';
+      }
+      const names = displayName.trim().split(' ');
+      if (names.length === 1) {
+        return names[0].charAt(0).toUpperCase();
+      }
+      return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+    },
+    getProfilePictureColor(displayName) {
+      const colors = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
+        '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
+        '#10AC84', '#EE5A24', '#0984E3', '#A29BFE', '#FD79A8'
+      ];
+      const name = displayName || this.user?.email || '';
+      const charSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      return colors[charSum % colors.length];
+    },
     goToSearchPage() {
       window.location.href = "/search.html";
     }
   }
-}).mount('#app');
+});
+
+if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+  import('@vercel/speed-insights/vue').then(({ SpeedInsights }) => {
+    app.component('SpeedInsights', SpeedInsights);
+  });
+}
+
+app.mount('#app');
 
 if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
   let email = window.localStorage.getItem('emailForSignIn');

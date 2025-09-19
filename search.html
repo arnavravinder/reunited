@@ -33,8 +33,19 @@
           <a href="index.html#guidelines">Guidelines</a>
           <a href="index.html#faqs">FAQs</a>
           <a href="index.html#contact">Contact</a>
-          <a v-if="!user" href="#" class="btn btn-outlined" @click.prevent="showLoginModal = true">Login / Sign Up</a>
-          <a v-else href="#" class="btn btn-outlined" @click.prevent="signOut">Sign Out</a>
+          <div v-if="!user" class="nav-user-section">
+            <a href="#" class="btn btn-outlined" @click.prevent="showLoginModal = true">Login / Sign Up</a>
+          </div>
+          <div v-else class="nav-user-section">
+            <div
+              class="profile-picture small"
+              :style="{ backgroundColor: getProfilePictureColor(userProfile.displayName) }"
+              :title="userProfile.displayName || user.email"
+            >
+              {{ getProfileInitials(userProfile.displayName) }}
+            </div>
+            <a href="#" class="btn btn-outlined" @click.prevent="signOut">Sign Out</a>
+          </div>
         </div>
       </div>
     </header>
@@ -425,6 +436,7 @@
         </div>
       </div>
     </footer>
+    <SpeedInsights />
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>

@@ -8,6 +8,44 @@
     --text-secondary: #b0b0b0;
     --success-color: #4caf50;
   }
+
+  .profile-picture {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    color: white;
+    text-transform: uppercase;
+    user-select: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .profile-picture:hover {
+    transform: scale(1.05);
+  }
+
+  .profile-picture.large {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+  }
+
+  .profile-picture.small {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
+
+  .nav-user-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
   * {
     margin: 0;
     padding: 0;

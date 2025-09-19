@@ -42,6 +42,11 @@ const app = Vue.createApp({
       passwordResetSending: false,
       passwordResetSent: false,
       showAppleComingSoon: false,
+      showNameCollectionModal: false,
+      nameCollectionForm: {
+        firstName: '',
+        lastName: ''
+      },
       isLoading: true,
       cache: {
         userProfile: null,
@@ -510,6 +515,10 @@ Item name:`;
               createdAt: firebase.firestore.FieldValue.serverTimestamp(),
               preferences: this.userPreferences
             }).catch(error => console.error("Error creating user profile doc:", error));
+
+            if (!this.userProfile.displayName || this.userProfile.displayName.trim().length === 0) {
+              this.showNameCollectionModal = true;
+            }
           }
           this.cache.userProfile = { ...this.userProfile };
           this.cache.lastUpdate = Date.now();
@@ -735,6 +744,56 @@ Item name:`;
       .finally(() => {
         this.isUpdating = false;
       });
+    },
+    submitNameCollection() {
+      if (!this.user) return;
+
+      const firstName = this.nameCollectionForm.firstName.trim();
+      const lastName = this.nameCollectionForm.lastName.trim();
+
+      if (!firstName || !lastName) {
+        this.showGenericMessagePopup("Please enter both first and last name.");
+        return;
+      }
+
+      this.isUpdating = true;
+      const fullName = `${firstName} ${lastName}`;
+
+      const updates = [];
+      updates.push(
+        this.user.updateProfile({
+          displayName: fullName
+        }).catch(error => {
+          console.error("Error updating auth profile:", error);
+          throw new Error("Auth profile update failed");
+        })
+      );
+
+      updates.push(
+        db.collection('users').doc(this.user.uid).update({
+          displayName: fullName,
+          firstName: firstName,
+          lastName: lastName
+        }).catch(error => {
+          console.error("Error updating firestore profile:", error);
+          throw new Error("Firestore profile update failed");
+        })
+      );
+
+      Promise.all(updates)
+        .then(() => {
+          this.userProfile.displayName = fullName;
+          this.showNameCollectionModal = false;
+          this.nameCollectionForm = { firstName: '', lastName: '' };
+          this.showGenericMessagePopup("Profile completed successfully!");
+        })
+        .catch(error => {
+          console.error("Error updating profile:", error);
+          this.showGenericMessagePopup(`Error updating profile: ${error.message}. Please try again.`);
+        })
+        .finally(() => {
+          this.isUpdating = false;
+        });
     },
     changePassword() {
       this.passwordError = null;
@@ -1054,6 +1113,26 @@ Item name:`;
         return false;
       }
     },
+    getProfileInitials(displayName) {
+      if (!displayName || displayName.trim().length === 0) {
+        return this.user?.email?.charAt(0).toUpperCase() || '?';
+      }
+      const names = displayName.trim().split(' ');
+      if (names.length === 1) {
+        return names[0].charAt(0).toUpperCase();
+      }
+      return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+    },
+    getProfilePictureColor(displayName) {
+      const colors = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
+        '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
+        '#10AC84', '#EE5A24', '#0984E3', '#A29BFE', '#FD79A8'
+      ];
+      const name = displayName || this.user?.email || '';
+      const charSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      return colors[charSum % colors.length];
+    },
     truncateDescription(text, maxLength = 100) {
       if (!text) return '';
       if (text.length <= maxLength) return text;
@@ -1260,4 +1339,11 @@ Item name:`;
 });
 
 app.use(window.VueTelInput);
+
+if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+  import('@vercel/speed-insights/vue').then(({ SpeedInsights }) => {
+    app.component('SpeedInsights', SpeedInsights);
+  });
+}
+
 app.mount('#dashboardApp');
