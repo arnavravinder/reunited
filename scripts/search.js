@@ -522,6 +522,17 @@ Available Items to Rank:
         this.showLoginModal = true;
         return;
       }
+
+      const activeClaims = await db.collection('claims')
+        .where('userId', '==', this.user.uid)
+        .where('status', 'in', ['pending', 'approved'])
+        .get();
+
+      if (activeClaims.size >= 3) {
+        alert("You can only have 3 active claims at a time. Please wait for your current claims to be resolved.");
+        return;
+      }
+
       this.isSubmittingClaim = true;
       try {
         let estimatedValue = 0;
@@ -535,6 +546,9 @@ Available Items to Rank:
         const isHighValue = estimatedValue >= 5000;
         const claimStatus = isHighValue ? 'pending' : 'approved';
         
+        const pickupDeadline = new Date();
+        pickupDeadline.setDate(pickupDeadline.getDate() + 7);
+
         const claimData = {
           itemId: this.claimItem.id,
           userId: this.user.uid,
@@ -548,7 +562,8 @@ Available Items to Rank:
           itemCategory: this.claimItem.category,
           itemLocation: this.claimItem.location,
           estimatedValue: estimatedValue,
-          claimCode: this.claimItem.claimCode || null
+          claimCode: this.claimItem.claimCode || null,
+          pickupDeadline: firebase.firestore.Timestamp.fromDate(pickupDeadline)
         };
         
         const claimRef = await db.collection('claims').add(claimData);
@@ -571,9 +586,9 @@ Available Items to Rank:
         await db.collection('notifications').add({
           userId: this.user.uid,
           title: isHighValue ? 'Claim Submitted for Review' : 'Item Claimed Successfully',
-          message: isHighValue 
-            ? `Your claim for ${this.claimItem.name} is pending review. Please use the contact form for follow-up.` 
-            : `Your claim for ${this.claimItem.name} has been approved. Use code ${this.claimItem.claimCode} to collect your item.`,
+          message: isHighValue
+            ? `Your claim for ${this.claimItem.name} is pending review. Please use the contact form for follow-up. You have 7 school days to collect once approved.`
+            : `Your claim for ${this.claimItem.name} has been approved. Use code ${this.claimItem.claimCode} to collect your item. You have 7 school days to collect or it will be returned to lost and found.`,
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           type: 'claim',
           read: false,

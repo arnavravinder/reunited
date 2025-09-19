@@ -32,6 +32,14 @@
   100% { transform: rotate(360deg); }
 }
 
+.text-warning {
+  color: #ffc107 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
 .auth-required {
   position: fixed;
   top: 0;

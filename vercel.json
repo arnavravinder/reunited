@@ -1,3 +1,9 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "crons": [
+    {
+      "path": "/api/cleanup-expired-claims",
+      "schedule": "0 2 * * *"
+    }
+  ]
 }

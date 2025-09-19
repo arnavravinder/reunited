@@ -1033,6 +1033,27 @@ Item name:`;
         return "Date Error";
       }
     },
+    isNearDeadline(deadlineValue) {
+      try {
+        if (!deadlineValue) return false;
+        const deadline = deadlineValue.toDate ? deadlineValue.toDate() : new Date(deadlineValue);
+        const now = new Date();
+        const diffDays = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+        return diffDays <= 2 && diffDays > 0;
+      } catch (error) {
+        return false;
+      }
+    },
+    isPastDeadline(deadlineValue) {
+      try {
+        if (!deadlineValue) return false;
+        const deadline = deadlineValue.toDate ? deadlineValue.toDate() : new Date(deadlineValue);
+        const now = new Date();
+        return deadline < now;
+      } catch (error) {
+        return false;
+      }
+    },
     truncateDescription(text, maxLength = 100) {
       if (!text) return '';
       if (text.length <= maxLength) return text;

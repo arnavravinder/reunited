@@ -897,6 +897,10 @@
                   <span class="detail-label">Claim Date</span>
                   <span class="detail-value">{{ formatDate(selectedClaim.claimDate) }}</span>
                 </div>
+                <div class="detail-row" v-if="selectedClaim.pickupDeadline">
+                  <span class="detail-label">Pickup Deadline</span>
+                  <span class="detail-value" :class="{ 'text-warning': isNearDeadline(selectedClaim.pickupDeadline), 'text-danger': isPastDeadline(selectedClaim.pickupDeadline) }">{{ formatDate(selectedClaim.pickupDeadline) }}</span>
+                </div>
               </div>
             </div>
         </div>
