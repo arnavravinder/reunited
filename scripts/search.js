@@ -22,7 +22,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-const AI_API_ENDPOINT = 'https://ai.hackclub.com/chat/completions';
+const AI_API_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 
 const app = Vue.createApp({
   data() {
@@ -319,10 +319,13 @@ const app = Vue.createApp({
         const prompt = this.buildAIPrompt(params, prefilteredItems);
         const response = await fetch(AI_API_ENDPOINT, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getEnvVar('OPENROUTER_API_KEY')}`
+          },
           body: JSON.stringify({
             messages: [{ role: 'user', content: prompt }],
-            model: 'qwen/qwen3-32b',
+            model: 'moonshotai/kimi-k2-thinking',
             temperature: 0.1
           })
         });
@@ -496,13 +499,16 @@ Available Items to Rank:
       try {
         const response = await fetch(AI_API_ENDPOINT, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getEnvVar('OPENROUTER_API_KEY')}`
+          },
           body: JSON.stringify({
             messages: [{
               role: 'user',
               content: `Estimate the value of this item in INR. Return only a numeric value or range with the currency symbol, e.g., "₹2000" or "₹8000-12000". No explanation. Item: ${item.name}, Description: ${item.description}`
             }],
-            model: 'qwen/qwen3-32b',
+            model: 'moonshotai/kimi-k2-thinking',
             temperature: 0.3
           })
         });

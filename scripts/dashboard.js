@@ -227,10 +227,11 @@ Location: ${form.location}
 
 Enhanced description:`;
 
-            const response = await fetch('https://ai.hackclub.com/chat/completions', {
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getEnvVar('OPENROUTER_API_KEY')}`
                 },
                 body: JSON.stringify({
                     messages: [
@@ -239,6 +240,7 @@ Enhanced description:`;
                             content: descriptionPrompt
                         }
                     ],
+                    model: 'moonshotai/kimi-k2-thinking',
                     max_tokens: 150,
                     temperature: 0.7
                 })
@@ -259,10 +261,11 @@ Enhanced description:`;
 
 Item name:`;
                     
-                    const nameResponse = await fetch('https://ai.hackclub.com/chat/completions', {
+                    const nameResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${getEnvVar('OPENROUTER_API_KEY')}`
                         },
                         body: JSON.stringify({
                             messages: [
@@ -271,6 +274,7 @@ Item name:`;
                                     content: namePrompt
                                 }
                             ],
+                            model: 'moonshotai/kimi-k2-thinking',
                             max_tokens: 20,
                             temperature: 0.5
                         })
