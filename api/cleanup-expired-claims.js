@@ -11,12 +11,14 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
+  if (req.method !== 'POST' && req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== `Bearer ${process.env.CLEANUP_API_KEY}`) {
+  const isVercelCron = req.headers['x-vercel-signature'];
+
+  if (!isVercelCron && (!authHeader || authHeader !== `Bearer ${process.env.CLEANUP_API_KEY}`)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -25,7 +27,6 @@ export default async function handler(req, res) {
 
     const expiredClaimsSnapshot = await db.collection('claims')
       .where('pickupDeadline', '<=', now)
-      .where('status', 'in', ['pending', 'approved'])
       .get();
 
     const batch = db.batch();
@@ -33,6 +34,10 @@ export default async function handler(req, res) {
 
     for (const doc of expiredClaimsSnapshot.docs) {
       const claimData = doc.data();
+
+      if (claimData.status !== 'pending' && claimData.status !== 'approved') {
+        continue;
+      }
 
       batch.update(doc.ref, {
         status: 'expired',

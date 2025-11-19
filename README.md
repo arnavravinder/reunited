@@ -43,5 +43,3 @@ arnav, 16, building stuff that solves real problems
 [linkedin](https://www.linkedin.com/in/arnav-ravinder) • [github](https://github.com/arnavravinder)
 
 ---
-
-*just trying to help people
