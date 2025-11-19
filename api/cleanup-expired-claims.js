@@ -1,36 +1,42 @@
 import admin from 'firebase-admin';
 
-if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: process.env.FIREBASE_DATABASE_URL
-  });
-}
-
-const db = admin.firestore();
+let db;
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST' && req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const authHeader = req.headers.authorization;
-  const isVercelCron = req.headers['x-vercel-signature'];
-
-  if (!isVercelCron && (!authHeader || authHeader !== `Bearer ${process.env.CLEANUP_API_KEY}`)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
   try {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+
+    if (req.method !== 'POST' && req.method !== 'GET') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    const authHeader = req.headers.authorization;
+    const isVercelCron = req.headers['x-vercel-signature'];
+
+    if (!isVercelCron && (!authHeader || authHeader !== `Bearer ${process.env.CLEANUP_API_KEY}`)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!admin.apps.length) {
+      if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+        throw new Error('FIREBASE_SERVICE_ACCOUNT_KEY environment variable is not set');
+      }
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: process.env.FIREBASE_DATABASE_URL
+      });
+    }
+
+    if (!db) {
+      db = admin.firestore();
+    }
     const now = admin.firestore.Timestamp.now();
 
     const expiredClaimsSnapshot = await db.collection('claims')
@@ -79,7 +85,7 @@ export default async function handler(req, res) {
       await batch.commit();
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       processedCount,
       message: `Successfully processed ${processedCount} expired claims`
@@ -87,9 +93,11 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Error cleaning up expired claims:', error);
-    res.status(500).json({
+    console.error('Error stack:', error.stack);
+    return res.status(500).json({
       error: 'Internal server error',
-      details: error.message
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 }

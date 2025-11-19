@@ -133,13 +133,23 @@
                 });
 
                 console.log('Response status:', response.status);
-                const data = await response.json();
-                console.log('Response data:', data);
+
+                const contentType = response.headers.get('content-type');
+                let data;
+
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                    console.log('Response data:', data);
+                } else {
+                    const text = await response.text();
+                    console.log('Response text:', text);
+                    data = { error: 'Server error', details: text };
+                }
 
                 if (response.ok) {
                     showResult(`Success! Processed ${data.processedCount} expired claims`, 'success');
                 } else {
-                    showResult(`Error: ${data.error || data.details || 'Unknown error'}`, 'error');
+                    showResult(`Error (${response.status}): ${data.error || data.details || 'Unknown error'}`, 'error');
                 }
             } catch (error) {
                 console.error('Fetch error:', error);
