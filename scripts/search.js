@@ -72,11 +72,11 @@ const app = Vue.createApp({
       claimForm: { description: '', contactInfo: '' },
       isSubmittingClaim: false,
       itemTypes: [
-        'Apparel', 'Jacket', 'Electronics', 'Water Bottle', 
+        'Apparel', 'Jacket', 'Electronics', 'Water Bottle',
         'Sports Equipment', 'Accessories', 'Uniform'
       ],
       locations: [
-        'Classroom', 'Primary School Block', 'Middle School Block', 'Hub', 
+        'Classroom', 'Primary School Block', 'Middle School Block', 'Hub',
         'Hangout Areas', 'Sports Field', 'Football Field', 'Bus'
       ]
     };
@@ -103,12 +103,12 @@ const app = Vue.createApp({
   },
   methods: {
     async precacheAllItems() {
-        try {
-            const snapshot = await db.collection('items').where('status', '==', 'available').get();
-            this.itemCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        } catch(error) {
-            console.error("Failed to pre-cache items:", error);
-        }
+      try {
+        const snapshot = await db.collection('items').where('status', '==', 'available').get();
+        this.itemCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      } catch (error) {
+        console.error("Failed to pre-cache items:", error);
+      }
     },
     scrollToResults() {
       const resultsSection = document.querySelector('.search-results');
@@ -174,7 +174,7 @@ const app = Vue.createApp({
       const authPromise = this.isSigningUp
         ? firebase.auth().createUserWithEmailAndPassword(this.loginForm.email, this.loginForm.password)
         : firebase.auth().signInWithEmailAndPassword(this.loginForm.email, this.loginForm.password);
-      
+
       authPromise.then(() => {
         this.showLoginModal = false;
         this.loginForm = { email: '', password: '' };
@@ -268,14 +268,14 @@ const app = Vue.createApp({
       this.isLoading = true;
       this.searchPerformed = true;
       this.currentPage = 1;
-      
+
       const searchParams = {
         query: this.searchQuery,
         itemType: this.selectedItemType === 'Others' ? this.otherItemType : this.selectedItemType,
         location: this.selectedLocation,
         dateRange: this.searchDateRange
       };
-      
+
       this.aiAssisted = this.isComplexSearch(searchParams);
 
       let results;
@@ -284,7 +284,7 @@ const app = Vue.createApp({
       } else {
         results = this.performBasicSearch(searchParams);
       }
-      
+
       this.updatePagination(results);
       this.isLoading = false;
       this.shouldScrollToResults = true;
@@ -311,7 +311,7 @@ const app = Vue.createApp({
       let prefilteredItems = [];
       try {
         prefilteredItems = this.prefilterItemsForAI(params, this.itemCache);
-        
+
         if (prefilteredItems.length === 0) {
           return [];
         }
@@ -325,13 +325,13 @@ const app = Vue.createApp({
           },
           body: JSON.stringify({
             messages: [{ role: 'user', content: prompt }],
-            model: 'moonshotai/kimi-k2-thinking',
+            model: 'google/gemini-2.5-flash',
             temperature: 0.1
           })
         });
 
         if (!response.ok) throw new Error(`AI search failed: ${response.status}`);
-        
+
         const data = await response.json();
         const aiResponse = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
         const itemIds = this.extractItemIds(aiResponse);
@@ -349,11 +349,11 @@ const app = Vue.createApp({
       return this.sortResults(results, params);
     },
     prefilterItemsForAI(params, items) {
-        const searchTerms = this.generateSearchTerms(params.query);
-        if (searchTerms.length === 0) return items;
-        return items.filter(item => 
-            item.searchTerms && item.searchTerms.some(term => searchTerms.includes(term))
-        );
+      const searchTerms = this.generateSearchTerms(params.query);
+      if (searchTerms.length === 0) return items;
+      return items.filter(item =>
+        item.searchTerms && item.searchTerms.some(term => searchTerms.includes(term))
+      );
     },
     buildAIPrompt(params, items) {
       let prompt = `You are a search relevance API. Your only task is to return a comma-separated list of item IDs.
@@ -372,15 +372,15 @@ Available Items to Rank:
     extractItemIds(aiResponse) {
       if (!aiResponse) return [];
       let content = aiResponse;
-      
+
       const thinkEndTag = "</think>";
       const thinkEndIndex = content.lastIndexOf(thinkEndTag);
       if (thinkEndIndex !== -1) {
-          content = content.substring(thinkEndIndex + thinkEndTag.length);
+        content = content.substring(thinkEndIndex + thinkEndTag.length);
       }
-      
+
       const cleanedResponse = content.replace(/[^a-zA-Z0-9,-]/g, '');
-      
+
       return cleanedResponse.split(',')
         .map(id => id.trim())
         .filter(id => id.length > 5);
@@ -413,30 +413,30 @@ Available Items to Rank:
       return [...new Set(query.toLowerCase().split(/\s+/).filter(term => term.length > 2))];
     },
     updatePagination(results) {
-        this.allItems = results;
-        this.totalPages = Math.ceil(this.allItems.length / this.itemsPerPage);
-        this.currentPage = 1;
-        this.searchResults = this.allItems.slice(0, this.itemsPerPage);
+      this.allItems = results;
+      this.totalPages = Math.ceil(this.allItems.length / this.itemsPerPage);
+      this.currentPage = 1;
+      this.searchResults = this.allItems.slice(0, this.itemsPerPage);
     },
     sortResults(items = null, params = null) {
-        const toSort = items || [...this.allItems];
-        const currentParams = params || { query: this.searchQuery, itemType: this.selectedItemType };
+      const toSort = items || [...this.allItems];
+      const currentParams = params || { query: this.searchQuery, itemType: this.selectedItemType };
 
-        switch (this.sortOption) {
-            case 'date-desc':
-                toSort.sort((a, b) => (b.dateFound && b.dateFound.toDate ? b.dateFound.toDate() : 0) - (a.dateFound && a.dateFound.toDate ? a.dateFound.toDate() : 0));
-                break;
-            case 'date-asc':
-                toSort.sort((a, b) => (a.dateFound && a.dateFound.toDate ? a.dateFound.toDate() : 0) - (b.dateFound && b.dateFound.toDate ? b.dateFound.toDate() : 0));
-                break;
-            case 'relevance':
-                if (currentParams.query) {
-                    const query = currentParams.query.toLowerCase();
-                    toSort.sort((a, b) => this.calculateRelevanceScore(b, query, currentParams.itemType) - this.calculateRelevanceScore(a, query, currentParams.itemType));
-                }
-                break;
-        }
-        return toSort;
+      switch (this.sortOption) {
+        case 'date-desc':
+          toSort.sort((a, b) => (b.dateFound && b.dateFound.toDate ? b.dateFound.toDate() : 0) - (a.dateFound && a.dateFound.toDate ? a.dateFound.toDate() : 0));
+          break;
+        case 'date-asc':
+          toSort.sort((a, b) => (a.dateFound && a.dateFound.toDate ? a.dateFound.toDate() : 0) - (b.dateFound && b.dateFound.toDate ? b.dateFound.toDate() : 0));
+          break;
+        case 'relevance':
+          if (currentParams.query) {
+            const query = currentParams.query.toLowerCase();
+            toSort.sort((a, b) => this.calculateRelevanceScore(b, query, currentParams.itemType) - this.calculateRelevanceScore(a, query, currentParams.itemType));
+          }
+          break;
+      }
+      return toSort;
     },
     calculateRelevanceScore(item, query, preferredType) {
       let score = 0;
@@ -508,7 +508,7 @@ Available Items to Rank:
               role: 'user',
               content: `Estimate the value of this item in INR. Return only a numeric value or range with the currency symbol, e.g., "₹2000" or "₹8000-12000". No explanation. Item: ${item.name}, Description: ${item.description}`
             }],
-            model: 'moonshotai/kimi-k2-thinking',
+            model: 'google/gemini-2.5-flash',
             temperature: 0.3
           })
         });
@@ -562,10 +562,10 @@ Available Items to Rank:
             estimatedValue = parseInt(valueMatch[1], 10);
           }
         }
-        
+
         const isHighValue = estimatedValue >= 5000;
         const claimStatus = isHighValue ? 'pending' : 'approved';
-        
+
         const pickupDeadline = new Date();
         pickupDeadline.setDate(pickupDeadline.getDate() + 7);
 
@@ -585,24 +585,24 @@ Available Items to Rank:
           claimCode: this.claimItem.claimCode || null,
           pickupDeadline: firebase.firestore.Timestamp.fromDate(pickupDeadline)
         };
-        
+
         const claimRef = await db.collection('claims').add(claimData);
-        
+
         await db.collection('items').doc(this.claimItem.id).update({
           claimed: true,
           claimId: claimRef.id,
           claimStatus: claimStatus
         });
-        
+
         const claimantFirstName = this.user.displayName ? this.user.displayName.split(' ')[0] : 'User';
         await db.collection('log').add({
-            itemName: this.claimItem.name,
-            claimDate: firebase.firestore.FieldValue.serverTimestamp(),
-            claimantFirstName: claimantFirstName,
-            itemId: this.claimItem.id,
-            claimId: claimRef.id
+          itemName: this.claimItem.name,
+          claimDate: firebase.firestore.FieldValue.serverTimestamp(),
+          claimantFirstName: claimantFirstName,
+          itemId: this.claimItem.id,
+          claimId: claimRef.id
         });
-        
+
         await db.collection('notifications').add({
           userId: this.user.uid,
           title: isHighValue ? 'Claim Submitted for Review' : 'Item Claimed Successfully',
@@ -616,7 +616,7 @@ Available Items to Rank:
           itemId: this.claimItem.id,
           claimId: claimRef.id
         });
-        
+
         if (isHighValue) {
           this.showClaimModal = false;
           const contactUrl = `index.html#contact?claim=${claimRef.id}&item=${this.claimItem.name}`;
@@ -721,15 +721,11 @@ Available Items to Rank:
       return colors[charSum % colors.length];
     },
     signOut() {
-      firebase.auth().signOut().catch(() => {});
+      firebase.auth().signOut().catch(() => { });
     }
   }
 });
 
-if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-  import('@vercel/speed-insights/vue').then(({ SpeedInsights }) => {
-    app.component('SpeedInsights', SpeedInsights);
-  });
-}
+
 
 app.mount('#searchApp');

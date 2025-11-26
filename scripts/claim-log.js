@@ -41,17 +41,17 @@ const app = Vue.createApp({
       passwordResetSending: false,
       passwordResetSent: false,
       showAppleComingSoon: false,
-      
+
       isLoading: true,
       mobileMenuOpen: false,
-      
+
       searchQuery: '',
       sortOption: 'date-desc',
-      
+
       currentPage: 1,
       itemsPerPage: 10,
       totalPages: 1,
-      
+
       logs: [],
       userProfile: {
         displayName: '',
@@ -100,7 +100,7 @@ const app = Vue.createApp({
   methods: {
     loadPublicLog() {
       this.isLoading = true;
-      
+
       db.collection('log')
         .orderBy('claimDate', 'desc')
         .limit(100)
@@ -117,7 +117,7 @@ const app = Vue.createApp({
           this.isLoading = false;
         });
     },
-    
+
     sortLogs() {
       switch (this.sortOption) {
         case 'date-desc':
@@ -136,26 +136,26 @@ const app = Vue.createApp({
           break;
       }
     },
-    
+
     updatePagination() {
       this.totalPages = Math.ceil(this.filteredLogs.length / this.itemsPerPage);
       if (this.currentPage > this.totalPages) {
         this.currentPage = Math.max(1, this.totalPages);
       }
     },
-    
+
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
     },
-    
+
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
     },
-    
+
     formatDate(dateValue) {
       try {
         let date;
@@ -166,26 +166,26 @@ const app = Vue.createApp({
         } else {
           return "No date available";
         }
-        
+
         if (isNaN(date.getTime())) {
           return "Invalid date";
         }
-        
-        return new Intl.DateTimeFormat('en-US', { 
-          year: 'numeric', 
-          month: 'short', 
-          day: 'numeric' 
+
+        return new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
         }).format(date);
       } catch (error) {
         console.error("Error formatting date:", error);
         return "Date format error";
       }
     },
-    
+
     toggleMobileMenu() {
       this.mobileMenuOpen = !this.mobileMenuOpen;
     },
-    
+
     submitLoginForm() {
       this.authError = null;
       if (this.isSigningUp) {
@@ -193,28 +193,28 @@ const app = Vue.createApp({
           this.loginForm.email,
           this.loginForm.password
         )
-        .then(() => {
-          this.showLoginModal = false;
-          this.loginForm = { email: '', password: '' };
-        })
-        .catch(error => {
-          this.authError = error.message;
-        });
+          .then(() => {
+            this.showLoginModal = false;
+            this.loginForm = { email: '', password: '' };
+          })
+          .catch(error => {
+            this.authError = error.message;
+          });
       } else {
         firebase.auth().signInWithEmailAndPassword(
           this.loginForm.email,
           this.loginForm.password
         )
-        .then(() => {
-          this.showLoginModal = false;
-          this.loginForm = { email: '', password: '' };
-        })
-        .catch(error => {
-          this.authError = error.message;
-        });
+          .then(() => {
+            this.showLoginModal = false;
+            this.loginForm = { email: '', password: '' };
+          })
+          .catch(error => {
+            this.authError = error.message;
+          });
       }
     },
-    
+
     sendMagicLink() {
       if (!this.magicLinkEmail) {
         this.authError = "Please enter your email address";
@@ -227,18 +227,18 @@ const app = Vue.createApp({
         handleCodeInApp: true
       };
       firebase.auth().sendSignInLinkToEmail(this.magicLinkEmail, actionCodeSettings)
-      .then(() => {
-        window.localStorage.setItem('emailForSignIn', this.magicLinkEmail);
-        this.magicLinkSent = true;
-      })
-      .catch(error => {
-        this.authError = error.message;
-      })
-      .finally(() => {
-        this.magicLinkSending = false;
-      });
+        .then(() => {
+          window.localStorage.setItem('emailForSignIn', this.magicLinkEmail);
+          this.magicLinkSent = true;
+        })
+        .catch(error => {
+          this.authError = error.message;
+        })
+        .finally(() => {
+          this.magicLinkSending = false;
+        });
     },
-    
+
     sendPasswordReset() {
       if (!this.resetEmail) {
         this.authError = "Please enter your email address";
@@ -247,52 +247,52 @@ const app = Vue.createApp({
       this.passwordResetSending = true;
       this.authError = null;
       firebase.auth().sendPasswordResetEmail(this.resetEmail)
-      .then(() => {
-        this.passwordResetSent = true;
-      })
-      .catch(error => {
-        this.authError = error.message;
-      })
-      .finally(() => {
-        this.passwordResetSending = false;
-      });
+        .then(() => {
+          this.passwordResetSent = true;
+        })
+        .catch(error => {
+          this.authError = error.message;
+        })
+        .finally(() => {
+          this.passwordResetSending = false;
+        });
     },
-    
+
     signInWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithPopup(provider)
-      .then(() => {
-        this.showLoginModal = false;
-      })
-      .catch(error => {
-        this.authError = error.message;
-      });
+        .then(() => {
+          this.showLoginModal = false;
+        })
+        .catch(error => {
+          this.authError = error.message;
+        });
     },
-    
+
     signInWithTwitter() {
       const provider = new firebase.auth.TwitterAuthProvider();
       firebase.auth().signInWithPopup(provider)
-      .then(() => {
-        this.showLoginModal = false;
-      })
-      .catch(error => {
-        this.authError = error.message;
-      });
+        .then(() => {
+          this.showLoginModal = false;
+        })
+        .catch(error => {
+          this.authError = error.message;
+        });
     },
-    
+
     toggleMagicLinkMode() {
       this.magicLinkMode = !this.magicLinkMode;
       this.magicLinkSent = false;
       this.forgotPassword = false;
       this.showAppleComingSoon = false;
     },
-    
+
     signOut() {
       firebase.auth().signOut().catch(error => {
         console.error("Error signing out:", error);
       });
     },
-    
+
     checkMagicLinkSignIn() {
       if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
         let email = window.localStorage.getItem('emailForSignIn');
@@ -302,18 +302,18 @@ const app = Vue.createApp({
         if (email) {
           this.isLoading = true;
           firebase.auth().signInWithEmailLink(email, window.location.href)
-          .then(() => {
-            window.localStorage.removeItem('emailForSignIn');
-            if (window.history && window.history.replaceState) {
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
-          })
-          .catch(() => {
-            alert("Error signing in. Please try again.");
-          })
-          .finally(() => {
-            this.isLoading = false;
-          });
+            .then(() => {
+              window.localStorage.removeItem('emailForSignIn');
+              if (window.history && window.history.replaceState) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+              }
+            })
+            .catch(() => {
+              alert("Error signing in. Please try again.");
+            })
+            .finally(() => {
+              this.isLoading = false;
+            });
         }
       }
     },
@@ -359,10 +359,6 @@ const app = Vue.createApp({
   }
 });
 
-if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-  import('@vercel/speed-insights/vue').then(({ SpeedInsights }) => {
-    app.component('SpeedInsights', SpeedInsights);
-  });
-}
+
 
 app.mount('#claimLogApp');

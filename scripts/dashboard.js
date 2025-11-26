@@ -60,7 +60,7 @@ const app = Vue.createApp({
       userProfile: {
         displayName: '',
         email: '',
-        phone: '' 
+        phone: ''
       },
       phoneValid: false,
       userPreferences: {
@@ -111,11 +111,11 @@ const app = Vue.createApp({
 
       if (user) {
         this.resetDashboardData();
-        
+
         // Check if we have cached data less than 5 minutes old
         const cacheAge = this.cache.lastUpdate ? Date.now() - this.cache.lastUpdate : Infinity;
         const isCacheValid = cacheAge < 300000; // 5 minutes
-        
+
         if (isCacheValid && this.cache.userProfile) {
           // Use cached data for immediate display
           this.userProfile = { ...this.cache.userProfile };
@@ -125,24 +125,24 @@ const app = Vue.createApp({
           this.isLoading = false;
           this.hideInitialLoader();
           this.$nextTick(() => {
-              this.initializeFlatpickr();
+            this.initializeFlatpickr();
           });
-          
+
           // Still load fresh data in background
           this.refreshDataInBackground();
         } else {
           // Load fresh data
           Promise.all([
-              this.loadUserProfile(),
-              this.loadNotifications(),
-              this.loadLostItems(),
-              this.loadClaims()
+            this.loadUserProfile(),
+            this.loadNotifications(),
+            this.loadLostItems(),
+            this.loadClaims()
           ]).finally(() => {
-              this.isLoading = false;
-              this.hideInitialLoader();
-              this.$nextTick(() => {
-                  this.initializeFlatpickr();
-              });
+            this.isLoading = false;
+            this.hideInitialLoader();
+            this.$nextTick(() => {
+              this.initializeFlatpickr();
+            });
           });
         }
       } else {
@@ -161,7 +161,7 @@ const app = Vue.createApp({
         this.activeTab = tabId;
       }
     } else {
-        this.activeTab = 'notifications';
+      this.activeTab = 'notifications';
     }
     this.checkMagicLinkSignIn();
   },
@@ -179,47 +179,47 @@ const app = Vue.createApp({
       this.phoneValid = validation.valid;
     },
     initializeFlatpickr() {
-        const commonConfig = {
-            dateFormat: "Y-m-d",
-            altInput: true,
-            altFormat: "F j, Y",
-            allowInput: true,
-        };
+      const commonConfig = {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "F j, Y",
+        allowInput: true,
+      };
 
-        const lostDateElem = document.getElementById('lostDatePopupFlatpickr');
-        if (lostDateElem && !this.flatpickrInstances.lostDate) {
-            this.flatpickrInstances.lostDate = flatpickr(lostDateElem, {
-                ...commonConfig,
-                defaultDate: this.lostItemForm.dateLost || "today",
-                onChange: (selectedDates, dateStr) => {
-                    this.lostItemForm.dateLost = dateStr;
-                }
-            });
-        }
+      const lostDateElem = document.getElementById('lostDatePopupFlatpickr');
+      if (lostDateElem && !this.flatpickrInstances.lostDate) {
+        this.flatpickrInstances.lostDate = flatpickr(lostDateElem, {
+          ...commonConfig,
+          defaultDate: this.lostItemForm.dateLost || "today",
+          onChange: (selectedDates, dateStr) => {
+            this.lostItemForm.dateLost = dateStr;
+          }
+        });
+      }
 
     },
     destroyFlatpickrInstance(key) {
-        if (this.flatpickrInstances[key]) {
-            this.flatpickrInstances[key].destroy();
-            delete this.flatpickrInstances[key];
-        }
+      if (this.flatpickrInstances[key]) {
+        this.flatpickrInstances[key].destroy();
+        delete this.flatpickrInstances[key];
+      }
     },
     async enhanceDescription() {
-        this.isEnhancingDescription = true;
-        this.aiError = null;
-        
-        const form = this.lostItemForm;
-        const currentDescription = form.description;
-        const currentName = form.name;
-        
-        if (!currentDescription || currentDescription.trim().length < 10) {
-            this.aiError = "Please write at least a basic description before enhancing with AI.";
-            this.isEnhancingDescription = false;
-            return;
-        }
+      this.isEnhancingDescription = true;
+      this.aiError = null;
 
-        try {
-            const descriptionPrompt = `Enhance this lost item description to be more detailed and searchable. Only use information explicitly provided - don't make up details. Focus on identifying features, colors, brands, distinctive marks. Keep it concise but comprehensive.
+      const form = this.lostItemForm;
+      const currentDescription = form.description;
+      const currentName = form.name;
+
+      if (!currentDescription || currentDescription.trim().length < 10) {
+        this.aiError = "Please write at least a basic description before enhancing with AI.";
+        this.isEnhancingDescription = false;
+        return;
+      }
+
+      try {
+        const descriptionPrompt = `Enhance this lost item description to be more detailed and searchable. Only use information explicitly provided - don't make up details. Focus on identifying features, colors, brands, distinctive marks. Keep it concise but comprehensive.
 
 Original: "${currentDescription}"
 Category: ${form.category}
@@ -227,78 +227,78 @@ Location: ${form.location}
 
 Enhanced description:`;
 
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getEnvVar('OPENROUTER_API_KEY')}`
-                },
-                body: JSON.stringify({
-                    messages: [
-                        {
-                            role: 'user',
-                            content: descriptionPrompt
-                        }
-                    ],
-                    model: 'moonshotai/kimi-k2-thinking',
-                    max_tokens: 150,
-                    temperature: 0.7
-                })
-            });
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getEnvVar('OPENROUTER_API_KEY')}`
+          },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: 'user',
+                content: descriptionPrompt
+              }
+            ],
+            model: 'moonshotai/kimi-k2-thinking',
+            max_tokens: 150,
+            temperature: 0.7
+          })
+        });
 
-            if (!response.ok) {
-                throw new Error(`AI service error: ${response.status}`);
-            }
+        if (!response.ok) {
+          throw new Error(`AI service error: ${response.status}`);
+        }
 
-            const data = await response.json();
-            
-            if (data.choices && data.choices[0] && data.choices[0].message) {
-                const enhancedDescription = data.choices[0].message.content.trim();
-                form.description = enhancedDescription;
-                
-                if (!currentName || currentName.length < 3 || currentName.toLowerCase().includes('item') || currentName.toLowerCase().includes('thing')) {
-                    const namePrompt = `Based on this description, suggest a better specific item name (2-4 words max): "${enhancedDescription}"
+        const data = await response.json();
+
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          const enhancedDescription = data.choices[0].message.content.trim();
+          form.description = enhancedDescription;
+
+          if (!currentName || currentName.length < 3 || currentName.toLowerCase().includes('item') || currentName.toLowerCase().includes('thing')) {
+            const namePrompt = `Based on this description, suggest a better specific item name (2-4 words max): "${enhancedDescription}"
 
 Item name:`;
-                    
-                    const nameResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${getEnvVar('OPENROUTER_API_KEY')}`
-                        },
-                        body: JSON.stringify({
-                            messages: [
-                                {
-                                    role: 'user',
-                                    content: namePrompt
-                                }
-                            ],
-                            model: 'moonshotai/kimi-k2-thinking',
-                            max_tokens: 20,
-                            temperature: 0.5
-                        })
-                    });
-                    
-                    if (nameResponse.ok) {
-                        const nameData = await nameResponse.json();
-                        if (nameData.choices && nameData.choices[0] && nameData.choices[0].message) {
-                            const suggestedName = nameData.choices[0].message.content.trim().replace(/['"]/g, '');
-                            if (suggestedName.length > 2 && suggestedName.length < 50) {
-                                form.name = suggestedName;
-                            }
-                        }
-                    }
+
+            const nameResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getEnvVar('OPENROUTER_API_KEY')}`
+              },
+              body: JSON.stringify({
+                messages: [
+                  {
+                    role: 'user',
+                    content: namePrompt
+                  }
+                ],
+                model: 'moonshotai/kimi-k2-thinking',
+                max_tokens: 20,
+                temperature: 0.5
+              })
+            });
+
+            if (nameResponse.ok) {
+              const nameData = await nameResponse.json();
+              if (nameData.choices && nameData.choices[0] && nameData.choices[0].message) {
+                const suggestedName = nameData.choices[0].message.content.trim().replace(/['"]/g, '');
+                if (suggestedName.length > 2 && suggestedName.length < 50) {
+                  form.name = suggestedName;
                 }
-            } else {
-                throw new Error('Unexpected response format from AI service');
+              }
             }
-        } catch (error) {
-            console.error('Error enhancing description:', error);
-            this.aiError = `Failed to enhance description: ${error.message}. Please try again.`;
-        } finally {
-            this.isEnhancingDescription = false;
+          }
+        } else {
+          throw new Error('Unexpected response format from AI service');
         }
+      } catch (error) {
+        console.error('Error enhancing description:', error);
+        this.aiError = `Failed to enhance description: ${error.message}. Please try again.`;
+      } finally {
+        this.isEnhancingDescription = false;
+      }
     },
     showGenericMessagePopup(message) {
       const popup = document.getElementById('reunited-generic-message-popup');
@@ -318,18 +318,18 @@ Item name:`;
     },
     openReportLostPopup() {
       if (!this.lostItemForm.id) {
-          this.lostItemForm = this.getInitialLostItemForm();
+        this.lostItemForm = this.getInitialLostItemForm();
       }
       this.aiError = null;
       this.$nextTick(() => {
+        if (this.flatpickrInstances.lostDate) {
+          this.flatpickrInstances.lostDate.setDate(this.lostItemForm.dateLost || "today", true);
+        } else {
+          this.initializeFlatpickr();
           if (this.flatpickrInstances.lostDate) {
-              this.flatpickrInstances.lostDate.setDate(this.lostItemForm.dateLost || "today", true);
-          } else {
-              this.initializeFlatpickr();
-              if (this.flatpickrInstances.lostDate) {
-                 this.flatpickrInstances.lostDate.setDate(this.lostItemForm.dateLost || "today", true);
-              }
+            this.flatpickrInstances.lostDate.setDate(this.lostItemForm.dateLost || "today", true);
           }
+        }
       });
       const popup = document.getElementById('reportLostItemPopup');
       if (popup) popup.style.display = 'flex';
@@ -361,23 +361,23 @@ Item name:`;
       const popup = document.getElementById('deleteAccountPopup');
       if (popup) popup.style.display = 'none';
     },
-    
+
     openClaimDetailsPopup(claim) {
       if (claim && claim.item) {
-          this.selectedClaim = claim;
+        this.selectedClaim = claim;
       } else if (claim) {
-           this.selectedClaim = { ...claim, item: { name: 'Item details unavailable', category: '', dateFound: '', location: '', description: '' } };
+        this.selectedClaim = { ...claim, item: { name: 'Item details unavailable', category: '', dateFound: '', location: '', description: '' } };
       } else {
-          console.error("Attempted to view details for an invalid claim object.");
-          return;
+        console.error("Attempted to view details for an invalid claim object.");
+        return;
       }
       const popup = document.getElementById('claimDetailsPopup');
       if (popup) popup.style.display = 'flex';
     },
     closeClaimDetailsPopup() {
-        const popup = document.getElementById('claimDetailsPopup');
-        if (popup) popup.style.display = 'none';
-        this.selectedClaim = null;
+      const popup = document.getElementById('claimDetailsPopup');
+      if (popup) popup.style.display = 'none';
+      this.selectedClaim = null;
     },
     openItemDetailsPopup(item, type) {
       this.selectedItem = { ...item };
@@ -386,10 +386,10 @@ Item name:`;
       if (popup) popup.style.display = 'flex';
     },
     closeItemDetailsPopup() {
-        const popup = document.getElementById('itemDetailsPopup');
-        if (popup) popup.style.display = 'none';
-        this.selectedItem = null;
-        this.selectedItemType = null;
+      const popup = document.getElementById('itemDetailsPopup');
+      if (popup) popup.style.display = 'none';
+      this.selectedItem = null;
+      this.selectedItemType = null;
     },
     getInitialLostItemForm() {
       return {
@@ -403,31 +403,31 @@ Item name:`;
       };
     },
     resetDashboardData() {
-        this.notifications = [];
-        this.lostItems = [];
-        this.claims = [];
-        this.userProfile = { displayName: '', email: '', phone: '' };
-        this.userPreferences = { emailNotifications: true, matchAlerts: true, statusUpdates: true };
-        this.selectedItem = null;
-        this.selectedClaim = null;
-        this.lostItemForm = this.getInitialLostItemForm();
-        this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
-        this.passwordError = null;
-        this.passwordSuccess = null;
-        this.deleteConfirmation = '';
-        this.authError = null;
-        this.loginForm = { email: '', password: ''};
-        this.isSigningUp = false;
-        this.magicLinkMode = false;
-        this.forgotPassword = false;
-        this.aiError = null;
-        this.cache = {
-            userProfile: null,
-            notifications: null,
-            lostItems: null,
-            claims: null,
-            lastUpdate: null
-        };
+      this.notifications = [];
+      this.lostItems = [];
+      this.claims = [];
+      this.userProfile = { displayName: '', email: '', phone: '' };
+      this.userPreferences = { emailNotifications: true, matchAlerts: true, statusUpdates: true };
+      this.selectedItem = null;
+      this.selectedClaim = null;
+      this.lostItemForm = this.getInitialLostItemForm();
+      this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
+      this.passwordError = null;
+      this.passwordSuccess = null;
+      this.deleteConfirmation = '';
+      this.authError = null;
+      this.loginForm = { email: '', password: '' };
+      this.isSigningUp = false;
+      this.magicLinkMode = false;
+      this.forgotPassword = false;
+      this.aiError = null;
+      this.cache = {
+        userProfile: null,
+        notifications: null,
+        lostItems: null,
+        claims: null,
+        lastUpdate: null
+      };
     },
     formatDateForInput(date) {
       if (!date) return '';
@@ -480,10 +480,10 @@ Item name:`;
     },
     refreshDataInBackground() {
       Promise.all([
-          this.loadUserProfile(),
-          this.loadNotifications(),
-          this.loadLostItems(),
-          this.loadClaims()
+        this.loadUserProfile(),
+        this.loadNotifications(),
+        this.loadLostItems(),
+        this.loadClaims()
       ]);
     },
     loadUserProfile() {
@@ -504,7 +504,7 @@ Item name:`;
                 statusUpdates: data.preferences.statusUpdates !== false
               };
             } else {
-               this.userPreferences = { emailNotifications: true, matchAlerts: true, statusUpdates: true };
+              this.userPreferences = { emailNotifications: true, matchAlerts: true, statusUpdates: true };
             }
           } else {
             this.userProfile = {
@@ -579,30 +579,30 @@ Item name:`;
           const itemPromises = [];
           snapshot.forEach(doc => {
             const claim = {
-                id: doc.id,
-                ...doc.data(),
-                claimDate: doc.data().claimDate
+              id: doc.id,
+              ...doc.data(),
+              claimDate: doc.data().claimDate
             };
             if (claim.itemId) {
-                 const itemPromise = db.collection('items').doc(claim.itemId).get()
-                  .then(itemDoc => {
-                    if (itemDoc.exists) {
-                      return {
-                        ...claim,
-                        item: { id: itemDoc.id, ...itemDoc.data() }
-                      };
-                    } else {
-                      console.warn(`Item with ID ${claim.itemId} not found for claim ${claim.id}`);
-                      return { ...claim, item: null };
-                    }
-                  }).catch(error => {
-                      console.error(`Error fetching item ${claim.itemId} for claim ${claim.id}:`, error);
-                      return { ...claim, item: null };
-                  });
-                itemPromises.push(itemPromise);
+              const itemPromise = db.collection('items').doc(claim.itemId).get()
+                .then(itemDoc => {
+                  if (itemDoc.exists) {
+                    return {
+                      ...claim,
+                      item: { id: itemDoc.id, ...itemDoc.data() }
+                    };
+                  } else {
+                    console.warn(`Item with ID ${claim.itemId} not found for claim ${claim.id}`);
+                    return { ...claim, item: null };
+                  }
+                }).catch(error => {
+                  console.error(`Error fetching item ${claim.itemId} for claim ${claim.id}:`, error);
+                  return { ...claim, item: null };
+                });
+              itemPromises.push(itemPromise);
             } else {
-                console.warn(`Claim ${claim.id} is missing itemId.`);
-                claimsData.push({ ...claim, item: null });
+              console.warn(`Claim ${claim.id} is missing itemId.`);
+              claimsData.push({ ...claim, item: null });
             }
           });
           const claimsWithItems = await Promise.all(itemPromises);
@@ -618,16 +618,16 @@ Item name:`;
       notificationRef.update({
         read: true
       })
-      .then(() => {
-        const index = this.notifications.findIndex(n => n.id === notificationId);
-        if (index !== -1) {
-          this.notifications[index].read = true;
-        }
-      })
-      .catch(error => {
-        console.error("Error marking notification as read:", error);
-        this.showGenericMessagePopup("Failed to mark notification as read. Please try again.");
-      });
+        .then(() => {
+          const index = this.notifications.findIndex(n => n.id === notificationId);
+          if (index !== -1) {
+            this.notifications[index].read = true;
+          }
+        })
+        .catch(error => {
+          console.error("Error marking notification as read:", error);
+          this.showGenericMessagePopup("Failed to mark notification as read. Please try again.");
+        });
     },
     markAllAsRead() {
       const batch = db.batch();
@@ -652,7 +652,7 @@ Item name:`;
     },
     handleNotificationAction(notification) {
       if (!notification.read) {
-          this.markAsRead(notification.id);
+        this.markAsRead(notification.id);
       }
       switch (notification.type) {
         case 'claim_update':
@@ -663,7 +663,7 @@ Item name:`;
             if (claim) {
               this.openClaimDetailsPopup(claim);
             } else {
-                console.warn(`Claim ${notification.claimId} not found in loaded claims.`);
+              console.warn(`Claim ${notification.claimId} not found in loaded claims.`);
             }
           }
           break;
@@ -676,7 +676,7 @@ Item name:`;
           if (notification.itemType === 'lost' && notification.itemId) {
             this.activeTab = 'lost';
             const item = this.lostItems.find(i => i.id === notification.itemId);
-            if(item) this.openItemDetailsPopup(item, 'lost');
+            if (item) this.openItemDetailsPopup(item, 'lost');
           }
           break;
         case 'system_message':
@@ -691,41 +691,41 @@ Item name:`;
       this.isUpdating = true;
 
       if (this.userProfile.phone && !this.phoneValid) {
-           this.showGenericMessagePopup("Phone number is invalid. Please correct it or leave it blank.");
-           this.isUpdating = false;
-           return;
+        this.showGenericMessagePopup("Phone number is invalid. Please correct it or leave it blank.");
+        this.isUpdating = false;
+        return;
       }
 
       const updates = [];
       if (this.userProfile.displayName !== this.user.displayName) {
         updates.push(
-            this.user.updateProfile({
-                displayName: this.userProfile.displayName
-            }).catch(error => {
-                console.error("Error updating auth profile:", error);
-                throw new Error("Auth profile update failed");
-            })
+          this.user.updateProfile({
+            displayName: this.userProfile.displayName
+          }).catch(error => {
+            console.error("Error updating auth profile:", error);
+            throw new Error("Auth profile update failed");
+          })
         );
       }
       updates.push(
         db.collection('users').doc(this.user.uid).update({
-            displayName: this.userProfile.displayName,
-            phone: this.userProfile.phone || ''
+          displayName: this.userProfile.displayName,
+          phone: this.userProfile.phone || ''
         }).catch(error => {
-            console.error("Error updating firestore profile:", error);
-            throw new Error("Firestore profile update failed");
+          console.error("Error updating firestore profile:", error);
+          throw new Error("Firestore profile update failed");
         })
       );
       Promise.all(updates)
         .then(() => {
-            this.showGenericMessagePopup("Profile updated successfully!");
+          this.showGenericMessagePopup("Profile updated successfully!");
         })
         .catch(error => {
-            console.error("Error updating profile:", error);
-            this.showGenericMessagePopup(`Error updating profile: ${error.message}. Please try again.`);
+          console.error("Error updating profile:", error);
+          this.showGenericMessagePopup(`Error updating profile: ${error.message}. Please try again.`);
         })
         .finally(() => {
-            this.isUpdating = false;
+          this.isUpdating = false;
         });
     },
     updatePreferences() {
@@ -738,16 +738,16 @@ Item name:`;
           statusUpdates: this.userPreferences.statusUpdates
         }
       }, { merge: true })
-      .then(() => {
-        this.showGenericMessagePopup("Preferences saved successfully!");
-      })
-      .catch(error => {
-        console.error("Error updating preferences:", error);
-        this.showGenericMessagePopup(`Error saving preferences. Please try again.`);
-      })
-      .finally(() => {
-        this.isUpdating = false;
-      });
+        .then(() => {
+          this.showGenericMessagePopup("Preferences saved successfully!");
+        })
+        .catch(error => {
+          console.error("Error updating preferences:", error);
+          this.showGenericMessagePopup(`Error saving preferences. Please try again.`);
+        })
+        .finally(() => {
+          this.isUpdating = false;
+        });
     },
     submitNameCollection() {
       if (!this.user) return;
@@ -803,12 +803,12 @@ Item name:`;
       this.passwordError = null;
       this.passwordSuccess = null;
       if (!this.passwordForm.currentPassword || !this.passwordForm.newPassword || !this.passwordForm.confirmPassword) {
-          this.passwordError = "Please fill in all password fields.";
-          return;
+        this.passwordError = "Please fill in all password fields.";
+        return;
       }
       if (this.passwordForm.newPassword.length < 6) {
-          this.passwordError = "New password must be at least 6 characters long.";
-          return;
+        this.passwordError = "New password must be at least 6 characters long.";
+        return;
       }
       if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
         this.passwordError = "New password and confirmation do not match.";
@@ -841,7 +841,7 @@ Item name:`;
           if (error.code === 'auth/wrong-password') {
             this.passwordError = "Current password is incorrect.";
           } else if (error.code === 'auth/weak-password') {
-              this.passwordError = "The new password is too weak.";
+            this.passwordError = "The new password is too weak.";
           } else {
             this.passwordError = `An error occurred: ${error.message}`;
           }
@@ -858,55 +858,55 @@ Item name:`;
       this.authError = null;
       this.isDeleting = true;
       try {
-          const batch = db.batch();
-          const userRef = db.collection('users').doc(this.user.uid);
-          batch.delete(userRef);
-          const results = await Promise.allSettled([
-              this.deleteCollectionForUser(batch, 'lostItems', 'userId'),
-              this.deleteCollectionForUser(batch, 'items', 'reportedBy'),
-              this.deleteCollectionForUser(batch, 'claims', 'userId'),
-              this.deleteCollectionForUser(batch, 'notifications', 'userId')
-          ]);
-          results.forEach(result => {
-              if (result.status === 'rejected') {
-                  console.error("Error querying/batching deletions:", result.reason);
-              }
-          });
-          await batch.commit();
-          await this.user.delete();
-          this.closeDeleteAccountPopup();
-          window.location.href = "index.html";
+        const batch = db.batch();
+        const userRef = db.collection('users').doc(this.user.uid);
+        batch.delete(userRef);
+        const results = await Promise.allSettled([
+          this.deleteCollectionForUser(batch, 'lostItems', 'userId'),
+          this.deleteCollectionForUser(batch, 'items', 'reportedBy'),
+          this.deleteCollectionForUser(batch, 'claims', 'userId'),
+          this.deleteCollectionForUser(batch, 'notifications', 'userId')
+        ]);
+        results.forEach(result => {
+          if (result.status === 'rejected') {
+            console.error("Error querying/batching deletions:", result.reason);
+          }
+        });
+        await batch.commit();
+        await this.user.delete();
+        this.closeDeleteAccountPopup();
+        window.location.href = "index.html";
       } catch (error) {
-          console.error("Error deleting account:", error);
-          this.authError = `Error deleting account: ${error.message}. You might need to log in again or contact support if the issue persists.`;
-          this.isDeleting = false;
+        console.error("Error deleting account:", error);
+        this.authError = `Error deleting account: ${error.message}. You might need to log in again or contact support if the issue persists.`;
+        this.isDeleting = false;
       }
     },
     async deleteCollectionForUser(batch, collectionName, userField) {
-        const snapshot = await db.collection(collectionName)
-                                 .where(userField, '==', this.user.uid)
-                                 .limit(500)
-                                 .get();
-        if (!snapshot.empty) {
-            snapshot.forEach(doc => {
-                batch.delete(doc.ref);
-            });
-        }
+      const snapshot = await db.collection(collectionName)
+        .where(userField, '==', this.user.uid)
+        .limit(500)
+        .get();
+      if (!snapshot.empty) {
+        snapshot.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+      }
     },
     editItem(item) {
-        this.closeItemDetailsPopup();
-        if (type === 'lost') {
-            this.lostItemForm = {
-            id: item.id,
-            name: item.name,
-            category: item.category,
-            dateLost: this.formatDateForInput(item.dateLost),
-            location: item.location,
-            description: item.description,
-            images: []
-            };
-            this.openReportLostPopup();
-        }
+      this.closeItemDetailsPopup();
+      if (type === 'lost') {
+        this.lostItemForm = {
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          dateLost: this.formatDateForInput(item.dateLost),
+          location: item.location,
+          description: item.description,
+          images: []
+        };
+        this.openReportLostPopup();
+      }
     },
     deleteItem(itemId) {
       this.closeItemDetailsPopup();
@@ -925,58 +925,58 @@ Item name:`;
         });
     },
     handleImageUpload(event) {
-        const form = this.lostItemForm;
-        const files = event.target.files;
-        if (!files || files.length === 0) return;
-        const maxImages = 5;
+      const form = this.lostItemForm;
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
+      const maxImages = 5;
 
-        if (form.images.length + files.length > maxImages) {
-            this.showGenericMessagePopup(`You can upload a maximum of ${maxImages} images.`);
-            event.target.value = null;
-            return;
+      if (form.images.length + files.length > maxImages) {
+        this.showGenericMessagePopup(`You can upload a maximum of ${maxImages} images.`);
+        event.target.value = null;
+        return;
+      }
+
+      Array.from(files).forEach(file => {
+        if (!file.type.startsWith('image/')) {
+          this.showGenericMessagePopup("Please upload valid image files (e.g., JPG, PNG, GIF).");
+          return;
         }
-
-        Array.from(files).forEach(file => {
-            if (!file.type.startsWith('image/')) {
-                this.showGenericMessagePopup("Please upload valid image files (e.g., JPG, PNG, GIF).");
-                return;
-            }
-            if (file.size > 5 * 1024 * 1024) { // 5MB
-                this.showGenericMessagePopup(`File ${file.name} is too large (max 5MB).`);
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                form.images.push({
-                    file: file,
-                    preview: e.target.result
-                });
-            };
-            reader.onerror = (error) => {
-                console.error("FileReader error:", error);
-                this.showGenericMessagePopup(`Error reading file ${file.name}.`);
-            };
-            reader.readAsDataURL(file);
-        });
-        event.target.value = null; // Reset file input
+        if (file.size > 5 * 1024 * 1024) { // 5MB
+          this.showGenericMessagePopup(`File ${file.name} is too large (max 5MB).`);
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          form.images.push({
+            file: file,
+            preview: e.target.result
+          });
+        };
+        reader.onerror = (error) => {
+          console.error("FileReader error:", error);
+          this.showGenericMessagePopup(`Error reading file ${file.name}.`);
+        };
+        reader.readAsDataURL(file);
+      });
+      event.target.value = null; // Reset file input
     },
     removeImage(index) {
-        const form = this.lostItemForm;
-        form.images.splice(index, 1);
+      const form = this.lostItemForm;
+      form.images.splice(index, 1);
     },
     async submitLostItemReport() {
       if (!this.user) return;
       this.isSubmitting = true;
       try {
         if (!this.lostItemForm.name || !this.lostItemForm.category || !this.lostItemForm.dateLost || !this.lostItemForm.location || !this.lostItemForm.description) {
-            throw new Error("Please fill in all required fields.");
+          throw new Error("Please fill in all required fields.");
         }
         const searchTerms = this.generateSearchTerms(
           `${this.lostItemForm.name} ${this.lostItemForm.category} ${this.lostItemForm.location} ${this.lostItemForm.description}`
         );
         const dateLostObject = new Date(this.lostItemForm.dateLost);
         if (isNaN(dateLostObject.getTime())) {
-            throw new Error("Invalid date selected for 'Date Lost'.");
+          throw new Error("Invalid date selected for 'Date Lost'.");
         }
         const itemData = {
           name: this.lostItemForm.name.trim(),
@@ -1002,10 +1002,10 @@ Item name:`;
           docRef = await db.collection('lostItems').add(itemData);
         }
         if (this.lostItemForm.images.length > 0) {
-           const mainImageUrl = await this.uploadImages(docRef.id, this.lostItemForm.images, 'lost');
-           if (mainImageUrl) {
-               await docRef.update({ image: mainImageUrl });
-           }
+          const mainImageUrl = await this.uploadImages(docRef.id, this.lostItemForm.images, 'lost');
+          if (mainImageUrl) {
+            await docRef.update({ image: mainImageUrl });
+          }
         }
         await this.loadLostItems();
         this.closeReportLostPopup();
@@ -1018,35 +1018,35 @@ Item name:`;
       }
     },
     async uploadImages(itemId, images, type) {
-        if (!images || images.length === 0) return null;
-        const collection = type === 'lost' ? 'lostItems' : 'items';
-        const mainImage = images[0];
-        let mainImageUrl = null;
-        try {
-            const mainImageRef = storage.ref(`${collection}/${itemId}/main_${Date.now()}_${mainImage.file.name}`);
-            const uploadTask = await mainImageRef.put(mainImage.file);
-            mainImageUrl = await uploadTask.ref.getDownloadURL();
-            const additionalImagePromises = [];
-            for (let i = 1; i < images.length; i++) {
-                const img = images[i];
-                const imageRef = storage.ref(`${collection}/${itemId}/img_${i}_${Date.now()}_${img.file.name}`);
-                additionalImagePromises.push(
-                    imageRef.put(img.file).then(task => task.ref.getDownloadURL())
-                );
-            }
-            await Promise.all(additionalImagePromises);
-            return mainImageUrl;
-        } catch (error) {
-            console.error(`Error uploading images for item ${itemId}:`, error);
-            if (error.code === 'storage/unauthorized') {
-                this.showGenericMessagePopup("Error: You do not have permission to upload images.");
-            } else if (error.code === 'storage/canceled') {
-                this.showGenericMessagePopup("Image upload cancelled.");
-            } else {
-                this.showGenericMessagePopup("An error occurred during image upload. Please try again.");
-            }
-            throw error;
+      if (!images || images.length === 0) return null;
+      const collection = type === 'lost' ? 'lostItems' : 'items';
+      const mainImage = images[0];
+      let mainImageUrl = null;
+      try {
+        const mainImageRef = storage.ref(`${collection}/${itemId}/main_${Date.now()}_${mainImage.file.name}`);
+        const uploadTask = await mainImageRef.put(mainImage.file);
+        mainImageUrl = await uploadTask.ref.getDownloadURL();
+        const additionalImagePromises = [];
+        for (let i = 1; i < images.length; i++) {
+          const img = images[i];
+          const imageRef = storage.ref(`${collection}/${itemId}/img_${i}_${Date.now()}_${img.file.name}`);
+          additionalImagePromises.push(
+            imageRef.put(img.file).then(task => task.ref.getDownloadURL())
+          );
         }
+        await Promise.all(additionalImagePromises);
+        return mainImageUrl;
+      } catch (error) {
+        console.error(`Error uploading images for item ${itemId}:`, error);
+        if (error.code === 'storage/unauthorized') {
+          this.showGenericMessagePopup("Error: You do not have permission to upload images.");
+        } else if (error.code === 'storage/canceled') {
+          this.showGenericMessagePopup("Image upload cancelled.");
+        } else {
+          this.showGenericMessagePopup("An error occurred during image upload. Please try again.");
+        }
+        throw error;
+      }
     },
     generateSearchTerms(text) {
       if (!text) return [];
@@ -1078,13 +1078,13 @@ Item name:`;
           date = new Date(dateValue);
         }
         else if (dateValue instanceof Date) {
-            date = dateValue;
+          date = dateValue;
         }
         else {
           return "Invalid Date";
         }
         if (isNaN(date.getTime())) {
-            return "Invalid Date";
+          return "Invalid Date";
         }
         return new Intl.DateTimeFormat('en-US', {
           year: 'numeric',
@@ -1143,7 +1143,7 @@ Item name:`;
       let truncated = text.substring(0, maxLength);
       let lastSpace = truncated.lastIndexOf(' ');
       if (lastSpace > maxLength / 2) {
-          truncated = truncated.substring(0, lastSpace);
+        truncated = truncated.substring(0, lastSpace);
       }
       return truncated + '...';
     },
@@ -1154,70 +1154,70 @@ Item name:`;
       this.authError = null;
       const email = this.loginForm.email.trim();
       const password = this.loginForm.password;
-       if (!email || !password) {
-            this.authError = "Please enter both email and password.";
-            return;
-        }
+      if (!email || !password) {
+        this.authError = "Please enter both email and password.";
+        return;
+      }
       if (this.isSigningUp) {
-          if (password.length < 6) {
-              this.authError = "Password must be at least 6 characters long.";
-              return;
-          }
-          firebase.auth().createUserWithEmailAndPassword(email, password)
+        if (password.length < 6) {
+          this.authError = "Password must be at least 6 characters long.";
+          return;
+        }
+        firebase.auth().createUserWithEmailAndPassword(email, password)
           .then((userCredential) => {
-              this.initializeUserProfile(userCredential.user);
-              this.showLoginModal = false;
-              this.loginForm = { email: '', password: '' };
-              this.isSigningUp = false;
+            this.initializeUserProfile(userCredential.user);
+            this.showLoginModal = false;
+            this.loginForm = { email: '', password: '' };
+            this.isSigningUp = false;
           })
           .catch(error => {
-              this.authError = this.getFriendlyAuthError(error);
+            this.authError = this.getFriendlyAuthError(error);
           });
       } else {
-          firebase.auth().signInWithEmailAndPassword(email, password)
+        firebase.auth().signInWithEmailAndPassword(email, password)
           .then(() => {
-              this.showLoginModal = false;
-              this.loginForm = { email: '', password: '' };
+            this.showLoginModal = false;
+            this.loginForm = { email: '', password: '' };
           })
           .catch(error => {
-               this.authError = this.getFriendlyAuthError(error);
+            this.authError = this.getFriendlyAuthError(error);
           });
       }
     },
     initializeUserProfile(user) {
-        if (!user) return;
-        const userRef = db.collection('users').doc(user.uid);
-        userRef.get().then(doc => {
-            if (!doc.exists) {
-                userRef.set({
-                    displayName: user.displayName || '',
-                    email: user.email,
-                    phone: '',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    preferences: {
-                        emailNotifications: true,
-                        matchAlerts: true,
-                        statusUpdates: true
-                    }
-                }).catch(error => console.error("Error initializing user profile:", error));
+      if (!user) return;
+      const userRef = db.collection('users').doc(user.uid);
+      userRef.get().then(doc => {
+        if (!doc.exists) {
+          userRef.set({
+            displayName: user.displayName || '',
+            email: user.email,
+            phone: '',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            preferences: {
+              emailNotifications: true,
+              matchAlerts: true,
+              statusUpdates: true
             }
-        });
+          }).catch(error => console.error("Error initializing user profile:", error));
+        }
+      });
     },
     getFriendlyAuthError(error) {
-        switch (error.code) {
-            case 'auth/invalid-email': return 'Please enter a valid email address.';
-            case 'auth/user-disabled': return 'This account has been disabled by an administrator.';
-            case 'auth/user-not-found': return 'No account found with this email address.';
-            case 'auth/wrong-password': return 'Incorrect password. Please try again.';
-            case 'auth/email-already-in-use': return 'This email address is already registered. Try logging in.';
-            case 'auth/weak-password': return 'Password is too weak. Please use at least 6 characters.';
-            case 'auth/too-many-requests': return 'Access temporarily disabled due to too many login attempts. Please reset your password or try again later.';
-            case 'auth/requires-recent-login': return 'This action requires you to have recently logged in. Please log out and log back in.';
-            case 'auth/operation-not-allowed': return 'Email/password sign-in is not enabled. Contact support.';
-            case 'auth/popup-closed-by-user': return 'Sign-in popup closed before completion.';
-            case 'auth/account-exists-with-different-credential': return 'An account already exists with this email using a different sign-in method (e.g., Google). Try logging in with that method.';
-            default: return `An unexpected error occurred: ${error.message}`;
-        }
+      switch (error.code) {
+        case 'auth/invalid-email': return 'Please enter a valid email address.';
+        case 'auth/user-disabled': return 'This account has been disabled by an administrator.';
+        case 'auth/user-not-found': return 'No account found with this email address.';
+        case 'auth/wrong-password': return 'Incorrect password. Please try again.';
+        case 'auth/email-already-in-use': return 'This email address is already registered. Try logging in.';
+        case 'auth/weak-password': return 'Password is too weak. Please use at least 6 characters.';
+        case 'auth/too-many-requests': return 'Access temporarily disabled due to too many login attempts. Please reset your password or try again later.';
+        case 'auth/requires-recent-login': return 'This action requires you to have recently logged in. Please log out and log back in.';
+        case 'auth/operation-not-allowed': return 'Email/password sign-in is not enabled. Contact support.';
+        case 'auth/popup-closed-by-user': return 'Sign-in popup closed before completion.';
+        case 'auth/account-exists-with-different-credential': return 'An account already exists with this email using a different sign-in method (e.g., Google). Try logging in with that method.';
+        default: return `An unexpected error occurred: ${error.message}`;
+      }
     },
     sendMagicLink() {
       const email = this.magicLinkEmail.trim();
@@ -1234,17 +1234,17 @@ Item name:`;
         handleCodeInApp: true
       };
       firebase.auth().sendSignInLinkToEmail(email, actionCodeSettings)
-      .then(() => {
-        window.localStorage.setItem('emailForSignIn', email);
-        this.magicLinkSent = true;
-        this.magicLinkEmail = '';
-      })
-      .catch(error => {
-        this.authError = this.getFriendlyAuthError(error);
-      })
-      .finally(() => {
-        this.magicLinkSending = false;
-      });
+        .then(() => {
+          window.localStorage.setItem('emailForSignIn', email);
+          this.magicLinkSent = true;
+          this.magicLinkEmail = '';
+        })
+        .catch(error => {
+          this.authError = this.getFriendlyAuthError(error);
+        })
+        .finally(() => {
+          this.magicLinkSending = false;
+        });
     },
     sendPasswordReset() {
       const email = this.resetEmail.trim();
@@ -1256,37 +1256,37 @@ Item name:`;
       this.authError = null;
       this.passwordResetSent = false;
       firebase.auth().sendPasswordResetEmail(email)
-      .then(() => {
-        this.passwordResetSent = true;
-         this.resetEmail = '';
-      })
-      .catch(error => {
-        this.authError = this.getFriendlyAuthError(error);
-      })
-      .finally(() => {
-        this.passwordResetSending = false;
-      });
-    },
-    signInWithProvider(providerType) {
-        let provider;
-        if (providerType === 'google') {
-            provider = new firebase.auth.GoogleAuthProvider();
-        } else if (providerType === 'twitter') {
-            provider = new firebase.auth.TwitterAuthProvider();
-        } else {
-            return;
-        }
-        this.authError = null;
-        firebase.auth().signInWithPopup(provider)
-        .then((result) => {
-            const isNewUser = result.additionalUserInfo?.isNewUser;
-            if (isNewUser) {
-                this.initializeUserProfile(result.user);
-            }
-            this.showLoginModal = false;
+        .then(() => {
+          this.passwordResetSent = true;
+          this.resetEmail = '';
         })
         .catch(error => {
-             this.authError = this.getFriendlyAuthError(error);
+          this.authError = this.getFriendlyAuthError(error);
+        })
+        .finally(() => {
+          this.passwordResetSending = false;
+        });
+    },
+    signInWithProvider(providerType) {
+      let provider;
+      if (providerType === 'google') {
+        provider = new firebase.auth.GoogleAuthProvider();
+      } else if (providerType === 'twitter') {
+        provider = new firebase.auth.TwitterAuthProvider();
+      } else {
+        return;
+      }
+      this.authError = null;
+      firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+          const isNewUser = result.additionalUserInfo?.isNewUser;
+          if (isNewUser) {
+            this.initializeUserProfile(result.user);
+          }
+          this.showLoginModal = false;
+        })
+        .catch(error => {
+          this.authError = this.getFriendlyAuthError(error);
         });
     },
     signInWithGoogle() { this.signInWithProvider('google'); },
@@ -1300,12 +1300,12 @@ Item name:`;
     },
     signOut() {
       firebase.auth().signOut()
-      .then(() => {
-      })
-      .catch(error => {
-        console.error("Error signing out:", error);
-        this.showGenericMessagePopup("Error signing out. Please try again.");
-      });
+        .then(() => {
+        })
+        .catch(error => {
+          console.error("Error signing out:", error);
+          this.showGenericMessagePopup("Error signing out. Please try again.");
+        });
     },
     checkMagicLinkSignIn() {
       if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
@@ -1316,23 +1316,23 @@ Item name:`;
         if (email) {
           this.isLoading = true;
           firebase.auth().signInWithEmailLink(email, window.location.href)
-          .then((result) => {
-            window.localStorage.removeItem('emailForSignIn');
-            if (window.history && window.history.replaceState) {
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
-            const isNewUser = result.additionalUserInfo?.isNewUser;
-            if (isNewUser) {
+            .then((result) => {
+              window.localStorage.removeItem('emailForSignIn');
+              if (window.history && window.history.replaceState) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+              }
+              const isNewUser = result.additionalUserInfo?.isNewUser;
+              if (isNewUser) {
                 this.initializeUserProfile(result.user);
-            }
-          })
-          .catch((error) => {
-            console.error("Error signing in with email link:", error);
-            this.showGenericMessagePopup(`Error signing in: ${this.getFriendlyAuthError(error)}`);
-            this.isLoading = false;
-          });
+              }
+            })
+            .catch((error) => {
+              console.error("Error signing in with email link:", error);
+              this.showGenericMessagePopup(`Error signing in: ${this.getFriendlyAuthError(error)}`);
+              this.isLoading = false;
+            });
         } else {
-            this.showGenericMessagePopup("Email is required to complete sign-in.");
+          this.showGenericMessagePopup("Email is required to complete sign-in.");
         }
       }
     }
@@ -1344,10 +1344,6 @@ Item name:`;
 
 app.use(window.VueTelInput);
 
-if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-  import('@vercel/speed-insights/vue').then(({ SpeedInsights }) => {
-    app.component('SpeedInsights', SpeedInsights);
-  });
-}
+
 
 app.mount('#dashboardApp');

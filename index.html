@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,12 +8,15 @@
   <!-- Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="icon" type="image/x-icon" href="favicon.png">
 
 </head>
+
 <body>
   <div id="app">
     <div class="splash-screen" v-if="loading">
@@ -38,11 +42,9 @@
             <a href="#" class="btn btn-outlined" @click.prevent="showLoginModal = true">Login / Sign Up</a>
           </div>
           <div v-else class="nav-user-section">
-            <div
-              class="profile-picture small"
+            <div class="profile-picture small"
               :style="{ backgroundColor: getProfilePictureColor(userProfile.displayName) }"
-              :title="userProfile.displayName || user.email"
-            >
+              :title="userProfile.displayName || user.email">
               {{ getProfileInitials(userProfile.displayName) }}
             </div>
             <a href="#" class="btn btn-outlined" @click.prevent="signOut">Logout</a>
@@ -55,7 +57,8 @@
       <div v-for="(item, index) in floatingItems" :key="index" class="floating-item" :style="item.style"></div>
       <div class="hero-content">
         <h1>Find What You've Lost</h1>
-        <p class="hero-subtitle">Reunited is a platform that helps you find your lost items and reconnect with what matters most to you.</p>
+        <p class="hero-subtitle">Reunited is a platform that helps you find your lost items and reconnect with what
+          matters most to you.</p>
         <div class="hero-btns">
           <a href="#" @click.prevent="goToSearchPage" class="btn">Search for my item</a>
         </div>
@@ -146,12 +149,14 @@
               </div>
               <div class="form-group">
                 <label for="subject">Subject</label>
-                <input type="text" id="subject" name="subject" class="form-control" v-model="contactForm.subject" required>
+                <input type="text" id="subject" name="subject" class="form-control" v-model="contactForm.subject"
+                  required>
               </div>
             </div>
             <div class="form-group">
               <label for="message">Message</label>
-              <textarea id="message" name="message" class="form-control" v-model="contactForm.message" required></textarea>
+              <textarea id="message" name="message" class="form-control" v-model="contactForm.message"
+                required></textarea>
             </div>
             <button type="submit" class="btn" :disabled="formSubmitting">
               {{ formSubmitting ? 'Sending...' : 'Send Message' }}
@@ -174,7 +179,8 @@
           &copy; 2025 Reunited. All rights reserved.
         </div>
         <div class="made-with-love">
-          Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav Ravinder</a>
+          Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav
+            Ravinder</a>
         </div>
       </div>
     </footer>
@@ -194,7 +200,8 @@
               <i class="fa-brands fa-apple"></i>
             </div>
             <div class="social-btn" @click="signInWithTwitter">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/5/57/X_logo_2023_%28white%29.png" alt="X" width="20" height="20">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/5/57/X_logo_2023_%28white%29.png" alt="X"
+                width="20" height="20">
             </div>
           </div>
           <div class="or-divider">
@@ -217,42 +224,40 @@
           <div v-if="magicLinkMode">
             <div class="form-group">
               <label for="magic-email">Your Email</label>
-              <input type="email" id="magic-email" class="form-control" v-model="magicLinkEmail" placeholder="Enter your email address">
+              <input type="email" id="magic-email" class="form-control" v-model="magicLinkEmail"
+                placeholder="Enter your email address">
             </div>
-            <button class="btn" style="width: 100%;" @click.prevent="sendMagicLink" :disabled="magicLinkSending">
+            <button class="btn w-100" @click.prevent="sendMagicLink" :disabled="magicLinkSending">
               {{ magicLinkSending ? 'Sending...' : 'Send Magic Link' }}
             </button>
-            <p v-if="magicLinkSent" style="text-align: center; margin-top: 1rem; color: var(--success-color);">
+            <p v-if="magicLinkSent" class="text-center mt-1 text-success">
               Magic link sent! Check your email.
             </p>
           </div>
           <div v-if="!magicLinkMode">
-            <button 
-              v-if="!forgotPassword" 
-              class="btn" 
-              style="width: 100%;" 
-              @click.prevent="submitLoginForm">
+            <button v-if="!forgotPassword" class="btn w-100" @click.prevent="submitLoginForm">
               {{ isSigningUp ? 'Sign Up' : 'Login' }}
             </button>
             <div v-else>
               <div class="form-group">
                 <input type="email" class="form-control" v-model="resetEmail" placeholder="Enter your email">
               </div>
-              <button class="btn" style="width: 100%;" @click.prevent="sendPasswordReset">
+              <button class="btn w-100" @click.prevent="sendPasswordReset">
                 {{ passwordResetSending ? 'Sending...' : 'Reset Password' }}
               </button>
-              <p v-if="passwordResetSent" style="text-align: center; margin-top: 1rem; color: var(--success-color);">
+              <p v-if="passwordResetSent" class="text-center mt-1 text-success">
                 Password reset email sent!
               </p>
             </div>
-            <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
-              {{ isSigningUp ? 'Already have an account?' : 'Don\'t have an account?' }} 
-              <a href="#" style="color: var(--accent-color);" @click.prevent="isSigningUp = !isSigningUp; forgotPassword = false; showAppleComingSoon=false">
+            <p class="text-center mt-1 text-secondary-color">
+              {{ isSigningUp ? 'Already have an account?' : 'Don\'t have an account?' }}
+              <a href="#" class="text-accent"
+                @click.prevent="isSigningUp = !isSigningUp; forgotPassword = false; showAppleComingSoon=false">
                 {{ isSigningUp ? 'Login' : 'Sign up' }}
               </a>
             </p>
-            <p v-if="!isSigningUp && !forgotPassword" style="text-align: center; margin-top: 0.5rem; color: var(--text-secondary);">
-              <a href="#" style="color: var(--accent-color);" @click.prevent="forgotPassword = true; showAppleComingSoon=false">
+            <p v-if="!isSigningUp && !forgotPassword" class="text-center mt-05 text-secondary-color">
+              <a href="#" class="text-accent" @click.prevent="forgotPassword = true; showAppleComingSoon=false">
                 Forgot password?
               </a>
             </p>
@@ -266,7 +271,6 @@
         </div>
       </div>
     </div>
-    <SpeedInsights />
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -276,4 +280,5 @@
   <script src="api/env.js"></script>
   <script src="scripts/main.js"></script>
 </body>
+
 </html>

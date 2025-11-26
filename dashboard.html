@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,9 @@
   <!-- Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -19,120 +22,125 @@
 
   <style>
     .popup-container {
-      display: none; 
+      display: none;
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(18, 18, 18, 0.85); 
+      background-color: rgba(18, 18, 18, 0.85);
       justify-content: center;
       align-items: center;
-      z-index: 99999; 
-      padding: 1rem; 
+      z-index: 99999;
+      padding: 1rem;
       box-sizing: border-box;
       backdrop-filter: blur(3px);
       -webkit-backdrop-filter: blur(3px);
     }
-    
+
     .popup-content {
-      background-color: var(--light-bg, #292E3D); 
-      padding: 25px; 
-      border-radius: 10px; 
+      background-color: var(--light-bg, #292E3D);
+      padding: 25px;
+      border-radius: 10px;
       text-align: center;
-      max-width: 450px; 
-      width: 100%; 
+      max-width: 450px;
+      width: 100%;
       box-sizing: border-box;
-      position: relative; 
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4); 
-      max-height: 90vh; 
-      overflow-y: auto; 
-      border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.1); 
+      position: relative;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.1);
     }
-    
+
     #reunited-generic-popup-message {
       color: var(--text-color, white);
-      font-size: 1.1rem; 
+      font-size: 1.1rem;
       line-height: 1.6;
       margin-bottom: 25px;
       font-family: 'Raleway', sans-serif;
     }
-    
-    #reunited-generic-message-popup .popup-button { 
+
+    #reunited-generic-message-popup .popup-button {
       background-color: var(--accent-color, #33b5e5);
       color: var(--text-color, white);
       border: none;
-      padding: 12px 25px; 
-      border-radius: 25px; 
+      padding: 12px 25px;
+      border-radius: 25px;
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.2s ease;
       display: block;
-      width: auto; 
+      width: auto;
       min-width: 120px;
-      margin: 15px auto 0; 
+      margin: 15px auto 0;
       font-size: 1rem;
       font-weight: 500;
       font-family: 'Work Sans', sans-serif;
     }
+
     #reunited-generic-message-popup .popup-button:hover {
       background-color: var(--accent-color-dark, #0099cc);
-      transform: translateY(-2px); 
+      transform: translateY(-2px);
     }
 
     .popup-close-btn {
       position: absolute;
-      top: 12px; 
-      right: 12px; 
-      font-size: 1.9rem; 
+      top: 12px;
+      right: 12px;
+      font-size: 1.9rem;
       font-weight: bold;
       color: var(--text-secondary, #adb5bd);
       cursor: pointer;
       line-height: 1;
       background: none;
       border: none;
-      padding: 0.3rem; 
-      z-index: 10; 
+      padding: 0.3rem;
+      z-index: 10;
       transition: color 0.2s ease;
     }
+
     .popup-close-btn:hover {
-      color: var(--text-color, #fff); 
+      color: var(--text-color, #fff);
     }
 
     .popup-content h2 {
-      margin: 0 0 1.8rem; 
+      margin: 0 0 1.8rem;
       font-family: 'Kanit', sans-serif;
       text-align: center;
-      color: var(--text-color, white); 
-      font-size: 1.7rem; 
+      color: var(--text-color, white);
+      font-size: 1.7rem;
       font-weight: 500;
     }
+
     .popup-content p {
-      margin-bottom: 1.2rem; 
-      color: var(--text-secondary, #adb5bd); 
+      margin-bottom: 1.2rem;
+      color: var(--text-secondary, #adb5bd);
       line-height: 1.6;
       text-align: center;
       font-size: 0.95rem;
     }
+
     .popup-content input[type="text"],
     .popup-content input[type="email"],
     .popup-content input[type="password"],
-    .popup-content input[type="date"], 
-    .popup-content input[type="tel"], 
+    .popup-content input[type="date"],
+    .popup-content input[type="tel"],
     .popup-content select,
     .popup-content textarea {
       display: block;
       width: 100%;
-      padding: 0.9rem 1.1rem; 
-      margin-bottom: 1.1rem; 
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 1.1rem;
       background-color: var(--dark-bg, #1e222d);
-      border: 1px solid rgba(var(--text-color-rgb, 255,255,255), 0.15); 
-      border-radius: 6px; 
+      border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.15);
+      border-radius: 6px;
       color: var(--text-color, white);
       font-size: 1rem;
       font-family: 'Work Sans', sans-serif;
       box-sizing: border-box;
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
+
     .popup-content input[type="text"]:focus,
     .popup-content input[type="email"]:focus,
     .popup-content input[type="password"]:focus,
@@ -142,101 +150,178 @@
     .popup-content textarea:focus {
       outline: none;
       border-color: var(--accent-color, #33b5e5);
-      box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 51, 181, 229), 0.35); 
+      box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 51, 181, 229), 0.35);
     }
 
     .popup-content textarea::placeholder {
-      font-family: 'Raleway', sans-serif; 
-      color: var(--text-secondary-placeholder, #868e96); 
-      opacity: 0.8; 
+      font-family: 'Raleway', sans-serif;
+      color: var(--text-secondary-placeholder, #868e96);
+      opacity: 0.8;
     }
 
     .popup-content textarea {
-      min-height: 110px; 
+      min-height: 110px;
       resize: vertical;
-      margin-bottom: 0.5rem; 
+      margin-bottom: 0.5rem;
     }
+
     .popup-content select {
       appearance: none;
-      -webkit-appearance: none; 
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23aaa'%3E%3Cpath d='M7 10L2 5h10z'/%3E%3C/svg%3E"); 
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23aaa'%3E%3Cpath d='M7 10L2 5h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 1rem center;
-      padding-right: 3rem; 
+      padding-right: 3rem;
     }
+
     .popup-content .input-label {
       display: block;
-      margin-bottom: 0.6rem; 
+      margin-bottom: 0.6rem;
       margin-left: 0.2rem;
       font-size: 0.9rem;
       color: var(--text-secondary, #adb5bd);
-      text-align: left; 
+      text-align: left;
       font-weight: 500;
     }
+
     .popup-content .error {
-      color: #f44336; 
-      margin: -0.5rem 0 1.2rem; 
+      color: #f44336;
+      margin: -0.5rem 0 1.2rem;
       font-size: 0.9rem;
       text-align: center;
     }
+
     .popup-content .success {
-      color: #4caf50; 
-      margin: -0.5rem 0 1.2rem; 
+      color: #4caf50;
+      margin: -0.5rem 0 1.2rem;
       font-size: 0.9rem;
       text-align: center;
     }
-    .popup-content.report-modal { max-width: 700px; }
-    .popup-content.delete-modal { max-width: 550px; }
-    .popup-content.delete-modal p { text-align: left; } 
-    .popup-content.delete-modal input[type="text"] { text-align: center; }
-    
-    .popup-content.claim-details-modal { max-width: 650px; }
-    .popup-content.item-detail-modal { max-width: 900px; }
 
-    .popup-content form .btn { 
-      margin-top: 1rem; 
-      padding: 12px 20px; 
+    .popup-content.report-modal {
+      max-width: 700px;
+    }
+
+    .popup-content.delete-modal {
+      max-width: 550px;
+    }
+
+    .popup-content.delete-modal p {
+      text-align: left;
+    }
+
+    .popup-content.delete-modal input[type="text"] {
+      text-align: center;
+    }
+
+    .popup-content.claim-details-modal {
+      max-width: 650px;
+    }
+
+    .popup-content.item-detail-modal {
+      max-width: 900px;
+    }
+
+    .popup-content form .btn {
+      margin-top: 1rem;
+      padding: 12px 20px;
       font-size: 1.05rem;
-      border-radius: 6px; 
-    }
-    .popup-content form .btn-full {
-        border-radius: 25px; 
+      border-radius: 6px;
     }
 
-    .popup-content .image-upload-container { margin-bottom: 1.5rem; }
+    .popup-content form .btn-full {
+      border-radius: 25px;
+    }
+
+    .popup-content .image-upload-container {
+      margin-bottom: 1.5rem;
+    }
+
     .popup-content .image-upload {
-      display: block; width: 100%; height: 120px;
+      display: block;
+      width: 100%;
+      height: 120px;
       border: 2px dashed var(--text-secondary-placeholder, #6c757d);
-      border-radius: 10px; cursor: pointer; position: relative;
-      margin-bottom: 1rem; background-color: var(--dark-bg, #1e222d);
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      margin-bottom: 1rem;
+      background-color: var(--dark-bg, #1e222d);
       transition: border-color 0.3s ease, background-color 0.3s ease;
     }
+
     .popup-content .image-upload:hover {
-        border-color: var(--accent-color, #33b5e5);
-        background-color: rgba(var(--accent-color-rgb, 51, 181, 229), 0.05); 
+      border-color: var(--accent-color, #33b5e5);
+      background-color: rgba(var(--accent-color-rgb, 51, 181, 229), 0.05);
     }
-    .popup-content .image-upload input { display: none; }
+
+    .popup-content .image-upload input {
+      display: none;
+    }
+
     .popup-content .upload-placeholder {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: var(--text-secondary-placeholder, #6c757d); text-align: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary-placeholder, #6c757d);
+      text-align: center;
     }
-    .popup-content .upload-placeholder i { font-size: 2rem; margin-bottom: 0.5rem; }
-    .popup-content .upload-preview { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+
+    .popup-content .upload-placeholder i {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .popup-content .upload-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
     .popup-content .preview-thumbnail {
-      position: relative; width: 80px; height: 80px;
-      border-radius: 5px; overflow: hidden;
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border-radius: 5px;
+      overflow: hidden;
       border: 1px solid var(--dark-bg, #1e222d);
     }
-    .popup-content .preview-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
-    .popup-content .remove-image {
-      position: absolute; top: 3px; right: 3px; width: 20px; height: 20px;
-      background-color: rgba(244, 67, 54, 0.8); color: white;
-      border: none; border-radius: 50%; display: flex;
-      align-items: center; justify-content: center; cursor: pointer;
-      font-size: 0.8rem; line-height: 1; transition: background-color 0.3s ease; padding: 0;
+
+    .popup-content .preview-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
-    .popup-content .remove-image:hover { background-color: rgba(244, 67, 54, 1); }
+
+    .popup-content .remove-image {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      width: 20px;
+      height: 20px;
+      background-color: rgba(244, 67, 54, 0.8);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      line-height: 1;
+      transition: background-color 0.3s ease;
+      padding: 0;
+    }
+
+    .popup-content .remove-image:hover {
+      background-color: rgba(244, 67, 54, 1);
+    }
 
     .phone-input-container {
       position: relative;
@@ -249,7 +334,7 @@
 
     .vue-tel-input input {
       background-color: var(--dark-bg, #1e222d) !important;
-      border: 1px solid rgba(var(--text-color-rgb, 255,255,255), 0.15) !important;
+      border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.15) !important;
       border-radius: 6px !important;
       color: var(--text-color, white) !important;
       font-size: 1rem !important;
@@ -265,7 +350,7 @@
 
     .vue-tel-input .vti__dropdown {
       background-color: var(--dark-bg, #1e222d) !important;
-      border: 1px solid rgba(var(--text-color-rgb, 255,255,255), 0.15) !important;
+      border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.15) !important;
       border-radius: 6px 0 0 6px !important;
     }
 
@@ -277,7 +362,7 @@
       background-color: var(--dark-bg, #1e222d) !important;
       border: 1px solid var(--accent-color, #33b5e5) !important;
       border-radius: 6px !important;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
       z-index: 100000 !important;
     }
 
@@ -318,149 +403,189 @@
       border-top-color: var(--accent-color, #33b5e5);
       animation: spin 1s linear infinite;
     }
-    
+
     .dashboard-loading {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background-color: rgba(30, 34, 45, 0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9998;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(30, 34, 45, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9998;
     }
 
     .flatpickr-calendar {
-        background: var(--dark-bg, #1e222d) !important;
-        border-radius: 6px !important;
-        border: 1px solid var(--accent-color, #33b5e5) !important;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
-        width: auto !important; 
+      background: var(--dark-bg, #1e222d) !important;
+      border-radius: 6px !important;
+      border: 1px solid var(--accent-color, #33b5e5) !important;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+      width: auto !important;
     }
+
     .flatpickr-months .flatpickr-month {
-        color: var(--text-color, white) !important;
-        fill: var(--text-color, white) !important;
+      color: var(--text-color, white) !important;
+      fill: var(--text-color, white) !important;
     }
+
     .flatpickr-months .flatpickr-prev-month svg,
     .flatpickr-months .flatpickr-next-month svg {
-        fill: var(--text-color, white) !important;
-        opacity: 0.7;
+      fill: var(--text-color, white) !important;
+      opacity: 0.7;
     }
+
     .flatpickr-months .flatpickr-prev-month:hover svg,
     .flatpickr-months .flatpickr-next-month:hover svg {
-        fill: var(--accent-color, #33b5e5) !important;
-        opacity: 1;
+      fill: var(--accent-color, #33b5e5) !important;
+      opacity: 1;
     }
+
     span.flatpickr-weekday {
-        color: var(--text-secondary, #adb5bd) !important;
+      color: var(--text-secondary, #adb5bd) !important;
     }
+
     .flatpickr-day {
-        color: var(--text-color, white) !important;
-        border: 1px solid transparent !important;
+      color: var(--text-color, white) !important;
+      border: 1px solid transparent !important;
     }
-    .flatpickr-day:hover, .flatpickr-day:focus {
-        background: var(--light-bg, #292E3D) !important;
-        border-color: var(--accent-color, #33b5e5) !important;
-        color: var(--text-color, white) !important;
+
+    .flatpickr-day:hover,
+    .flatpickr-day:focus {
+      background: var(--light-bg, #292E3D) !important;
+      border-color: var(--accent-color, #33b5e5) !important;
+      color: var(--text-color, white) !important;
     }
-    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange,
-    .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus,
-    .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover {
-        background: var(--accent-color, #33b5e5) !important;
-        border-color: var(--accent-color, #33b5e5) !important;
-        color: var(--text-color, white) !important;
+
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange,
+    .flatpickr-day.selected:focus,
+    .flatpickr-day.startRange:focus,
+    .flatpickr-day.endRange:focus,
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover {
+      background: var(--accent-color, #33b5e5) !important;
+      border-color: var(--accent-color, #33b5e5) !important;
+      color: var(--text-color, white) !important;
     }
+
     .flatpickr-day.today {
-        border-color: var(--primary-color, #6e7fff) !important; 
+      border-color: var(--primary-color, #6e7fff) !important;
     }
-    .flatpickr-day.today:hover, .flatpickr-day.today:focus {
-        background: var(--light-bg, #292E3D) !important;
-        border-color: var(--primary-color, #6e7fff) !important;
-        color: var(--text-color, white) !important;
+
+    .flatpickr-day.today:hover,
+    .flatpickr-day.today:focus {
+      background: var(--light-bg, #292E3D) !important;
+      border-color: var(--primary-color, #6e7fff) !important;
+      color: var(--text-color, white) !important;
     }
-    .flatpickr-day.disabled, .flatpickr-day.disabled:hover {
-        color: var(--text-secondary, #adb5bd) !important;
-        opacity: 0.4;
-        background: transparent !important;
+
+    .flatpickr-day.disabled,
+    .flatpickr-day.disabled:hover {
+      color: var(--text-secondary, #adb5bd) !important;
+      opacity: 0.4;
+      background: transparent !important;
     }
+
     .flatpickr-time {
-        border-top: 1px solid rgba(var(--text-color-rgb, 255,255,255), 0.15) !important;
+      border-top: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.15) !important;
     }
-    .flatpickr-time input, .flatpickr-time .flatpickr-am-pm {
-        color: var(--text-color, white) !important;
-        background: var(--dark-bg, #1e222d) !important;
-        border: 1px solid rgba(var(--text-color-rgb, 255,255,255), 0.15) !important;
+
+    .flatpickr-time input,
+    .flatpickr-time .flatpickr-am-pm {
+      color: var(--text-color, white) !important;
+      background: var(--dark-bg, #1e222d) !important;
+      border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.15) !important;
     }
+
     .numInputWrapper span:hover {
-        background: var(--light-bg, #292E3D) !important;
+      background: var(--light-bg, #292E3D) !important;
     }
+
     .flatpickr-current-month input.cur-year {
-        color: var(--text-color, white) !important;
+      color: var(--text-color, white) !important;
     }
 
     .popup-content .claim-details,
     .popup-content .item-detail-header,
     .popup-content .item-detail-content,
     .popup-content .modal-actions {
-        text-align: left; 
+      text-align: left;
     }
+
     .popup-content .claim-details h4,
     .popup-content .item-detail-header h2 {
-        text-align: left;
+      text-align: left;
     }
-    .popup-content .claim-status-container { text-align: center; }
-    .popup-content .loading-placeholder { text-align: center; }
+
+    .popup-content .claim-status-container {
+      text-align: center;
+    }
+
+    .popup-content .loading-placeholder {
+      text-align: center;
+    }
+
     .popup-content .modal-actions {
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid var(--dark-bg);
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.8rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--dark-bg);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.8rem;
     }
+
     .popup-content .modal-actions .btn {
-        margin-top: 0;
+      margin-top: 0;
     }
 
     .ai-enhance-button {
-        background-color: transparent;
-        border: 1px solid var(--accent-color, #33b5e5);
-        color: var(--accent-color, #33b5e5);
-        padding: 0.3rem 0.6rem;
-        font-size: 0.8rem;
-        border-radius: 15px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin-top: 0.3rem;
-        margin-bottom: 1rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        float: right; 
-    }
-    .ai-enhance-button:hover {
-        background-color: rgba(var(--accent-color-rgb, 51, 181, 229), 0.1);
-    }
-    .ai-enhance-button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-    .ai-enhance-button .spinner-tiny {
-        width: 12px;
-        height: 12px;
-        border: 2px solid rgba(var(--accent-color-rgb, 51, 181, 229), 0.2);
-        border-top-color: var(--accent-color, #33b5e5);
-    }
-    .ai-error-message {
-        color: #f44336; 
-        font-size: 0.85rem;
-        margin-top: -0.8rem; 
-        margin-bottom: 1rem;
-        text-align: right;
-        clear: both;
+      background-color: transparent;
+      border: 1px solid var(--accent-color, #33b5e5);
+      color: var(--accent-color, #33b5e5);
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 0.3rem;
+      margin-bottom: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      float: right;
     }
 
+    .ai-enhance-button:hover {
+      background-color: rgba(var(--accent-color-rgb, 51, 181, 229), 0.1);
+    }
+
+    .ai-enhance-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .ai-enhance-button .spinner-tiny {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(var(--accent-color-rgb, 51, 181, 229), 0.2);
+      border-top-color: var(--accent-color, #33b5e5);
+    }
+
+    .ai-error-message {
+      color: #f44336;
+      font-size: 0.85rem;
+      margin-top: -0.8rem;
+      margin-bottom: 1rem;
+      text-align: right;
+      clear: both;
+    }
   </style>
 </head>
+
 <body>
   <div id="appLoading" class="app-loading">
     <div class="loading-spinner"></div>
@@ -507,10 +632,8 @@
             </div>
             <div class="user-info">
               <div class="welcome-header">
-                <div
-                  class="profile-picture large"
-                  :style="{ backgroundColor: getProfilePictureColor(userProfile.displayName) }"
-                >
+                <div class="profile-picture large"
+                  :style="{ backgroundColor: getProfilePictureColor(userProfile.displayName) }">
                   {{ getProfileInitials(userProfile.displayName) }}
                 </div>
                 <h1>Welcome, {{ userProfile.displayName || user.email }}</h1>
@@ -519,7 +642,7 @@
             </div>
           </div>
           <div class="dashboard-actions">
-            <button class="btn" @click="openReportLostPopup()"> 
+            <button class="btn" @click="openReportLostPopup()">
               <i class="fas fa-search"></i> Report Lost Item
             </button>
           </div>
@@ -529,12 +652,8 @@
       <section class="dashboard-content">
         <div class="container">
           <div class="dashboard-tabs">
-            <button
-              v-for="tab in tabs"
-              :key="tab.id"
-              :class="['tab-btn', { active: activeTab === tab.id }]"
-              @click="activeTab = tab.id"
-            >
+            <button v-for="tab in tabs" :key="tab.id" :class="['tab-btn', { active: activeTab === tab.id }]"
+              @click="activeTab = tab.id">
               <i :class="tab.icon"></i> {{ tab.name }}
               <span v-if="getTabCount(tab.id)" class="tab-count">{{ getTabCount(tab.id) }}</span>
             </button>
@@ -553,13 +672,8 @@
               <p>You don't have any notifications at the moment</p>
             </div>
             <div class="notifications-list" v-else>
-              <div
-                v-for="(notification, index) in notifications"
-                :key="index"
-                class="notification-item"
-                :class="{ unread: !notification.read }"
-                @click="markAsRead(notification.id)"
-              >
+              <div v-for="(notification, index) in notifications" :key="index" class="notification-item"
+                :class="{ unread: !notification.read }" @click="markAsRead(notification.id)">
                 <div class="notification-icon">
                   <i :class="getNotificationIcon(notification.type)"></i>
                 </div>
@@ -569,7 +683,8 @@
                   <div class="notification-time">{{ formatDate(notification.timestamp) }}</div>
                 </div>
                 <div class="notification-actions">
-                  <button class="action-btn" v-if="notification.actionable" @click.stop="handleNotificationAction(notification)">
+                  <button class="action-btn" v-if="notification.actionable"
+                    @click.stop="handleNotificationAction(notification)">
                     <i class="fas fa-arrow-right"></i>
                   </button>
                 </div>
@@ -580,7 +695,7 @@
           <div class="tab-content" v-if="activeTab === 'lost'">
             <div class="section-header">
               <h2>My Lost Item Reports</h2>
-              <button class="btn-tiny" @click="openReportLostPopup()"> 
+              <button class="btn-tiny" @click="openReportLostPopup()">
                 <i class="fas fa-plus"></i> Report New
               </button>
             </div>
@@ -588,12 +703,14 @@
               <i class="fas fa-search"></i>
               <h3>No Lost Item Reports</h3>
               <p>You haven't reported any lost items yet</p>
-              <button class="btn" @click="openReportLostPopup()">Report a Lost Item</button> 
+              <button class="btn" @click="openReportLostPopup()">Report a Lost Item</button>
             </div>
             <div class="items-grid" v-else>
               <div class="item-card" v-for="(item, index) in lostItems" :key="index">
-                <div class="item-status" :class="getClaimStatusClass(item.status)">{{ item.status.replace('_', ' ') }}</div>
-                <div class="item-image" :style="{ backgroundImage: `url(${item.image || 'images/no-image.png'})` }"></div>
+                <div class="item-status" :class="getClaimStatusClass(item.status)">{{ item.status.replace('_', ' ') }}
+                </div>
+                <div class="item-image" :style="{ backgroundImage: `url(${item.image || 'images/no-image.png'})` }">
+                </div>
                 <div class="item-info">
                   <h3>{{ item.name }}</h3>
                   <div class="item-meta">
@@ -618,8 +735,10 @@
             </div>
             <div class="claims-list" v-else>
               <div class="claim-item" v-for="(claim, index) in claims" :key="index">
-                <div class="claim-status" :class="getClaimStatusClass(getEffectiveClaimStatus(claim))">{{ getEffectiveClaimStatus(claim) }}</div>
-                <div class="claim-image" :style="{ backgroundImage: `url(${claim.item?.image || 'images/no-image.png'})` }"></div>
+                <div class="claim-status" :class="getClaimStatusClass(getEffectiveClaimStatus(claim))">{{
+                  getEffectiveClaimStatus(claim) }}</div>
+                <div class="claim-image"
+                  :style="{ backgroundImage: `url(${claim.item?.image || 'images/no-image.png'})` }"></div>
                 <div class="claim-info">
                   <h3>{{ claim.item?.name || 'Item details unavailable' }}</h3>
                   <div class="claim-meta">
@@ -642,16 +761,13 @@
                 <h3>Profile</h3>
                 <input type="text" v-model="userProfile.displayName" placeholder="Display Name">
                 <div class="phone-input-container">
-                  <vue-tel-input 
-                    v-model="userProfile.phone" 
-                    mode="international"
+                  <vue-tel-input v-model="userProfile.phone" mode="international"
                     :dropdown-options="{ showDialCodeInSelection: true }"
-                    :input-options="{ placeholder: 'Phone (Optional)' }"
-                    @validate="onPhoneValidate">
+                    :input-options="{ placeholder: 'Phone (Optional)' }" @validate="onPhoneValidate">
                   </vue-tel-input>
                 </div>
                 <button class="btn" @click="updateProfile" :disabled="isUpdating">
-                    {{ isUpdating ? 'Updating...' : 'Update Profile' }}
+                  {{ isUpdating ? 'Updating...' : 'Update Profile' }}
                 </button>
               </div>
               <div class="settings-card">
@@ -687,16 +803,16 @@
                   </label>
                 </div>
                 <button class="btn" @click="updatePreferences" :disabled="isUpdating">
-                    {{ isUpdating ? 'Saving...' : 'Save Preferences' }}
+                  {{ isUpdating ? 'Saving...' : 'Save Preferences' }}
                 </button>
               </div>
               <div class="settings-card">
                 <h3>Security</h3>
                 <div class="security-option">
-                  <button class="btn" @click="openChangePasswordPopup()">Change Password</button> 
+                  <button class="btn" @click="openChangePasswordPopup()">Change Password</button>
                 </div>
                 <div class="security-option">
-                  <button class="btn btn-danger" @click="openDeleteAccountPopup()">Delete Account</button> 
+                  <button class="btn btn-danger" @click="openDeleteAccountPopup()">Delete Account</button>
                 </div>
               </div>
             </div>
@@ -715,15 +831,19 @@
 
         <form @submit.prevent="submitLoginForm">
           <input type="email" v-model="loginForm.email" placeholder="Email Address" required autocomplete="username">
-          <input type="password" v-model="loginForm.password" placeholder="Password" required autocomplete="current-password">
+          <input type="password" v-model="loginForm.password" placeholder="Password" required
+            autocomplete="current-password">
           <div v-if="authError" class="error">{{ authError }}</div>
           <button type="submit" class="btn btn-full">{{ isSigningUp ? 'Sign Up' : 'Login' }}</button>
         </form>
 
         <div class="login-options">
-            <a href="#" @click.prevent="forgotPassword = !forgotPassword; magicLinkMode = false" v-if="!isSigningUp && !magicLinkMode && !forgotPassword">Forgot Password?</a>
-            <a href="#" @click.prevent="forgotPassword = false; magicLinkMode = false" v-if="forgotPassword">Back to Login</a>
-            <a href="#" @click.prevent="magicLinkMode = !magicLinkMode; forgotPassword = false">{{ magicLinkMode ? 'Use Password Instead' : 'Use Magic Link' }}</a>
+          <a href="#" @click.prevent="forgotPassword = !forgotPassword; magicLinkMode = false"
+            v-if="!isSigningUp && !magicLinkMode && !forgotPassword">Forgot Password?</a>
+          <a href="#" @click.prevent="forgotPassword = false; magicLinkMode = false" v-if="forgotPassword">Back to
+            Login</a>
+          <a href="#" @click.prevent="magicLinkMode = !magicLinkMode; forgotPassword = false">{{ magicLinkMode ? 'Use
+            Password Instead' : 'Use Magic Link' }}</a>
         </div>
 
         <div v-if="forgotPassword" class="sub-section">
@@ -756,11 +876,12 @@
           <button class="social-btn twitter" @click="signInWithTwitter">
             <i class="fab fa-x-twitter"></i> Continue with X
           </button>
-           <p v-if="showAppleComingSoon" class="info">Apple Sign In coming soon!</p>
+          <p v-if="showAppleComingSoon" class="info">Apple Sign In coming soon!</p>
         </div>
 
         <p class="toggle-auth">
-          <a href="#" @click.prevent="isSigningUp = !isSigningUp; authError=null; forgotPassword=false; magicLinkMode=false">
+          <a href="#"
+            @click.prevent="isSigningUp = !isSigningUp; authError=null; forgotPassword=false; magicLinkMode=false">
             {{ isSigningUp ? 'Already have an account? Login' : 'Don\'t have an account? Sign Up' }}
           </a>
         </p>
@@ -775,7 +896,7 @@
     </div>
 
     <div id="reportLostItemPopup" class="popup-container">
-      <div class="popup-content report-modal"> 
+      <div class="popup-content report-modal">
         <span class="popup-close-btn" @click="closeReportLostPopup()">×</span>
         <h2 v-if="!lostItemForm.id">Report Lost Item</h2>
         <h2 v-else>Edit Lost Item Report</h2>
@@ -785,21 +906,24 @@
             <option disabled value="">Select Category</option>
             <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
           </select>
-          <label class="input-label" for="lostDatePopupFlatpickr">Date Lost</label> 
+          <label class="input-label" for="lostDatePopupFlatpickr">Date Lost</label>
           <input id="lostDatePopupFlatpickr" type="text" placeholder="Select Date Lost" readonly required>
           <select v-model="lostItemForm.location" required>
             <option disabled value="">Select Location</option>
             <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
           </select>
-          <textarea v-model="lostItemForm.description" placeholder="Detailed Description (color, brand, identifying features, where you last saw it, etc.)" required></textarea>
-          <button type="button" class="ai-enhance-button" @click="enhanceDescription()" :disabled="isEnhancingDescription">
+          <textarea v-model="lostItemForm.description"
+            placeholder="Detailed Description (color, brand, identifying features, where you last saw it, etc.)"
+            required></textarea>
+          <button type="button" class="ai-enhance-button" @click="enhanceDescription()"
+            :disabled="isEnhancingDescription">
             <span v-if="isEnhancingDescription" class="spinner spinner-tiny"></span>
             <span v-else><i class="fas fa-magic"></i> Enhance with AI</span>
           </button>
           <div v-if="aiError" class="ai-error-message">{{ aiError }}</div>
-          <div style="clear:both;"></div>
-          
-          <div class="image-upload-container" style="margin-top: 1rem;">
+          <div class="clear-both"></div>
+
+          <div class="image-upload-container mt-1">
             <label class="image-upload">
               <input type="file" multiple @change="handleImageUpload($event, 'lost')" accept="image/*">
               <div class="upload-placeholder">
@@ -814,7 +938,7 @@
               </div>
             </div>
           </div>
-          <button type="submit" class="btn btn-full" :disabled="isSubmitting || isEnhancingDescription"> 
+          <button type="submit" class="btn btn-full" :disabled="isSubmitting || isEnhancingDescription">
             {{ isSubmitting ? 'Submitting...' : (lostItemForm.id ? 'Update Report' : 'Submit Report') }}
           </button>
         </form>
@@ -823,16 +947,19 @@
 
 
     <div id="changePasswordPopup" class="popup-container">
-      <div class="popup-content"> 
+      <div class="popup-content">
         <span class="popup-close-btn" @click="closeChangePasswordPopup()">×</span>
         <h2>Change Password</h2>
         <form @submit.prevent="changePassword">
-          <input type="password" v-model="passwordForm.currentPassword" placeholder="Current Password" required autocomplete="current-password">
-          <input type="password" v-model="passwordForm.newPassword" placeholder="New Password (min. 6 characters)" required autocomplete="new-password">
-          <input type="password" v-model="passwordForm.confirmPassword" placeholder="Confirm New Password" required autocomplete="new-password">
+          <input type="password" v-model="passwordForm.currentPassword" placeholder="Current Password" required
+            autocomplete="current-password">
+          <input type="password" v-model="passwordForm.newPassword" placeholder="New Password (min. 6 characters)"
+            required autocomplete="new-password">
+          <input type="password" v-model="passwordForm.confirmPassword" placeholder="Confirm New Password" required
+            autocomplete="new-password">
           <div v-if="passwordError" class="error">{{ passwordError }}</div>
           <div v-if="passwordSuccess" class="success">{{ passwordSuccess }}</div>
-          <button type="submit" class="btn btn-full" :disabled="isUpdating"> 
+          <button type="submit" class="btn btn-full" :disabled="isUpdating">
             {{ isUpdating ? 'Changing...' : 'Change Password' }}
           </button>
         </form>
@@ -840,15 +967,17 @@
     </div>
 
     <div id="deleteAccountPopup" class="popup-container">
-      <div class="popup-content delete-modal"> 
+      <div class="popup-content delete-modal">
         <span class="popup-close-btn" @click="closeDeleteAccountPopup()">×</span>
         <h2>Delete Account</h2>
-        <p>Are you sure you want to delete your account? This will permanently remove all your reported items, claims, and personal information.</p>
+        <p>Are you sure you want to delete your account? This will permanently remove all your reported items, claims,
+          and personal information.</p>
         <p><strong>This action cannot be undone.</strong></p>
         <p>To confirm, please type <strong>DELETE</strong> in the box below.</p>
         <input type="text" v-model="deleteConfirmation" placeholder="Type DELETE here" required>
         <div v-if="authError" class="error">{{ authError }}</div>
-        <button class="btn btn-danger btn-full" @click="deleteAccount" :disabled="isDeleting || deleteConfirmation !== 'DELETE'"> 
+        <button class="btn btn-danger btn-full" @click="deleteAccount"
+          :disabled="isDeleting || deleteConfirmation !== 'DELETE'">
           {{ isDeleting ? 'Deleting...' : 'Permanently Delete My Account' }}
         </button>
       </div>
@@ -859,65 +988,74 @@
         <span class="popup-close-btn" @click="closeClaimDetailsPopup()">×</span>
         <h2>Claim Details</h2>
         <div v-if="selectedClaim">
-           <div class="claim-details">
-              <div class="claim-status-container">
-                <span class="status-badge large" :class="getClaimStatusClass(getEffectiveClaimStatus(selectedClaim))">
-                    {{ getEffectiveClaimStatus(selectedClaim) }}
-                </span>
-                <p class="status-message" v-if="getEffectiveClaimStatus(selectedClaim) === 'pending'">Your claim is being reviewed by the item finder.</p>
-                <p class="status-message" v-if="getEffectiveClaimStatus(selectedClaim) === 'approved'">Your claim is approved! Please contact the finder (if details provided) or support to arrange collection.</p>
-                <p class="status-message" v-if="getEffectiveClaimStatus(selectedClaim) === 'collected'">This item has been marked as collected.</p>
-                <p class="status-message" v-if="getEffectiveClaimStatus(selectedClaim) === 'rejected'">Your claim was rejected. This might happen if proof of ownership wasn't sufficient or another claim was approved. Contact support if you believe this is an error.</p>
-              </div>
+          <div class="claim-details">
+            <div class="claim-status-container">
+              <span class="status-badge large" :class="getClaimStatusClass(getEffectiveClaimStatus(selectedClaim))">
+                {{ getEffectiveClaimStatus(selectedClaim) }}
+              </span>
+              <p class="status-message" v-if="getEffectiveClaimStatus(selectedClaim) === 'pending'">Your claim is being
+                reviewed by the item finder.</p>
+              <p class="status-message" v-if="getEffectiveClaimStatus(selectedClaim) === 'approved'">Your claim is
+                approved! Please contact the finder (if details provided) or support to arrange collection.</p>
+              <p class="status-message" v-if="getEffectiveClaimStatus(selectedClaim) === 'collected'">This item has been
+                marked as collected.</p>
+              <p class="status-message" v-if="getEffectiveClaimStatus(selectedClaim) === 'rejected'">Your claim was
+                rejected. This might happen if proof of ownership wasn't sufficient or another claim was approved.
+                Contact support if you believe this is an error.</p>
+            </div>
 
-              <div class="claim-details-section">
-                <h4>Item Information</h4>
-                <div class="claim-item-preview">
-                    <div class="claim-item-image" :style="{ backgroundImage: `url(${selectedClaim.item?.image || 'images/no-image.png'})` }"></div>
-                    <div class="claim-item-info">
-                        <div class="detail-row">
-                            <span class="detail-label">Item Name</span>
-                            <span class="detail-value">{{ selectedClaim.item?.name || 'N/A' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Category</span>
-                            <span class="detail-value">{{ selectedClaim.item?.category || 'N/A' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Date Found</span>
-                            <span class="detail-value">{{ formatDate(selectedClaim.item?.dateFound) }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Location Found</span>
-                            <span class="detail-value">{{ selectedClaim.item?.location || 'N/A' }}</span>
-                        </div>
-                    </div>
-                </div>
-                 <div class="detail-row">
-                  <span class="detail-label">Item Description</span>
-                  <span class="detail-value description">{{ selectedClaim.item?.description || 'No description available.' }}</span>
+            <div class="claim-details-section">
+              <h4>Item Information</h4>
+              <div class="claim-item-preview">
+                <div class="claim-item-image"
+                  :style="{ backgroundImage: `url(${selectedClaim.item?.image || 'images/no-image.png'})` }"></div>
+                <div class="claim-item-info">
+                  <div class="detail-row">
+                    <span class="detail-label">Item Name</span>
+                    <span class="detail-value">{{ selectedClaim.item?.name || 'N/A' }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-label">Category</span>
+                    <span class="detail-value">{{ selectedClaim.item?.category || 'N/A' }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-label">Date Found</span>
+                    <span class="detail-value">{{ formatDate(selectedClaim.item?.dateFound) }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-label">Location Found</span>
+                    <span class="detail-value">{{ selectedClaim.item?.location || 'N/A' }}</span>
+                  </div>
                 </div>
               </div>
-
-              <div class="claim-details-section">
-                <h4>Your Claim</h4>
-                 <div class="detail-row">
-                  <span class="detail-label">Claim Date</span>
-                  <span class="detail-value">{{ formatDate(selectedClaim.claimDate) }}</span>
-                </div>
-                <div class="detail-row" v-if="selectedClaim.pickupDeadline">
-                  <span class="detail-label">Pickup Deadline</span>
-                  <span class="detail-value" :class="{ 'text-warning': isNearDeadline(selectedClaim.pickupDeadline), 'text-danger': isPastDeadline(selectedClaim.pickupDeadline) }">{{ formatDate(selectedClaim.pickupDeadline) }}</span>
-                </div>
+              <div class="detail-row">
+                <span class="detail-label">Item Description</span>
+                <span class="detail-value description">{{ selectedClaim.item?.description || 'No description available.'
+                  }}</span>
               </div>
             </div>
+
+            <div class="claim-details-section">
+              <h4>Your Claim</h4>
+              <div class="detail-row">
+                <span class="detail-label">Claim Date</span>
+                <span class="detail-value">{{ formatDate(selectedClaim.claimDate) }}</span>
+              </div>
+              <div class="detail-row" v-if="selectedClaim.pickupDeadline">
+                <span class="detail-label">Pickup Deadline</span>
+                <span class="detail-value"
+                  :class="{ 'text-warning': isNearDeadline(selectedClaim.pickupDeadline), 'text-danger': isPastDeadline(selectedClaim.pickupDeadline) }">{{
+                  formatDate(selectedClaim.pickupDeadline) }}</span>
+              </div>
+            </div>
+          </div>
         </div>
         <div v-else class="loading-placeholder">
-            <p>Loading claim details...</p>
-            <div class="spinner-small"></div>
+          <p>Loading claim details...</p>
+          <div class="spinner-small"></div>
         </div>
         <div class="modal-actions">
-             <button class="btn btn-outlined" @click="closeClaimDetailsPopup()">Close</button>
+          <button class="btn btn-outlined" @click="closeClaimDetailsPopup()">Close</button>
         </div>
       </div>
     </div>
@@ -926,43 +1064,52 @@
       <div class="popup-content item-detail-modal">
         <span class="popup-close-btn" @click="closeItemDetailsPopup()">×</span>
         <div v-if="selectedItem">
-            <div class="item-detail-header">
+          <div class="item-detail-header">
             <h2>{{ selectedItem.name }}</h2>
             <div class="header-actions">
-                <button class="btn btn-tiny btn-outlined" @click="editItem(selectedItem, selectedItemType)">
-                    <i class="fas fa-pencil-alt"></i> Edit
-                </button>
-                <button class="btn btn-tiny btn-danger" @click="deleteItem(selectedItem.id, selectedItemType)">
-                    <i class="fas fa-trash-alt"></i> Delete
-                </button>
+              <button class="btn btn-tiny btn-outlined" @click="editItem(selectedItem, selectedItemType)">
+                <i class="fas fa-pencil-alt"></i> Edit
+              </button>
+              <button class="btn btn-tiny btn-danger" @click="deleteItem(selectedItem.id, selectedItemType)">
+                <i class="fas fa-trash-alt"></i> Delete
+              </button>
             </div>
-            </div>
-            <div class="item-detail-content">
+          </div>
+          <div class="item-detail-content">
             <div class="item-images">
-                <div class="main-image" :style="{ backgroundImage: `url(${selectedItem.image || 'images/no-image.png'})` }"></div>
+              <div class="main-image"
+                :style="{ backgroundImage: `url(${selectedItem.image || 'images/no-image.png'})` }"></div>
             </div>
             <div class="item-details">
-                <div class="detail-item"><strong class="detail-key">Category:</strong> <span class="detail-val">{{ selectedItem.category }}</span></div>
-                <div class="detail-item"><strong class="detail-key">Date {{ selectedItemType === 'lost' ? 'Lost' : 'Found' }}:</strong> <span class="detail-val">{{ selectedItemType === 'lost' ? formatDate(selectedItem.dateLost) : formatDate(selectedItem.dateFound) }}</span></div>
-                <div class="detail-item"><strong class="detail-key">Location:</strong> <span class="detail-val">{{ selectedItem.location }}</span></div>
-                <div class="detail-item"><strong class="detail-key">Status:</strong> <span class="status-badge inline" :class="getClaimStatusClass(selectedItem.status)">{{ selectedItem.status.replace('_', ' ') }}</span></div>
-                <div class="detail-item full-width"><strong class="detail-key">Description:</strong> <p class="detail-val description">{{ selectedItem.description }}</p></div>
+              <div class="detail-item"><strong class="detail-key">Category:</strong> <span class="detail-val">{{
+                  selectedItem.category }}</span></div>
+              <div class="detail-item"><strong class="detail-key">Date {{ selectedItemType === 'lost' ? 'Lost' : 'Found'
+                  }}:</strong> <span class="detail-val">{{ selectedItemType === 'lost' ?
+                  formatDate(selectedItem.dateLost) : formatDate(selectedItem.dateFound) }}</span></div>
+              <div class="detail-item"><strong class="detail-key">Location:</strong> <span class="detail-val">{{
+                  selectedItem.location }}</span></div>
+              <div class="detail-item"><strong class="detail-key">Status:</strong> <span class="status-badge inline"
+                  :class="getClaimStatusClass(selectedItem.status)">{{ selectedItem.status.replace('_', ' ') }}</span>
+              </div>
+              <div class="detail-item full-width"><strong class="detail-key">Description:</strong>
+                <p class="detail-val description">{{ selectedItem.description }}</p>
+              </div>
             </div>
-            </div>
+          </div>
         </div>
         <div v-else class="loading-placeholder">
-            <p>Loading item details...</p>
-            <div class="spinner-small"></div>
+          <p>Loading item details...</p>
+          <div class="spinner-small"></div>
         </div>
         <div class="modal-actions">
           <button class="btn btn-outlined" @click="closeItemDetailsPopup()">Close</button>
         </div>
       </div>
     </div>
-    <SpeedInsights />
+
   </div>
 
-  <!-- Name Collection Modal -->
+
   <div class="modal-overlay" v-if="showNameCollectionModal" @click.self="false">
     <div class="modal name-collection-modal">
       <div class="modal-header">
@@ -972,23 +1119,13 @@
       <form @submit.prevent="submitNameCollection" class="modal-form">
         <div class="form-group">
           <label for="firstName">First Name *</label>
-          <input
-            type="text"
-            id="firstName"
-            v-model="nameCollectionForm.firstName"
-            required
-            placeholder="Enter your first name"
-          >
+          <input type="text" id="firstName" v-model="nameCollectionForm.firstName" required
+            placeholder="Enter your first name">
         </div>
         <div class="form-group">
           <label for="lastName">Last Name *</label>
-          <input
-            type="text"
-            id="lastName"
-            v-model="nameCollectionForm.lastName"
-            required
-            placeholder="Enter your last name"
-          >
+          <input type="text" id="lastName" v-model="nameCollectionForm.lastName" required
+            placeholder="Enter your last name">
         </div>
         <div class="modal-actions">
           <button type="submit" class="btn" :disabled="isUpdating">
@@ -1006,10 +1143,11 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue-tel-input@8/dist/vue-tel-input.umd.min.js"></script>
-  
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> 
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <script src="api/env.js"></script>
   <script src="scripts/dashboard.js"></script>
 </body>
+
 </html>

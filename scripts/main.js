@@ -91,7 +91,7 @@ const app = Vue.createApp({
       const item = params.get('item');
       const issue = params.get('issue');
       let prefilledMessage = "";
-      
+
       if (claim || claimId) {
         const id = claim || claimId;
         if (issue === 'pickup_dispute') {
@@ -103,17 +103,17 @@ const app = Vue.createApp({
         }
         prefilledMessage += "Claim ID: " + id + "\n";
       }
-      
+
       if (item) {
         prefilledMessage += "Item: " + decodeURIComponent(item) + "\n";
       }
-      
+
       if (issue && issue !== 'pickup_dispute') {
         prefilledMessage += "Issue type: " + issue.replace(/_/g, ' ') + "\n";
       }
-      
+
       this.contactForm.message = prefilledMessage;
-      
+
       if (window.location.hash.includes('contact')) {
         this.$nextTick(() => {
           const contactSection = document.getElementById('contact');
@@ -230,26 +230,26 @@ const app = Vue.createApp({
         body: formData,
         headers: { 'Accept': 'application/json' }
       })
-      .then(response => {
-        if (response.ok) {
-          this.formSubmitted = true;
-          this.contactForm = {
-            name: '',
-            email: '',
-            phone: '',
-            subject: '',
-            message: ''
-          };
-        } else {
-          throw new Error('Form submission failed');
-        }
-      })
-      .catch(() => {
-        alert('There was an error submitting the form. Please try again later.');
-      })
-      .finally(() => {
-        this.formSubmitting = false;
-      });
+        .then(response => {
+          if (response.ok) {
+            this.formSubmitted = true;
+            this.contactForm = {
+              name: '',
+              email: '',
+              phone: '',
+              subject: '',
+              message: ''
+            };
+          } else {
+            throw new Error('Form submission failed');
+          }
+        })
+        .catch(() => {
+          alert('There was an error submitting the form. Please try again later.');
+        })
+        .finally(() => {
+          this.formSubmitting = false;
+        });
     },
     submitLoginForm() {
       this.authError = null;
@@ -258,25 +258,25 @@ const app = Vue.createApp({
           this.loginForm.email,
           this.loginForm.password
         )
-        .then(() => {
-          this.showLoginModal = false;
-          this.loginForm = { email: '', password: '' };
-        })
-        .catch(error => {
-          this.authError = error.message;
-        });
+          .then(() => {
+            this.showLoginModal = false;
+            this.loginForm = { email: '', password: '' };
+          })
+          .catch(error => {
+            this.authError = error.message;
+          });
       } else {
         firebase.auth().signInWithEmailAndPassword(
           this.loginForm.email,
           this.loginForm.password
         )
-        .then(() => {
-          this.showLoginModal = false;
-          this.loginForm = { email: '', password: '' };
-        })
-        .catch(error => {
-          this.authError = error.message;
-        });
+          .then(() => {
+            this.showLoginModal = false;
+            this.loginForm = { email: '', password: '' };
+          })
+          .catch(error => {
+            this.authError = error.message;
+          });
       }
     },
     sendMagicLink() {
@@ -291,16 +291,16 @@ const app = Vue.createApp({
         handleCodeInApp: true
       };
       firebase.auth().sendSignInLinkToEmail(this.magicLinkEmail, actionCodeSettings)
-      .then(() => {
-        window.localStorage.setItem('emailForSignIn', this.magicLinkEmail);
-        this.magicLinkSent = true;
-      })
-      .catch(error => {
-        this.authError = error.message;
-      })
-      .finally(() => {
-        this.magicLinkSending = false;
-      });
+        .then(() => {
+          window.localStorage.setItem('emailForSignIn', this.magicLinkEmail);
+          this.magicLinkSent = true;
+        })
+        .catch(error => {
+          this.authError = error.message;
+        })
+        .finally(() => {
+          this.magicLinkSending = false;
+        });
     },
     sendPasswordReset() {
       if (!this.resetEmail) {
@@ -310,38 +310,38 @@ const app = Vue.createApp({
       this.passwordResetSending = true;
       this.authError = null;
       firebase.auth().sendPasswordResetEmail(this.resetEmail)
-      .then(() => {
-        this.passwordResetSent = true;
-      })
-      .catch(error => {
-        this.authError = error.message;
-      })
-      .finally(() => {
-        this.passwordResetSending = false;
-      });
+        .then(() => {
+          this.passwordResetSent = true;
+        })
+        .catch(error => {
+          this.authError = error.message;
+        })
+        .finally(() => {
+          this.passwordResetSending = false;
+        });
     },
     signInWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithPopup(provider)
-      .then(() => {
-        this.showLoginModal = false;
-      })
-      .catch(error => {
-        this.authError = error.message;
-      });
+        .then(() => {
+          this.showLoginModal = false;
+        })
+        .catch(error => {
+          this.authError = error.message;
+        });
     },
     signInWithTwitter() {
       const provider = new firebase.auth.TwitterAuthProvider();
       firebase.auth().signInWithPopup(provider)
-      .then(() => {
-        this.showLoginModal = false;
-      })
-      .catch(error => {
-        this.authError = error.message;
-      });
+        .then(() => {
+          this.showLoginModal = false;
+        })
+        .catch(error => {
+          this.authError = error.message;
+        });
     },
     signOut() {
-      firebase.auth().signOut().catch(() => {});
+      firebase.auth().signOut().catch(() => { });
     },
     loadUserProfile() {
       if (!this.user) return;
@@ -388,11 +388,7 @@ const app = Vue.createApp({
   }
 });
 
-if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-  import('@vercel/speed-insights/vue').then(({ SpeedInsights }) => {
-    app.component('SpeedInsights', SpeedInsights);
-  });
-}
+
 
 app.mount('#app');
 
@@ -403,14 +399,14 @@ if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
   }
   if (email) {
     firebase.auth().signInWithEmailLink(email, window.location.href)
-    .then(() => {
-      window.localStorage.removeItem('emailForSignIn');
-      if (window.history && window.history.replaceState) {
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-    })
-    .catch(() => {
-      alert("Error signing in. Please try again.");
-    });
+      .then(() => {
+        window.localStorage.removeItem('emailForSignIn');
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      })
+      .catch(() => {
+        alert("Error signing in. Please try again.");
+      });
   }
 }
