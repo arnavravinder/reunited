@@ -277,8 +277,7 @@
             v-if="!isSigningUp && !magicLinkMode && !forgotPassword">Forgot Password?</a>
           <a href="#" @click.prevent="forgotPassword = false; magicLinkMode = false" v-if="forgotPassword">Back to
             Login</a>
-          <a href="#" @click.prevent="magicLinkMode = !magicLinkMode; forgotPassword = false">{{ magicLinkMode ? 'Use
-            Password Instead' : 'Use Magic Link' }}</a>
+          <a href="#" @click.prevent="magicLinkMode = !magicLinkMode; forgotPassword = false">{{ magicLinkMode ? 'Use Password Instead' : 'Use Magic Link' }}</a>
         </div>
 
         <div v-if="forgotPassword" class="sub-section">
