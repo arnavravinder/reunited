@@ -294,7 +294,7 @@ Item name:`;
           throw new Error('Unexpected response format from AI service');
         }
       } catch (error) {
-        console.error('Error enhancing description:', error);
+
         this.aiError = `Failed to enhance description: ${error.message}. Please try again.`;
       } finally {
         this.isEnhancingDescription = false;
@@ -307,7 +307,7 @@ Item name:`;
         popupMessage.textContent = message;
         popup.style.display = 'flex';
       } else {
-        console.error('Generic message popup elements not found');
+
       }
     },
     hideGenericMessagePopup() {
@@ -368,7 +368,7 @@ Item name:`;
       } else if (claim) {
         this.selectedClaim = { ...claim, item: { name: 'Item details unavailable', category: '', dateFound: '', location: '', description: '' } };
       } else {
-        console.error("Attempted to view details for an invalid claim object.");
+
         return;
       }
       const popup = document.getElementById('claimDetailsPopup');
@@ -518,7 +518,7 @@ Item name:`;
               email: this.userProfile.email,
               createdAt: firebase.firestore.FieldValue.serverTimestamp(),
               preferences: this.userPreferences
-            }).catch(error => console.error("Error creating user profile doc:", error));
+            }).catch(error => { });
 
             if (!this.userProfile.displayName || this.userProfile.displayName.trim().length === 0) {
               this.showNameCollectionModal = true;
@@ -528,7 +528,7 @@ Item name:`;
           this.cache.lastUpdate = Date.now();
         })
         .catch(error => {
-          console.error("Error loading user profile:", error);
+
         });
     },
     loadNotifications() {
@@ -547,7 +547,7 @@ Item name:`;
           this.cache.notifications = [...this.notifications];
         })
         .catch(error => {
-          console.error("Error loading notifications:", error);
+
         });
     },
     loadLostItems() {
@@ -565,7 +565,7 @@ Item name:`;
           this.cache.lostItems = [...this.lostItems];
         })
         .catch(error => {
-          console.error("Error loading lost items:", error);
+
         });
     },
     loadClaims() {
@@ -592,16 +592,16 @@ Item name:`;
                       item: { id: itemDoc.id, ...itemDoc.data() }
                     };
                   } else {
-                    console.warn(`Item with ID ${claim.itemId} not found for claim ${claim.id}`);
+
                     return { ...claim, item: null };
                   }
                 }).catch(error => {
-                  console.error(`Error fetching item ${claim.itemId} for claim ${claim.id}:`, error);
+
                   return { ...claim, item: null };
                 });
               itemPromises.push(itemPromise);
             } else {
-              console.warn(`Claim ${claim.id} is missing itemId.`);
+
               claimsData.push({ ...claim, item: null });
             }
           });
@@ -610,7 +610,7 @@ Item name:`;
           this.cache.claims = [...this.claims];
         })
         .catch(error => {
-          console.error("Error loading claims:", error);
+
         });
     },
     markAsRead(notificationId) {
@@ -625,7 +625,7 @@ Item name:`;
           }
         })
         .catch(error => {
-          console.error("Error marking notification as read:", error);
+
           this.showGenericMessagePopup("Failed to mark notification as read. Please try again.");
         });
     },
@@ -646,7 +646,7 @@ Item name:`;
           });
         })
         .catch(error => {
-          console.error("Error marking all notifications as read:", error);
+
           this.showGenericMessagePopup("Failed to mark all notifications as read. Please try again.");
         });
     },
@@ -663,7 +663,7 @@ Item name:`;
             if (claim) {
               this.openClaimDetailsPopup(claim);
             } else {
-              console.warn(`Claim ${notification.claimId} not found in loaded claims.`);
+
             }
           }
           break;
@@ -702,7 +702,7 @@ Item name:`;
           this.user.updateProfile({
             displayName: this.userProfile.displayName
           }).catch(error => {
-            console.error("Error updating auth profile:", error);
+
             throw new Error("Auth profile update failed");
           })
         );
@@ -712,7 +712,7 @@ Item name:`;
           displayName: this.userProfile.displayName,
           phone: this.userProfile.phone || ''
         }).catch(error => {
-          console.error("Error updating firestore profile:", error);
+
           throw new Error("Firestore profile update failed");
         })
       );
@@ -721,7 +721,7 @@ Item name:`;
           this.showGenericMessagePopup("Profile updated successfully!");
         })
         .catch(error => {
-          console.error("Error updating profile:", error);
+
           this.showGenericMessagePopup(`Error updating profile: ${error.message}. Please try again.`);
         })
         .finally(() => {
@@ -742,7 +742,7 @@ Item name:`;
           this.showGenericMessagePopup("Preferences saved successfully!");
         })
         .catch(error => {
-          console.error("Error updating preferences:", error);
+
           this.showGenericMessagePopup(`Error saving preferences. Please try again.`);
         })
         .finally(() => {
@@ -768,7 +768,7 @@ Item name:`;
         this.user.updateProfile({
           displayName: fullName
         }).catch(error => {
-          console.error("Error updating auth profile:", error);
+
           throw new Error("Auth profile update failed");
         })
       );
@@ -779,7 +779,7 @@ Item name:`;
           firstName: firstName,
           lastName: lastName
         }).catch(error => {
-          console.error("Error updating firestore profile:", error);
+
           throw new Error("Firestore profile update failed");
         })
       );
@@ -792,7 +792,7 @@ Item name:`;
           this.showGenericMessagePopup("Profile completed successfully!");
         })
         .catch(error => {
-          console.error("Error updating profile:", error);
+
           this.showGenericMessagePopup(`Error updating profile: ${error.message}. Please try again.`);
         })
         .finally(() => {
@@ -837,7 +837,7 @@ Item name:`;
           }, 2000);
         })
         .catch(error => {
-          console.error("Error changing password:", error);
+
           if (error.code === 'auth/wrong-password') {
             this.passwordError = "Current password is incorrect.";
           } else if (error.code === 'auth/weak-password') {
@@ -869,7 +869,7 @@ Item name:`;
         ]);
         results.forEach(result => {
           if (result.status === 'rejected') {
-            console.error("Error querying/batching deletions:", result.reason);
+
           }
         });
         await batch.commit();
@@ -877,7 +877,7 @@ Item name:`;
         this.closeDeleteAccountPopup();
         window.location.href = "index.html";
       } catch (error) {
-        console.error("Error deleting account:", error);
+
         this.authError = `Error deleting account: ${error.message}. You might need to log in again or contact support if the issue persists.`;
         this.isDeleting = false;
       }
@@ -920,7 +920,7 @@ Item name:`;
           this.showGenericMessagePopup("Item deleted successfully!");
         })
         .catch(error => {
-          console.error("Error deleting item:", error);
+
           this.showGenericMessagePopup("Error deleting item. Please try again.");
         });
     },
@@ -953,7 +953,7 @@ Item name:`;
           });
         };
         reader.onerror = (error) => {
-          console.error("FileReader error:", error);
+
           this.showGenericMessagePopup(`Error reading file ${file.name}.`);
         };
         reader.readAsDataURL(file);
@@ -1011,7 +1011,7 @@ Item name:`;
         this.closeReportLostPopup();
         this.showGenericMessagePopup(isEditing ? "Lost item updated successfully!" : "Lost item reported successfully! We'll notify you if we find a match.");
       } catch (error) {
-        console.error("Error reporting lost item:", error);
+
         this.showGenericMessagePopup(`Error reporting lost item: ${error.message}. Please try again.`);
       } finally {
         this.isSubmitting = false;
@@ -1037,7 +1037,7 @@ Item name:`;
         await Promise.all(additionalImagePromises);
         return mainImageUrl;
       } catch (error) {
-        console.error(`Error uploading images for item ${itemId}:`, error);
+
         if (error.code === 'storage/unauthorized') {
           this.showGenericMessagePopup("Error: You do not have permission to upload images.");
         } else if (error.code === 'storage/canceled') {
@@ -1092,7 +1092,7 @@ Item name:`;
           day: 'numeric'
         }).format(date);
       } catch (error) {
-        console.error("Error formatting date:", dateValue, error);
+
         return "Date Error";
       }
     },
@@ -1199,7 +1199,7 @@ Item name:`;
               matchAlerts: true,
               statusUpdates: true
             }
-          }).catch(error => console.error("Error initializing user profile:", error));
+          }).catch(error => { });
         }
       });
     },
@@ -1303,7 +1303,7 @@ Item name:`;
         .then(() => {
         })
         .catch(error => {
-          console.error("Error signing out:", error);
+
           this.showGenericMessagePopup("Error signing out. Please try again.");
         });
     },
@@ -1327,7 +1327,7 @@ Item name:`;
               }
             })
             .catch((error) => {
-              console.error("Error signing in with email link:", error);
+
               this.showGenericMessagePopup(`Error signing in: ${this.getFriendlyAuthError(error)}`);
               this.isLoading = false;
             });

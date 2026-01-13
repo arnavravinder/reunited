@@ -107,7 +107,7 @@ const app = Vue.createApp({
         const snapshot = await db.collection('items').where('status', '==', 'available').get();
         this.itemCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       } catch (error) {
-        console.error("Failed to pre-cache items:", error);
+
       }
     },
     scrollToResults() {
@@ -137,7 +137,7 @@ const app = Vue.createApp({
           });
         }
       }).catch(error => {
-        console.error("Error loading user profile:", error);
+
       });
     },
     initDatePicker() {
@@ -343,7 +343,7 @@ const app = Vue.createApp({
           results = this.fallbackSearch(params, prefilteredItems);
         }
       } catch (error) {
-        console.error("Error in AI search, running fallback:", error);
+
         results = this.fallbackSearch(params, this.itemCache);
       }
       return this.sortResults(results, params);
@@ -493,7 +493,7 @@ Available Items to Rank:
         if (urls.length > 0) {
           this.selectedItem.additionalImages = urls;
         }
-      }).catch(error => console.error("Error loading additional images:", error));
+      }).catch(error => { });
     },
     async getItemValuation(item) {
       try {
@@ -517,7 +517,7 @@ Available Items to Rank:
         const content = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content.trim()) || "N/A";
         this.itemValuation = content;
       } catch (error) {
-        console.error("Error in AI valuation:", error);
+
         this.itemValuation = "₹500-1500";
       }
     },
@@ -569,6 +569,11 @@ Available Items to Rank:
         const pickupDeadline = new Date();
         pickupDeadline.setDate(pickupDeadline.getDate() + 7);
 
+        let claimCode = this.claimItem.claimCode;
+        if (!claimCode) {
+          claimCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
         const claimData = {
           itemId: this.claimItem.id,
           userId: this.user.uid,
@@ -582,7 +587,7 @@ Available Items to Rank:
           itemCategory: this.claimItem.category,
           itemLocation: this.claimItem.location,
           estimatedValue: estimatedValue,
-          claimCode: this.claimItem.claimCode || null,
+          claimCode: claimCode,
           pickupDeadline: firebase.firestore.Timestamp.fromDate(pickupDeadline)
         };
 
@@ -591,7 +596,8 @@ Available Items to Rank:
         await db.collection('items').doc(this.claimItem.id).update({
           claimed: true,
           claimId: claimRef.id,
-          claimStatus: claimStatus
+          claimStatus: claimStatus,
+          claimCode: claimCode
         });
 
         const claimantFirstName = this.user.displayName ? this.user.displayName.split(' ')[0] : 'User';
@@ -608,7 +614,7 @@ Available Items to Rank:
           title: isHighValue ? 'Claim Submitted for Review' : 'Item Claimed Successfully',
           message: isHighValue
             ? `Your claim for ${this.claimItem.name} is pending review. Please use the contact form for follow-up. You have 7 school days to collect once approved.`
-            : `Your claim for ${this.claimItem.name} has been approved. Use code ${this.claimItem.claimCode} to collect your item. You have 7 school days to collect or it will be returned to lost and found.`,
+            : `Your claim for ${this.claimItem.name} has been approved. Use code ${claimCode} to collect your item. You have 7 school days to collect or it will be returned to lost and found.`,
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           type: 'claim',
           read: false,
@@ -631,19 +637,20 @@ Available Items to Rank:
                 email: this.user.email,
                 userName: this.user.displayName || this.user.email,
                 itemName: this.claimItem.name,
-                claimCode: this.claimItem.claimCode,
+                claimCode: claimCode,
                 itemLocation: this.claimItem.location,
                 claimDate: new Date().toISOString()
               })
             });
           } catch (emailError) {
-            console.error("Error sending claim email:", emailError);
+
           }
+          this.claimItem.claimCode = claimCode;
           this.showClaimModal = false;
           this.showClaimCodeModal = true;
         }
       } catch (error) {
-        console.error("Error submitting claim:", error);
+
         alert("An error occurred while submitting your claim. Please try again.");
       } finally {
         this.isSubmittingClaim = false;
@@ -675,7 +682,7 @@ Available Items to Rank:
         }
         return "No date available";
       } catch (error) {
-        console.error("Error formatting date:", error);
+
         return "Date format error";
       }
     },
@@ -692,7 +699,7 @@ Available Items to Rank:
         }
         return "No date available";
       } catch (error) {
-        console.error("Error formatting date and time:", error);
+
         return "Date format error";
       }
     },

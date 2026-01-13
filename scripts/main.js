@@ -359,7 +359,7 @@ const app = Vue.createApp({
           };
         }
       }).catch(error => {
-        console.error("Error loading user profile:", error);
+
       });
     },
     getProfileInitials(displayName) {

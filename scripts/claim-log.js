@@ -111,7 +111,7 @@ const app = Vue.createApp({
           this.updatePagination();
         })
         .catch(error => {
-          console.error("Error loading public log:", error);
+
         })
         .finally(() => {
           this.isLoading = false;
@@ -177,7 +177,7 @@ const app = Vue.createApp({
           day: 'numeric'
         }).format(date);
       } catch (error) {
-        console.error("Error formatting date:", error);
+
         return "Date format error";
       }
     },
@@ -289,7 +289,7 @@ const app = Vue.createApp({
 
     signOut() {
       firebase.auth().signOut().catch(error => {
-        console.error("Error signing out:", error);
+
       });
     },
 
@@ -333,7 +333,7 @@ const app = Vue.createApp({
           };
         }
       }).catch(error => {
-        console.error("Error loading user profile:", error);
+
       });
     },
     getProfileInitials(displayName) {

@@ -54,7 +54,7 @@
 }
 
 body {
-  font-family: 'Work Sans', sans-serif;
+  font-family: 'Instrument Sans', sans-serif;
   background-color: var(--dark-bg);
   color: var(--text-color);
   line-height: 1.6;
@@ -63,25 +63,40 @@ body {
 h1,
 h2,
 h3 {
-  font-family: 'Kanit', sans-serif;
-  font-weight: 500;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 h1 {
-  font-size: 3.5rem;
-  margin-bottom: 1rem;
+  font-size: 4.5rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
 }
 
 h2 {
-  font-size: 2rem;
+  font-size: 2.5rem;
   margin-bottom: 1.5rem;
+  color: var(--text-color);
+  letter-spacing: -0.03em;
+}
+
+.swirly-text {
+  font-family: 'Great Vibes', cursive;
   color: var(--accent-color);
+  font-weight: 400;
+  font-size: 4.5rem;
+  line-height: 1;
+  display: block;
+  margin-top: 0.5rem;
 }
 
 p {
-  font-family: 'Raleway', sans-serif;
+  font-family: 'Instrument Sans', sans-serif;
   margin-bottom: 1rem;
   font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text-secondary);
 }
 
 .container {
@@ -93,13 +108,14 @@ p {
 
 .btn {
   display: inline-block;
-  padding: 0.8rem 2rem;
-  background-color: var(--accent-color);
-  color: white;
+  padding: 1rem 2.5rem;
+  background-color: var(--text-color);
+  color: var(--darker-bg);
   border: none;
   border-radius: 50px;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Instrument Sans', sans-serif;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   text-decoration: none;
@@ -107,24 +123,26 @@ p {
 }
 
 .btn:hover {
-  background-color: #5867ff;
+  background-color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(94, 114, 228, 0.3);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
 .btn-outlined {
   background-color: transparent;
-  border: 2px solid var(--accent-color);
-  color: var(--accent-color);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-color);
 }
 
 .btn-outlined:hover {
-  background-color: var(--accent-color);
+  background-color: rgba(255, 255, 255, 0.1);
   color: white;
+  border-color: white;
 }
 
 .btn-secondary {
   background-color: var(--secondary-accent);
+  color: white;
 }
 
 .btn-secondary:hover {
@@ -152,13 +170,14 @@ p {
 }
 
 .splash-logo {
-  font-family: 'Lora', serif;
+  font-family: 'Instrument Serif', serif;
   font-size: 3rem;
   color: white;
   position: relative;
   transition: all 0.5s ease;
   display: inline-block;
   z-index: 2;
+  font-style: italic;
 }
 
 .splash-text {
@@ -202,13 +221,14 @@ p {
 }
 
 header {
-  padding: 0.5rem 0;
-  background-color: rgba(26, 26, 26, 0.95);
+  padding: 1rem 0;
+  background-color: rgba(10, 10, 10, 0.8);
   position: fixed;
   width: 100%;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .header-container {
@@ -218,20 +238,18 @@ header {
 }
 
 .logo {
-  font-family: 'Lora', serif;
+  font-family: 'Instrument Serif', serif;
   font-size: 1.8rem;
-  font-weight: 600;
+  font-weight: 400;
+  font-style: italic;
   color: white;
   text-decoration: none;
   position: relative;
 }
 
 .logo::after {
-  content: ".";
-  font-size: 2.5rem;
-  color: var(--secondary-accent);
-  position: absolute;
-  bottom: -5px;
+  content: "";
+  display: none;
 }
 
 .nav-links {
@@ -243,19 +261,20 @@ header {
 .nav-links a {
   color: var(--text-secondary);
   text-decoration: none;
-  font-family: 'Work Sans', sans-serif;
-  font-size: 1rem;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
   transition: color 0.3s ease;
 }
 
 .nav-links a:hover {
-  color: var(--accent-color);
+  color: white;
 }
 
 .nav-links .btn {
   color: white !important;
   margin-left: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   font-size: 0.9rem;
 }
 
@@ -275,25 +294,94 @@ header {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background: radial-gradient(circle at center, var(--light-bg) 0%, var(--dark-bg) 70%);
+  background-color: #050505;
+  background-image:
+    radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+  z-index: 1;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(110, 127, 255, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  filter: blur(60px);
+  z-index: 0;
+  animation: pulse-glow 8s infinite alternate;
+}
+
+@keyframes pulse-glow {
+  0% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+
+  100% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
 }
 
 .hero-content {
   text-align: center;
-  max-width: 800px;
+  max-width: 900px;
   padding: 0 2rem;
   position: relative;
   z-index: 2;
 }
 
+.hero-serif {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  display: block;
+  font-size: 6rem;
+  margin-bottom: -1rem;
+  background: linear-gradient(to right, #fff, #a5a5a5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-sans {
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 600;
+  display: block;
+  font-size: 4rem;
+  letter-spacing: -0.03em;
+}
+
 .hero-subtitle {
-  font-family: 'Raleway', sans-serif;
-  font-size: 1.3rem;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 1.2rem;
   color: var(--text-secondary);
-  margin-bottom: 2rem;
-  max-width: 600px;
+  margin-bottom: 2.5rem;
+  max-width: 500px;
   margin-left: auto;
   margin-right: auto;
+  font-weight: 300;
+  line-height: 1.6;
 }
 
 .hero-btns {
@@ -304,11 +392,7 @@ header {
 }
 
 .floating-item {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.1;
-  background-color: var(--accent-color);
-  animation: float 20s infinite alternate ease-in-out;
+  display: none;
 }
 
 @keyframes float {
