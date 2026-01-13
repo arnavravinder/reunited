@@ -20,570 +20,7 @@
   <link rel="stylesheet" href="styles/dashboard.css">
   <link rel="icon" type="image/x-icon" href="favicon.png">
 
-  <style>
-    .popup-container {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(18, 18, 18, 0.85);
-      justify-content: center;
-      align-items: center;
-      z-index: 99999;
-      padding: 1rem;
-      box-sizing: border-box;
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
-    }
 
-    .popup-content {
-      background-color: var(--light-bg, #292E3D);
-      padding: 25px;
-      border-radius: 10px;
-      text-align: center;
-      max-width: 450px;
-      width: 100%;
-      box-sizing: border-box;
-      position: relative;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
-      max-height: 90vh;
-      overflow-y: auto;
-      border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.1);
-    }
-
-    #reunited-generic-popup-message {
-      color: var(--text-color, white);
-      font-size: 1.1rem;
-      line-height: 1.6;
-      margin-bottom: 25px;
-      font-family: 'Raleway', sans-serif;
-    }
-
-    #reunited-generic-message-popup .popup-button {
-      background-color: var(--accent-color, #33b5e5);
-      color: var(--text-color, white);
-      border: none;
-      padding: 12px 25px;
-      border-radius: 25px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      display: block;
-      width: auto;
-      min-width: 120px;
-      margin: 15px auto 0;
-      font-size: 1rem;
-      font-weight: 500;
-      font-family: 'Work Sans', sans-serif;
-    }
-
-    #reunited-generic-message-popup .popup-button:hover {
-      background-color: var(--accent-color-dark, #0099cc);
-      transform: translateY(-2px);
-    }
-
-    .popup-close-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      font-size: 1.9rem;
-      font-weight: bold;
-      color: var(--text-secondary, #adb5bd);
-      cursor: pointer;
-      line-height: 1;
-      background: none;
-      border: none;
-      padding: 0.3rem;
-      z-index: 10;
-      transition: color 0.2s ease;
-    }
-
-    .popup-close-btn:hover {
-      color: var(--text-color, #fff);
-    }
-
-    .popup-content h2 {
-      margin: 0 0 1.8rem;
-      font-family: 'Kanit', sans-serif;
-      text-align: center;
-      color: var(--text-color, white);
-      font-size: 1.7rem;
-      font-weight: 500;
-    }
-
-    .popup-content p {
-      margin-bottom: 1.2rem;
-      color: var(--text-secondary, #adb5bd);
-      line-height: 1.6;
-      text-align: center;
-      font-size: 0.95rem;
-    }
-
-    .popup-content input[type="text"],
-    .popup-content input[type="email"],
-    .popup-content input[type="password"],
-    .popup-content input[type="date"],
-    .popup-content input[type="tel"],
-    .popup-content select,
-    .popup-content textarea {
-      display: block;
-      width: 100%;
-      padding: 0.9rem 1.1rem;
-      margin-bottom: 1.1rem;
-      background-color: var(--dark-bg, #1e222d);
-      border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.15);
-      border-radius: 6px;
-      color: var(--text-color, white);
-      font-size: 1rem;
-      font-family: 'Work Sans', sans-serif;
-      box-sizing: border-box;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .popup-content input[type="text"]:focus,
-    .popup-content input[type="email"]:focus,
-    .popup-content input[type="password"]:focus,
-    .popup-content input[type="date"]:focus,
-    .popup-content input[type="tel"]:focus,
-    .popup-content select:focus,
-    .popup-content textarea:focus {
-      outline: none;
-      border-color: var(--accent-color, #33b5e5);
-      box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 51, 181, 229), 0.35);
-    }
-
-    .popup-content textarea::placeholder {
-      font-family: 'Raleway', sans-serif;
-      color: var(--text-secondary-placeholder, #868e96);
-      opacity: 0.8;
-    }
-
-    .popup-content textarea {
-      min-height: 110px;
-      resize: vertical;
-      margin-bottom: 0.5rem;
-    }
-
-    .popup-content select {
-      appearance: none;
-      -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23aaa'%3E%3Cpath d='M7 10L2 5h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 1rem center;
-      padding-right: 3rem;
-    }
-
-    .popup-content .input-label {
-      display: block;
-      margin-bottom: 0.6rem;
-      margin-left: 0.2rem;
-      font-size: 0.9rem;
-      color: var(--text-secondary, #adb5bd);
-      text-align: left;
-      font-weight: 500;
-    }
-
-    .popup-content .error {
-      color: #f44336;
-      margin: -0.5rem 0 1.2rem;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-
-    .popup-content .success {
-      color: #4caf50;
-      margin: -0.5rem 0 1.2rem;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-
-    .popup-content.report-modal {
-      max-width: 700px;
-    }
-
-    .popup-content.delete-modal {
-      max-width: 550px;
-    }
-
-    .popup-content.delete-modal p {
-      text-align: left;
-    }
-
-    .popup-content.delete-modal input[type="text"] {
-      text-align: center;
-    }
-
-    .popup-content.claim-details-modal {
-      max-width: 650px;
-    }
-
-    .popup-content.item-detail-modal {
-      max-width: 900px;
-    }
-
-    .popup-content form .btn {
-      margin-top: 1rem;
-      padding: 12px 20px;
-      font-size: 1.05rem;
-      border-radius: 6px;
-    }
-
-    .popup-content form .btn-full {
-      border-radius: 25px;
-    }
-
-    .popup-content .image-upload-container {
-      margin-bottom: 1.5rem;
-    }
-
-    .popup-content .image-upload {
-      display: block;
-      width: 100%;
-      height: 120px;
-      border: 2px dashed var(--text-secondary-placeholder, #6c757d);
-      border-radius: 10px;
-      cursor: pointer;
-      position: relative;
-      margin-bottom: 1rem;
-      background-color: var(--dark-bg, #1e222d);
-      transition: border-color 0.3s ease, background-color 0.3s ease;
-    }
-
-    .popup-content .image-upload:hover {
-      border-color: var(--accent-color, #33b5e5);
-      background-color: rgba(var(--accent-color-rgb, 51, 181, 229), 0.05);
-    }
-
-    .popup-content .image-upload input {
-      display: none;
-    }
-
-    .popup-content .upload-placeholder {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-secondary-placeholder, #6c757d);
-      text-align: center;
-    }
-
-    .popup-content .upload-placeholder i {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .popup-content .upload-preview {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.8rem;
-    }
-
-    .popup-content .preview-thumbnail {
-      position: relative;
-      width: 80px;
-      height: 80px;
-      border-radius: 5px;
-      overflow: hidden;
-      border: 1px solid var(--dark-bg, #1e222d);
-    }
-
-    .popup-content .preview-thumbnail img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .popup-content .remove-image {
-      position: absolute;
-      top: 3px;
-      right: 3px;
-      width: 20px;
-      height: 20px;
-      background-color: rgba(244, 67, 54, 0.8);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 0.8rem;
-      line-height: 1;
-      transition: background-color 0.3s ease;
-      padding: 0;
-    }
-
-    .popup-content .remove-image:hover {
-      background-color: rgba(244, 67, 54, 1);
-    }
-
-    .phone-input-container {
-      position: relative;
-      margin-bottom: 1.1rem;
-    }
-
-    .vue-tel-input {
-      border-radius: 6px !important;
-    }
-
-    .vue-tel-input input {
-      background-color: var(--dark-bg, #1e222d) !important;
-      border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.15) !important;
-      border-radius: 6px !important;
-      color: var(--text-color, white) !important;
-      font-size: 1rem !important;
-      font-family: 'Work Sans', sans-serif !important;
-      padding: 0.9rem 1.1rem !important;
-    }
-
-    .vue-tel-input input:focus {
-      outline: none !important;
-      border-color: var(--accent-color, #33b5e5) !important;
-      box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 51, 181, 229), 0.35) !important;
-    }
-
-    .vue-tel-input .vti__dropdown {
-      background-color: var(--dark-bg, #1e222d) !important;
-      border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.15) !important;
-      border-radius: 6px 0 0 6px !important;
-    }
-
-    .vue-tel-input .vti__dropdown:hover {
-      background-color: var(--light-bg, #292E3D) !important;
-    }
-
-    .vue-tel-input .vti__dropdown-list {
-      background-color: var(--dark-bg, #1e222d) !important;
-      border: 1px solid var(--accent-color, #33b5e5) !important;
-      border-radius: 6px !important;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
-      z-index: 100000 !important;
-    }
-
-    .vue-tel-input .vti__dropdown-item {
-      color: var(--text-secondary, #adb5bd) !important;
-      padding: 8px 12px !important;
-    }
-
-    .vue-tel-input .vti__dropdown-item:hover,
-    .vue-tel-input .vti__dropdown-item.highlighted {
-      background-color: var(--light-bg, #292E3D) !important;
-      color: var(--text-color, white) !important;
-    }
-
-    .vue-tel-input .vti__selection {
-      color: var(--text-color, white) !important;
-    }
-
-    .app-loading {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, var(--darker-bg, #1a1f2e) 0%, var(--dark-bg, #1e222d) 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
-      transition: opacity 0.3s ease;
-    }
-
-    .app-loading .loading-spinner {
-      width: 60px;
-      height: 60px;
-      border: 4px solid rgba(var(--accent-color-rgb, 51, 181, 229), 0.2);
-      border-radius: 50%;
-      border-top-color: var(--accent-color, #33b5e5);
-      animation: spin 1s linear infinite;
-    }
-
-    .dashboard-loading {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(30, 34, 45, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9998;
-    }
-
-    .flatpickr-calendar {
-      background: var(--dark-bg, #1e222d) !important;
-      border-radius: 6px !important;
-      border: 1px solid var(--accent-color, #33b5e5) !important;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
-      width: auto !important;
-    }
-
-    .flatpickr-months .flatpickr-month {
-      color: var(--text-color, white) !important;
-      fill: var(--text-color, white) !important;
-    }
-
-    .flatpickr-months .flatpickr-prev-month svg,
-    .flatpickr-months .flatpickr-next-month svg {
-      fill: var(--text-color, white) !important;
-      opacity: 0.7;
-    }
-
-    .flatpickr-months .flatpickr-prev-month:hover svg,
-    .flatpickr-months .flatpickr-next-month:hover svg {
-      fill: var(--accent-color, #33b5e5) !important;
-      opacity: 1;
-    }
-
-    span.flatpickr-weekday {
-      color: var(--text-secondary, #adb5bd) !important;
-    }
-
-    .flatpickr-day {
-      color: var(--text-color, white) !important;
-      border: 1px solid transparent !important;
-    }
-
-    .flatpickr-day:hover,
-    .flatpickr-day:focus {
-      background: var(--light-bg, #292E3D) !important;
-      border-color: var(--accent-color, #33b5e5) !important;
-      color: var(--text-color, white) !important;
-    }
-
-    .flatpickr-day.selected,
-    .flatpickr-day.startRange,
-    .flatpickr-day.endRange,
-    .flatpickr-day.selected:focus,
-    .flatpickr-day.startRange:focus,
-    .flatpickr-day.endRange:focus,
-    .flatpickr-day.selected:hover,
-    .flatpickr-day.startRange:hover,
-    .flatpickr-day.endRange:hover {
-      background: var(--accent-color, #33b5e5) !important;
-      border-color: var(--accent-color, #33b5e5) !important;
-      color: var(--text-color, white) !important;
-    }
-
-    .flatpickr-day.today {
-      border-color: var(--primary-color, #6e7fff) !important;
-    }
-
-    .flatpickr-day.today:hover,
-    .flatpickr-day.today:focus {
-      background: var(--light-bg, #292E3D) !important;
-      border-color: var(--primary-color, #6e7fff) !important;
-      color: var(--text-color, white) !important;
-    }
-
-    .flatpickr-day.disabled,
-    .flatpickr-day.disabled:hover {
-      color: var(--text-secondary, #adb5bd) !important;
-      opacity: 0.4;
-      background: transparent !important;
-    }
-
-    .flatpickr-time {
-      border-top: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.15) !important;
-    }
-
-    .flatpickr-time input,
-    .flatpickr-time .flatpickr-am-pm {
-      color: var(--text-color, white) !important;
-      background: var(--dark-bg, #1e222d) !important;
-      border: 1px solid rgba(var(--text-color-rgb, 255, 255, 255), 0.15) !important;
-    }
-
-    .numInputWrapper span:hover {
-      background: var(--light-bg, #292E3D) !important;
-    }
-
-    .flatpickr-current-month input.cur-year {
-      color: var(--text-color, white) !important;
-    }
-
-    .popup-content .claim-details,
-    .popup-content .item-detail-header,
-    .popup-content .item-detail-content,
-    .popup-content .modal-actions {
-      text-align: left;
-    }
-
-    .popup-content .claim-details h4,
-    .popup-content .item-detail-header h2 {
-      text-align: left;
-    }
-
-    .popup-content .claim-status-container {
-      text-align: center;
-    }
-
-    .popup-content .loading-placeholder {
-      text-align: center;
-    }
-
-    .popup-content .modal-actions {
-      margin-top: 1.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--dark-bg);
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.8rem;
-    }
-
-    .popup-content .modal-actions .btn {
-      margin-top: 0;
-    }
-
-    .ai-enhance-button {
-      background-color: transparent;
-      border: 1px solid var(--accent-color, #33b5e5);
-      color: var(--accent-color, #33b5e5);
-      padding: 0.3rem 0.6rem;
-      font-size: 0.8rem;
-      border-radius: 15px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      margin-top: 0.3rem;
-      margin-bottom: 1rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      float: right;
-    }
-
-    .ai-enhance-button:hover {
-      background-color: rgba(var(--accent-color-rgb, 51, 181, 229), 0.1);
-    }
-
-    .ai-enhance-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .ai-enhance-button .spinner-tiny {
-      width: 12px;
-      height: 12px;
-      border: 2px solid rgba(var(--accent-color-rgb, 51, 181, 229), 0.2);
-      border-top-color: var(--accent-color, #33b5e5);
-    }
-
-    .ai-error-message {
-      color: #f44336;
-      font-size: 0.85rem;
-      margin-top: -0.8rem;
-      margin-bottom: 1rem;
-      text-align: right;
-      clear: both;
-    }
-  </style>
 </head>
 
 <body>
@@ -632,10 +69,7 @@
             </div>
             <div class="user-info">
               <div class="welcome-header">
-                <div class="profile-picture large"
-                  :style="{ backgroundColor: getProfilePictureColor(userProfile.displayName) }">
-                  {{ getProfileInitials(userProfile.displayName) }}
-                </div>
+
                 <h1>Welcome, {{ userProfile.displayName || user.email }}</h1>
               </div>
               <p>Manage your lost and found items</p>
@@ -709,7 +143,8 @@
               <div class="item-card" v-for="(item, index) in lostItems" :key="index">
                 <div class="item-status" :class="getClaimStatusClass(item.status)">{{ item.status.replace('_', ' ') }}
                 </div>
-                <div class="item-image" :style="{ backgroundImage: `url(${item.image || 'images/no-image.png'})` }">
+                <div class="item-image"
+                  :style="{ backgroundImage: 'url(' + (item.image || 'images/no-image.png') + ')' }">
                 </div>
                 <div class="item-info">
                   <h3>{{ item.name }}</h3>
@@ -738,7 +173,7 @@
                 <div class="claim-status" :class="getClaimStatusClass(getEffectiveClaimStatus(claim))">{{
                   getEffectiveClaimStatus(claim) }}</div>
                 <div class="claim-image"
-                  :style="{ backgroundImage: `url(${claim.item?.image || 'images/no-image.png'})` }"></div>
+                  :style="{ backgroundImage: 'url(' + (claim.item?.image || 'images/no-image.png') + ')' }"></div>
                 <div class="claim-info">
                   <h3>{{ claim.item?.name || 'Item details unavailable' }}</h3>
                   <div class="claim-meta">
@@ -1008,7 +443,8 @@
               <h4>Item Information</h4>
               <div class="claim-item-preview">
                 <div class="claim-item-image"
-                  :style="{ backgroundImage: `url(${selectedClaim.item?.image || 'images/no-image.png'})` }"></div>
+                  :style="{ backgroundImage: 'url(' + (selectedClaim.item?.image || 'images/no-image.png') + ')' }">
+                </div>
                 <div class="claim-item-info">
                   <div class="detail-row">
                     <span class="detail-label">Item Name</span>
@@ -1078,7 +514,7 @@
           <div class="item-detail-content">
             <div class="item-images">
               <div class="main-image"
-                :style="{ backgroundImage: `url(${selectedItem.image || 'images/no-image.png'})` }"></div>
+                :style="{ backgroundImage: 'url(' + (selectedItem.image || 'images/no-image.png') + ')' }"></div>
             </div>
             <div class="item-details">
               <div class="detail-item"><strong class="detail-key">Category:</strong> <span class="detail-val">{{
@@ -1107,34 +543,36 @@
       </div>
     </div>
 
-  </div>
 
-
-  <div class="modal-overlay" v-if="showNameCollectionModal" @click.self="false">
-    <div class="modal name-collection-modal">
-      <div class="modal-header">
-        <h3>Complete Your Profile</h3>
-        <p>Please provide your name to complete your profile setup</p>
+    <!--
+    <div class="modal-overlay" v-if="showNameCollectionModal">
+      <div class="modal name-collection-modal">
+        <div class="modal-header">
+          <h3>Complete Your Profile</h3>
+          <p>Please provide your name to complete your profile setup</p>
+        </div>
+        <form @submit.prevent="submitNameCollection" class="modal-form">
+          <div class="form-group">
+            <label for="firstName">First Name *</label>
+            <input type="text" id="firstName" v-model="nameCollectionForm.firstName" required
+              placeholder="Enter your first name">
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name *</label>
+            <input type="text" id="lastName" v-model="nameCollectionForm.lastName" required
+              placeholder="Enter your last name">
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="btn" :disabled="isUpdating">
+              <span v-if="isUpdating" class="spinner-tiny"></span>
+              Complete Profile
+            </button>
+          </div>
+        </form>
       </div>
-      <form @submit.prevent="submitNameCollection" class="modal-form">
-        <div class="form-group">
-          <label for="firstName">First Name *</label>
-          <input type="text" id="firstName" v-model="nameCollectionForm.firstName" required
-            placeholder="Enter your first name">
-        </div>
-        <div class="form-group">
-          <label for="lastName">Last Name *</label>
-          <input type="text" id="lastName" v-model="nameCollectionForm.lastName" required
-            placeholder="Enter your last name">
-        </div>
-        <div class="modal-actions">
-          <button type="submit" class="btn" :disabled="isUpdating">
-            <span v-if="isUpdating" class="spinner-tiny"></span>
-            Complete Profile
-          </button>
-        </div>
-      </form>
     </div>
+    -->
+
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/12.6.0/firebase-app-compat.js"></script>

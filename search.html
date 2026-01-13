@@ -41,11 +41,7 @@
             <a href="#" class="btn btn-outlined" @click.prevent="showLoginModal = true">Login / Sign Up</a>
           </div>
           <div v-else class="nav-user-section">
-            <div class="profile-picture small"
-              :style="{ backgroundColor: getProfilePictureColor(userProfile.displayName) }"
-              :title="userProfile.displayName || user.email">
-              {{ getProfileInitials(userProfile.displayName) }}
-            </div>
+
             <a href="#" class="btn btn-outlined" @click.prevent="signOut">Sign Out</a>
           </div>
         </div>
@@ -433,9 +429,7 @@
           <a href="index.html#faqs">FAQs</a>
           <a href="index.html#contact">Contact</a>
         </div>
-        <div class="copyright">
-          © 2025 Reunited. All rights reserved.
-        </div>
+
         <div class="made-with-love">
           Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav
             Ravinder</a>

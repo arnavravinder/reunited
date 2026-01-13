@@ -8,8 +8,9 @@
   <!-- Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&display=swap"
-  rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="icon" type="image/x-icon" href="favicon.png">
@@ -41,11 +42,7 @@
             <a href="#" class="btn btn-outlined" @click.prevent="showLoginModal = true">Login / Sign Up</a>
           </div>
           <div v-else class="nav-user-section">
-            <div class="profile-picture small"
-              :style="{ backgroundColor: getProfilePictureColor(userProfile.displayName) }"
-              :title="userProfile.displayName || user.email">
-              {{ getProfileInitials(userProfile.displayName) }}
-            </div>
+
             <a href="#" class="btn btn-outlined" @click.prevent="signOut">Logout</a>
           </div>
         </div>
@@ -55,7 +52,7 @@
     <section class="hero">
       <div v-for="(item, index) in floatingItems" :key="index" class="floating-item" :style="item.style"></div>
       <div class="hero-content">
-        <h1><span class="hero-serif">Find</span> <span class="hero-sans">what you've lost</span></h1>
+        <h1>Find What You've Lost</h1>
         <p class="hero-subtitle">Reunited is a platform that helps you find your lost items and reconnect with what
           matters most to you.</p>
         <div class="hero-btns">
@@ -174,9 +171,7 @@
           <a href="#faqs">FAQs</a>
           <a href="#contact">Contact</a>
         </div>
-        <div class="copyright">
-          &copy; 2025 Reunited. All rights reserved.
-        </div>
+
         <div class="made-with-love">
           Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav
             Ravinder</a>

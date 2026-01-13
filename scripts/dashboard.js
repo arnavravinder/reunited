@@ -1298,6 +1298,9 @@ Item name:`;
       this.forgotPassword = false;
       this.showAppleComingSoon = false;
     },
+    getBackgroundImage(imageUrl) {
+      return { backgroundImage: `url(${imageUrl || 'images/no-image.png'})` };
+    },
     signOut() {
       firebase.auth().signOut()
         .then(() => {
