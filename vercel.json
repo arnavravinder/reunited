@@ -1,4 +1,10 @@
 {
+  "rewrites": [
+    {
+      "source": "/scripts/env.js",
+      "destination": "/api/env"
+    }
+  ],
   "cleanUrls": true,
   "crons": [
     {
