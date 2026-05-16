@@ -35,11 +35,7 @@ vue.js + firebase because they're fast and i don't have to worry about servers. 
 
 tired of losing stuff with no good way to find it. this could save people money, reduce waste, and help get back things that actually mean something.
 
-
-## built by
-
-arnav, 16, building stuff that solves real problems
-
+my details:
 [linkedin](https://www.linkedin.com/in/arnav-ravinder) • [github](https://github.com/arnavravinder)
 
 ---
