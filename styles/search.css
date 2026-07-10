@@ -1365,3 +1365,166 @@
 .flatpickr-next-month:hover svg {
   fill: var(--secondary-accent) !important;
 }
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 0 0.9rem;
+  }
+
+  .modal-overlay .item-detail-modal {
+    padding: 1.5rem 1.25rem 1.35rem;
+    border-radius: 20px;
+  }
+
+  .item-detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-bottom: 1.1rem;
+    padding-right: 2.4rem;
+  }
+
+  .item-detail-header h2 {
+    font-size: 1.65rem;
+    line-height: 1.15;
+  }
+
+  .item-status,
+  .claimed-badge.large {
+    font-size: 0.68rem;
+    padding: 0.28rem 0.75rem;
+  }
+
+  .item-detail-content {
+    gap: 1.25rem;
+  }
+
+  .main-image {
+    height: 215px;
+  }
+
+  .image-thumbnails .thumbnail {
+    width: 54px;
+    height: 54px;
+  }
+
+  .detail-row {
+    margin-bottom: 0;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .detail-row:first-child {
+    padding-top: 0;
+  }
+
+  .detail-row:last-of-type {
+    border-bottom: none;
+  }
+
+  .detail-label {
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 0.2rem;
+  }
+
+  .detail-value {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .item-actions {
+    margin-top: 1.25rem;
+  }
+
+  .item-actions .btn {
+    width: 100%;
+    max-width: none;
+  }
+
+  .modal-overlay .claim-modal {
+    padding: 1.5rem 1.25rem 1.35rem;
+    border-radius: 20px;
+  }
+
+  .claim-modal .modal-title {
+    font-size: 1.55rem;
+  }
+
+  .item-preview {
+    padding: 0.8rem;
+    border-radius: 14px;
+    gap: 0.9rem;
+  }
+
+  .preview-image {
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+  }
+
+  .preview-info h4 {
+    font-size: 1rem;
+  }
+
+  .preview-info p {
+    font-size: 0.82rem;
+  }
+
+  .claim-modal .form-group label {
+    font-size: 0.88rem;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  .modal-overlay .claim-code-modal {
+    padding: 1.9rem 1.4rem 1.6rem;
+  }
+
+  .claim-actions {
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .claim-actions .btn {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .modal-overlay .item-detail-modal,
+  .modal-overlay .claim-modal {
+    padding: 1.35rem 1.05rem 1.2rem;
+  }
+
+  .item-detail-header h2 {
+    font-size: 1.45rem;
+  }
+
+  .main-image {
+    height: 185px;
+  }
+
+  .claim-code-char {
+    font-size: 1.55rem;
+    min-width: 1.5rem;
+  }
+
+  .claim-code-title {
+    font-size: 2rem;
+  }
+}

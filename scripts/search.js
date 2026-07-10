@@ -113,7 +113,7 @@ const app = Vue.createApp({
     };
   },
   mounted() {
-    this.precacheAllItems();
+    this.precachePromise = this.precacheAllItems();
 
     const incomingQuery = new URLSearchParams(window.location.search).get('q');
     if (incomingQuery) {
@@ -312,6 +312,9 @@ const app = Vue.createApp({
         return;
       }
       this.searchError = '';
+      if (this.precachePromise) {
+        await this.precachePromise;
+      }
       const searchParams = this.buildSearchParams();
       this.lastSearchParams = searchParams;
       this.searchPerformed = true;
