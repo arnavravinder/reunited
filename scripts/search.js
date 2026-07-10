@@ -18,6 +18,17 @@ const firebaseConfig = {
   appId: getEnvVar('FIREBASE_APP_ID')
 };
 
+const friendlyAuthError = (error) => {
+  const code = (error && error.code) || "";
+  if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") return null;
+  if (code === "auth/invalid-email") return "That email does not look quite right.";
+  if (code === "auth/network-request-failed") return "Network trouble - check your connection and try again.";
+  if (code === "auth/too-many-requests") return "Too many attempts. Give it a minute, then try again.";
+  if (code === "auth/unauthorized-domain") return "Sign-in is not available on this address.";
+  if (code === "auth/account-exists-with-different-credential") return "That email is linked to Google - use Continue with Google instead.";
+  return "Something went wrong. Please try again.";
+};
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
@@ -212,6 +223,7 @@ const app = Vue.createApp({
           flatpickr(this.$refs.datePicker, {
             dateFormat: 'Y-m-d',
             maxDate: 'today',
+            disableMobile: true,
             onChange: (selectedDates) => {
               if (selectedDates.length > 0) {
                 const selectedDate = selectedDates[0];
@@ -247,7 +259,7 @@ const app = Vue.createApp({
         window.localStorage.setItem('emailForSignIn', this.magicLinkEmail);
         this.magicLinkSent = true;
       }).catch(error => {
-        this.authError = error.message;
+        this.authError = friendlyAuthError(error);
       }).finally(() => {
         this.magicLinkSending = false;
       });
@@ -257,7 +269,7 @@ const app = Vue.createApp({
       firebase.auth().signInWithPopup(provider).then(() => {
         this.showLoginModal = false;
       }).catch(error => {
-        this.authError = error.message;
+        this.authError = friendlyAuthError(error);
       });
     },
     checkMagicLinkSignIn() {

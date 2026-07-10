@@ -19,7 +19,7 @@
 
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/dashboard.css">
-  <link rel="icon" type="image/x-icon" href="favicon.png">
+  <link rel="icon" type="image/png" href="favicon-r.png">
 
 
 </head>
@@ -69,7 +69,7 @@
             </div>
             <div v-else class="nav-user-section">
               <a href="#" class="nav-login" @click.prevent="showLoginModal = true">Log in</a>
-              <a href="#" class="btn btn-get-started" @click.prevent="showLoginModal = true">Get Started &#8599;</a>
+              <a href="#" class="btn btn-get-started" @click.prevent="showLoginModal = true">Get Started <i class="ri-arrow-right-up-line"></i></a>
             </div>
           </div>
         </div>
@@ -264,7 +264,6 @@
             <div class="footer-logo">Reunited</div>
             <div class="footer-links">
               <a href="index.html">Home</a>
-              <a href="index.html#guidelines">Guidelines</a>
               <a href="index.html#faqs">FAQs</a>
               <a href="index.html#contact">Contact</a>
             </div>
@@ -296,7 +295,7 @@
         </div>
 
         <form class="login-form" @submit.prevent="sendMagicLink">
-          <input type="email" v-model="magicLinkEmail" placeholder="you@school.edu" required autocomplete="email">
+          <input type="email" v-model="magicLinkEmail" placeholder="you@inventureacademy.com" required autocomplete="email">
           <button type="submit" class="btn btn-full" :disabled="magicLinkSending">
             {{ magicLinkSending ? 'Sending…' : 'Send magic link' }}
           </button>

@@ -1528,3 +1528,11 @@
     font-size: 2rem;
   }
 }
+
+@media (max-width: 768px) {
+  .field-control input,
+  .field-control select,
+  .select-value {
+    font-size: 16px;
+  }
+}

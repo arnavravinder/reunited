@@ -358,3 +358,10 @@
     padding-right: 1rem;
   }
 }
+
+@media (max-width: 768px) {
+  .search-input input,
+  .filter-dropdown select {
+    font-size: 16px;
+  }
+}

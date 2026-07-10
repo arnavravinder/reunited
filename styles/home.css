@@ -932,3 +932,10 @@ header.scrolled .container {
     padding: 5rem 0 1rem;
   }
 }
+
+@media (max-width: 768px) {
+  .contact .field-control input,
+  .contact .field-control textarea {
+    font-size: 16px;
+  }
+}

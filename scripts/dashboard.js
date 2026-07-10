@@ -275,7 +275,7 @@ Item name:`;
         }
       } catch (error) {
 
-        this.aiError = `Failed to enhance description: ${error.message}. Please try again.`;
+        this.aiError = "Could not enhance the description right now. Please try again.";
       } finally {
         this.isEnhancingDescription = false;
       }
@@ -671,7 +671,7 @@ Item name:`;
         })
         .catch(error => {
 
-          this.showGenericMessagePopup(`Error updating profile: ${error.message}. Please try again.`);
+          this.showGenericMessagePopup("Could not update your profile. Please try again.");
         })
         .finally(() => {
           this.isUpdating = false;
@@ -725,7 +725,7 @@ Item name:`;
         window.location.href = "index.html";
       } catch (error) {
 
-        this.authError = `Error deleting account: ${error.message}. You might need to log in again or contact support if the issue persists.`;
+        this.authError = "Could not delete your account. Sign out, sign back in, and try again - or contact us if it keeps happening.";
         this.isDeleting = false;
       }
     },
@@ -859,7 +859,7 @@ Item name:`;
         this.showGenericMessagePopup(isEditing ? "Lost item updated successfully!" : "Lost item reported successfully! We'll notify you if we find a match.");
       } catch (error) {
 
-        this.showGenericMessagePopup(`Error reporting lost item: ${error.message}. Please try again.`);
+        this.showGenericMessagePopup("Could not submit the report. Please try again.");
       } finally {
         this.isSubmitting = false;
       }
@@ -1030,9 +1030,10 @@ Item name:`;
         case 'auth/too-many-requests': return 'Access temporarily disabled due to too many login attempts. Please reset your password or try again later.';
         case 'auth/requires-recent-login': return 'This action requires you to have recently logged in. Please log out and log back in.';
         case 'auth/operation-not-allowed': return 'Email/password sign-in is not enabled. Contact support.';
-        case 'auth/popup-closed-by-user': return 'Sign-in popup closed before completion.';
+        case 'auth/popup-closed-by-user':
+        case 'auth/cancelled-popup-request': return null;
         case 'auth/account-exists-with-different-credential': return 'An account already exists with this email using a different sign-in method (e.g., Google). Try logging in with that method.';
-        default: return `An unexpected error occurred: ${error.message}`;
+        default: return 'Something went wrong. Please try again.';
       }
     },
     sendMagicLink() {

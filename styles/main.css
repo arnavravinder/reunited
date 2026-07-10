@@ -72,12 +72,20 @@
   box-sizing: border-box;
 }
 
+/* iOS rubber-band overscroll paints the root background; sand-tinted so
+   over-pulling past the shore footer reads as more beach, not a void. */
+html {
+  background-color: #e4c9b3;
+  overscroll-behavior-y: none;
+}
+
 body {
   font-family: 'General Sans', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
   line-height: 1.6;
   overflow-x: clip;
+  overscroll-behavior-y: none;
 }
 
 h1,
@@ -163,123 +171,6 @@ p {
   padding: 0.4rem 1rem;
   font-size: 0.8rem;
   border-radius: 20px;
-}
-
-.splash-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--bg-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.splash-screen.splash-clear {
-  background-color: transparent;
-  pointer-events: none;
-}
-
-.splash-logo {
-  font-family: 'Canela', serif;
-  font-size: 3rem;
-  font-weight: 300;
-  color: var(--text-color);
-  position: relative;
-  display: inline-block;
-  z-index: 2;
-  letter-spacing: -0.01em;
-  will-change: transform;
-  animation: splashIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes splashIn {
-  from {
-    opacity: 0;
-    filter: blur(10px);
-  }
-
-  to {
-    opacity: 1;
-    filter: blur(0);
-  }
-}
-
-.splash-text {
-  position: relative;
-  z-index: 3;
-}
-
-.splash-period {
-  color: var(--secondary-accent);
-  opacity: 0;
-}
-
-.splash-dot-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-}
-
-.splash-dot {
-  position: absolute;
-  display: block;
-  left: 0;
-  top: 0;
-  width: 14px;
-  height: 14px;
-  background-color: var(--secondary-accent);
-  border-radius: 50%;
-  z-index: 1;
-  will-change: transform;
-}
-
-.splash-ring {
-  position: absolute;
-  display: block;
-  width: 30px;
-  height: 30px;
-  margin: -15px 0 0 -15px;
-  border: 1.5px solid var(--secondary-accent);
-  border-radius: 50%;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.splash-ring.pulse {
-  animation: ringPulse 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes ringPulse {
-  0% {
-    opacity: 0.7;
-    transform: scale(0.35);
-  }
-
-  100% {
-    opacity: 0;
-    transform: scale(2.6);
-  }
-}
-
-#app.is-loading header,
-#app.is-loading .hero-bg,
-#app.is-loading .haze-overlay,
-#app.is-loading .caustics {
-  filter: blur(16px);
-  opacity: 0.6;
-}
-
-header,
-.hero-bg,
-.haze-overlay,
-.caustics {
-  transition: filter 2s cubic-bezier(0.16, 1, 0.3, 1), opacity 2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 header {
@@ -842,13 +733,11 @@ textarea.form-control {
 
 .login-success {
   font-family: 'General Sans', sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
   color: #3d8c40;
-  background-color: rgba(76, 175, 80, 0.08);
-  padding: 0.8rem;
-  border-radius: 10px;
-  text-align: center;
-  margin: 0 0 1rem;
+  text-align: left;
+  margin: 0 0 1.1rem;
 }
 
 .or-divider {
@@ -871,13 +760,12 @@ textarea.form-control {
 }
 
 .auth-error {
+  font-family: 'General Sans', sans-serif;
   color: #b4452f;
-  background-color: rgba(180, 69, 47, 0.08);
-  padding: 0.8rem;
-  border-radius: 10px;
-  text-align: center;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  text-align: left;
+  margin-bottom: 1.1rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
 }
 
 .form-success {
@@ -987,6 +875,10 @@ copyright {
     font-size: 2.8rem;
   }
 
+  .hero h1 {
+    font-size: 3.6rem;
+  }
+
   h2 {
     font-size: 1.8rem;
   }
@@ -1018,9 +910,21 @@ copyright {
   }
 
   .mobile-menu-btn {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     order: 3;
-    padding: 0.35rem 0 0.35rem 0.35rem;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    margin-left: 0.65rem;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 10px 24px rgba(31, 28, 25, 0.06);
+    font-size: 1.1rem;
   }
 
   .nav-actions {
@@ -1033,44 +937,42 @@ copyright {
     display: none;
   }
 
-  header.mobile-menu-active {
-    background-color: rgba(244, 239, 234, 0.92);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-
   .mobile-menu-active .nav-links {
     position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
+    top: calc(100% + 8px);
+    left: 16px;
+    right: 16px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0;
-    background-color: rgba(244, 239, 234, 0.92);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    padding: 0.4rem 1.5rem 1.1rem;
-    border-bottom: 1px solid rgba(31, 28, 25, 0.06);
-    box-shadow: 0 24px 50px rgba(31, 28, 25, 0.08);
+    align-items: stretch;
+    gap: 0.1rem;
+    background-color: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    padding: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    border-radius: 24px;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 20px 50px rgba(31, 28, 25, 0.14);
     z-index: 99;
+    transform-origin: top center;
+    animation: accountMenuIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .mobile-menu-active .nav-links a {
-    padding: 0.9rem 0;
+    padding: 0.85rem 1rem;
     text-align: center;
     width: 100%;
-    max-width: 260px;
     font-size: 1.15rem;
-    border-bottom: 1px solid rgba(31, 28, 25, 0.07);
+    border-radius: 17px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.25s ease, opacity 0.25s ease;
   }
 
-  .mobile-menu-active .nav-links a:last-child {
-    border-bottom: none;
+  .mobile-menu-active .nav-links a:active {
+    background-color: rgba(255, 255, 255, 0.8);
+    opacity: 1;
   }
 
   .form-row {
@@ -1093,10 +995,6 @@ copyright {
 
   .modal-title {
     font-size: 1.5rem;
-  }
-
-  .splash-logo {
-    font-size: 2rem;
   }
 
   .hero {
@@ -1131,6 +1029,10 @@ copyright {
     font-size: 2.2rem;
   }
 
+  .hero h1 {
+    font-size: 3.1rem;
+  }
+
   .logo {
     font-size: 1.55rem;
   }
@@ -1151,10 +1053,6 @@ copyright {
   .btn {
     padding: 0.8rem 1.5rem;
     font-size: 0.9rem;
-  }
-
-  .splash-logo {
-    font-size: 1.5rem;
   }
 
   .hero-content {

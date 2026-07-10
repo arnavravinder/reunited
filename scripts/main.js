@@ -17,13 +17,23 @@ const firebaseConfig = {
   appId: getEnvVar('FIREBASE_APP_ID')
 };
 
+const friendlyAuthError = (error) => {
+  const code = (error && error.code) || "";
+  if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") return null;
+  if (code === "auth/invalid-email") return "That email does not look quite right.";
+  if (code === "auth/network-request-failed") return "Network trouble - check your connection and try again.";
+  if (code === "auth/too-many-requests") return "Too many attempts. Give it a minute, then try again.";
+  if (code === "auth/unauthorized-domain") return "Sign-in is not available on this address.";
+  if (code === "auth/account-exists-with-different-credential") return "That email is linked to Google - use Continue with Google instead.";
+  return "Something went wrong. Please try again.";
+};
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 const app = Vue.createApp({
   data() {
     return {
-      loading: true,
       heroQuery: '',
       mobileMenuOpen: false,
       accountMenuOpen: false,
@@ -119,8 +129,9 @@ const app = Vue.createApp({
         this.loadUserProfile();
       }
     });
-    this.startLoadingAnimation();
     this.$nextTick(() => {
+      const heroContent = document.querySelector('.hero-content');
+      if (heroContent) heroContent.classList.add('revealed');
       this.initScrollFX();
       this.initRevealObserver();
     });
@@ -130,116 +141,6 @@ const app = Vue.createApp({
     document.removeEventListener('click', this.closeAccountMenuOutside);
   },
   methods: {
-    startLoadingAnimation() {
-      const appEl = document.getElementById('app');
-      const reveal = () => {
-        const heroContent = document.querySelector('.hero-content');
-        if (heroContent) heroContent.classList.add('revealed');
-      };
-      const finish = () => {
-        document.body.style.overflow = '';
-        this.loading = false;
-      };
-
-      document.body.style.overflow = 'hidden';
-
-      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const seenSplash = sessionStorage.getItem('reunitedSplashSeen');
-      sessionStorage.setItem('reunitedSplashSeen', '1');
-
-      const splashLogo = this.$refs.splashLogo;
-      const splashDot = this.$refs.splashDot;
-      const splashPeriod = this.$refs.splashPeriod;
-      const splashRing = this.$refs.splashRing;
-      const splashWrapper = this.$refs.splashDotWrapper;
-      const navLogo = this.$refs.navLogo;
-      const canAnimate = splashLogo && splashDot && splashPeriod && splashRing && splashWrapper && navLogo;
-
-      if (reducedMotion || seenSplash || !canAnimate) {
-        const splashEl = document.querySelector('.splash-screen');
-        if (splashEl) {
-          splashEl.style.transition = 'opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1)';
-          requestAnimationFrame(() => { splashEl.style.opacity = '0'; });
-        }
-        setTimeout(() => {
-          finish();
-          reveal();
-        }, 480);
-        return;
-      }
-
-      appEl.classList.add('is-loading');
-      navLogo.style.transition = 'none';
-      navLogo.style.opacity = '0';
-
-      const wrapRect = splashWrapper.getBoundingClientRect();
-      const perRect = splashPeriod.getBoundingClientRect();
-      const tx = perRect.left + perRect.width / 2 - wrapRect.left;
-      const ty = perRect.top + perRect.height * 0.72 - wrapRect.top;
-
-      const targetR = Math.hypot(tx, ty);
-      const targetA = Math.atan2(ty, tx);
-      const TURNS = 1.25;
-      const startA = targetA - TURNS * Math.PI * 2;
-      const START_RX = 135;
-      const START_RY = 62;
-      const ORBIT_MS = 1100;
-
-      const easeOrbit = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-      splashRing.style.left = tx + 'px';
-      splashRing.style.top = ty + 'px';
-
-      const t0 = performance.now();
-      const runOrbit = (now) => {
-        const t = Math.min((now - t0) / ORBIT_MS, 1);
-        const e = easeOrbit(t);
-        const angle = startA + (targetA - startA) * e;
-        const rx = START_RX + (targetR - START_RX) * e;
-        const ry = START_RY + (targetR - START_RY) * e;
-        const x = Math.cos(angle) * rx;
-        const y = Math.sin(angle) * ry;
-        const scale = 1 - 0.5 * Math.max(0, (t - 0.7) / 0.3);
-        splashDot.style.transform = `translate(${x - 7}px, ${y - 7}px) scale(${scale})`;
-        if (t < 1) {
-          requestAnimationFrame(runOrbit);
-        } else {
-          dock();
-        }
-      };
-      requestAnimationFrame(runOrbit);
-
-      function dock() {
-        splashRing.classList.add('pulse');
-        splashDot.style.transition = 'opacity 0.16s ease';
-        splashPeriod.style.transition = 'opacity 0.16s ease';
-        splashDot.style.opacity = '0';
-        splashPeriod.style.opacity = '1';
-        setTimeout(handoff, 170);
-      }
-
-      function handoff() {
-        appEl.classList.remove('is-loading');
-        reveal();
-
-        const splashEl = document.querySelector('.splash-screen');
-        const sRect = splashLogo.getBoundingClientRect();
-        const nRect = navLogo.getBoundingClientRect();
-        const dx = nRect.left - sRect.left;
-        const dy = nRect.top - sRect.top;
-        const sc = nRect.width / sRect.width;
-
-        splashEl.classList.add('splash-clear');
-        splashLogo.style.transformOrigin = 'top left';
-        splashLogo.style.transition = 'transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)';
-        splashLogo.style.transform = `translate(${dx}px, ${dy}px) scale(${sc})`;
-
-        setTimeout(() => {
-          navLogo.style.opacity = '';
-          finish();
-        }, 680);
-      }
-    },
     initRevealObserver() {
       const els = document.querySelectorAll('[data-reveal]');
       if (!('IntersectionObserver' in window) || !els.length) {
@@ -331,7 +232,7 @@ const app = Vue.createApp({
           this.magicLinkSent = true;
         })
         .catch(error => {
-          this.authError = error.message;
+          this.authError = friendlyAuthError(error);
         })
         .finally(() => {
           this.magicLinkSending = false;
@@ -344,7 +245,7 @@ const app = Vue.createApp({
           this.showLoginModal = false;
         })
         .catch(error => {
-          this.authError = error.message;
+          this.authError = friendlyAuthError(error);
         });
     },
     signOut() {
@@ -412,7 +313,7 @@ if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
         }
       })
       .catch(() => {
-        alert("Error signing in. Please try again.");
+        this.authError = "That sign-in link did not work. Request a fresh one below."; this.showLoginModal = true;
       });
   }
 }

@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/search.css">
-  <link rel="icon" type="image/x-icon" href="favicon.png">
+  <link rel="icon" type="image/png" href="favicon-r.png">
 </head>
 
 <body>
@@ -50,7 +50,7 @@
           </div>
           <div v-else class="nav-user-section">
             <a href="#" class="nav-login" @click.prevent="showLoginModal = true">Log in</a>
-            <a href="#" class="btn btn-get-started" @click.prevent="showLoginModal = true">Get Started &#8599;</a>
+            <a href="#" class="btn btn-get-started" @click.prevent="showLoginModal = true">Get Started <i class="ri-arrow-right-up-line"></i></a>
           </div>
         </div>
       </div>
@@ -124,7 +124,7 @@
                 <label for="date-lost">Date lost</label>
                 <div class="field-control">
                   <i class="ri-calendar-line"></i>
-                  <input type="text" id="date-lost" class="datepicker-input" placeholder="Anytime" ref="datePicker">
+                  <input type="text" id="date-lost" class="datepicker-input" placeholder="Any date" ref="datePicker">
                 </div>
               </div>
               <div class="field-group others-field" v-if="selectedItemType === 'Others'">
@@ -277,7 +277,6 @@
           <div class="footer-logo">Reunited</div>
           <div class="footer-links">
             <a href="index.html">Home</a>
-            <a href="index.html#guidelines">Guidelines</a>
             <a href="index.html#faqs">FAQs</a>
             <a href="index.html#contact">Contact</a>
           </div>
@@ -442,7 +441,7 @@
         </div>
 
         <form class="login-form" @submit.prevent="sendMagicLink">
-          <input type="email" class="form-control" v-model="magicLinkEmail" placeholder="you@school.edu" required
+          <input type="email" class="form-control" v-model="magicLinkEmail" placeholder="you@inventureacademy.com" required
             autocomplete="email">
           <button type="submit" class="btn w-100" :disabled="magicLinkSending">
             {{ magicLinkSending ? 'Sending…' : 'Send magic link' }}
