@@ -22,7 +22,34 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-const AI_API_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
+const AI_ENDPOINT = getEnvVar('AI_DEV_PROXY') || '/api/ai';
+const GEMINI_DIRECT_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+const GEMINI_DIRECT_MODEL = 'gemini-2.5-flash';
+
+const requestAIChat = async (payload) => {
+  const proxyResponse = await fetch(AI_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).catch(() => null);
+
+  const proxyMissing = !proxyResponse || proxyResponse.status === 404 || proxyResponse.status === 405;
+  if (!proxyMissing) return proxyResponse;
+
+  const geminiKey = getEnvVar('GEMINI_API_KEY');
+  if (!geminiKey) {
+    if (proxyResponse) return proxyResponse;
+    throw new Error('AI proxy unreachable');
+  }
+  return fetch(GEMINI_DIRECT_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${geminiKey}`
+    },
+    body: JSON.stringify({ model: GEMINI_DIRECT_MODEL, ...payload })
+  });
+};
 
 const app = Vue.createApp({
   data() {
@@ -30,22 +57,25 @@ const app = Vue.createApp({
       user: null,
       authError: null,
       showLoginModal: false,
-      isSigningUp: false,
-      loginForm: { email: '', password: '' },
-      magicLinkMode: false,
       magicLinkEmail: '',
       magicLinkSending: false,
       magicLinkSent: false,
-      forgotPassword: false,
-      resetEmail: '',
-      passwordResetSending: false,
-      passwordResetSent: false,
-      showAppleComingSoon: false,
       isLoading: false,
+      authChecked: false,
+      searchError: '',
       mobileMenuOpen: false,
+      accountMenuOpen: false,
       viewMode: 'grid',
       searchPerformed: false,
       aiAssisted: false,
+      aiSearching: false,
+      aiCancelled: false,
+      resultsAnimating: false,
+      topMatchIds: [],
+      aiRankedIds: [],
+      gridCols: 4,
+      resizeTimer: null,
+      lastSearchParams: null,
       shouldScrollToResults: false,
       searchQuery: '',
       selectedItemType: '',
@@ -66,6 +96,7 @@ const app = Vue.createApp({
       },
       selectedItem: null,
       itemValuation: null,
+      messageModal: { visible: false, title: '', text: '', actionLabel: '', actionHref: '' },
       showClaimModal: false,
       showClaimCodeModal: false,
       claimItem: null,
@@ -83,10 +114,22 @@ const app = Vue.createApp({
   },
   mounted() {
     this.precacheAllItems();
+
+    const incomingQuery = new URLSearchParams(window.location.search).get('q');
+    if (incomingQuery) {
+      this.searchQuery = incomingQuery;
+      this.pendingUrlSearch = true;
+    }
+
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
+      this.authChecked = true;
       if (user) {
         this.loadUserProfile();
+        if (this.pendingUrlSearch) {
+          this.pendingUrlSearch = false;
+          this.performSearch();
+        }
       }
     });
 
@@ -94,11 +137,34 @@ const app = Vue.createApp({
       this.initDatePicker();
     }
     this.checkMagicLinkSignIn();
+    window.addEventListener('resize', this.onResize);
+    document.addEventListener('click', this.closeDropdownsOutside);
+  },
+  unmounted() {
+    window.removeEventListener('resize', this.onResize);
+    document.removeEventListener('click', this.closeDropdownsOutside);
+  },
+  watch: {
+    viewMode() {
+      this.computeTopRow();
+    }
   },
   updated() {
     if (this.shouldScrollToResults && !this.isLoading) {
       this.scrollToResults();
       this.shouldScrollToResults = false;
+    }
+  },
+  computed: {
+    paginationPages() {
+      const total = this.totalPages;
+      const current = this.currentPage;
+      if (total <= 6) {
+        return Array.from({ length: total }, (_, i) => i + 1);
+      }
+      if (current <= 3) return [1, 2, 3, '…', total];
+      if (current >= total - 2) return [1, '…', total - 2, total - 1, total];
+      return [1, '…', current, '…', total];
     }
   },
   methods: {
@@ -111,9 +177,9 @@ const app = Vue.createApp({
       }
     },
     scrollToResults() {
-      const resultsSection = document.querySelector('.search-results');
-      if (resultsSection) {
-        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const target = document.querySelector('.ai-loader-section') || document.querySelector('.search-results');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     },
     loadUserProfile() {
@@ -169,19 +235,6 @@ const app = Vue.createApp({
     formatDateYMD(date) {
       return date.toISOString().split('T')[0];
     },
-    submitLoginForm() {
-      this.authError = null;
-      const authPromise = this.isSigningUp
-        ? firebase.auth().createUserWithEmailAndPassword(this.loginForm.email, this.loginForm.password)
-        : firebase.auth().signInWithEmailAndPassword(this.loginForm.email, this.loginForm.password);
-
-      authPromise.then(() => {
-        this.showLoginModal = false;
-        this.loginForm = { email: '', password: '' };
-      }).catch(error => {
-        this.authError = error.message;
-      });
-    },
     sendMagicLink() {
       if (!this.magicLinkEmail) {
         this.authError = "Please enter your email address";
@@ -199,21 +252,6 @@ const app = Vue.createApp({
         this.magicLinkSending = false;
       });
     },
-    sendPasswordReset() {
-      if (!this.resetEmail) {
-        this.authError = "Please enter your email address";
-        return;
-      }
-      this.passwordResetSending = true;
-      this.authError = null;
-      firebase.auth().sendPasswordResetEmail(this.resetEmail).then(() => {
-        this.passwordResetSent = true;
-      }).catch(error => {
-        this.authError = error.message;
-      }).finally(() => {
-        this.passwordResetSending = false;
-      });
-    },
     signInWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithPopup(provider).then(() => {
@@ -221,20 +259,6 @@ const app = Vue.createApp({
       }).catch(error => {
         this.authError = error.message;
       });
-    },
-    signInWithTwitter() {
-      const provider = new firebase.auth.TwitterAuthProvider();
-      firebase.auth().signInWithPopup(provider).then(() => {
-        this.showLoginModal = false;
-      }).catch(error => {
-        this.authError = error.message;
-      });
-    },
-    toggleMagicLinkMode() {
-      this.magicLinkMode = !this.magicLinkMode;
-      this.magicLinkSent = false;
-      this.forgotPassword = false;
-      this.showAppleComingSoon = false;
     },
     checkMagicLinkSignIn() {
       if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
@@ -250,7 +274,7 @@ const app = Vue.createApp({
               window.history.replaceState({}, document.title, window.location.pathname);
             }
           }).catch(() => {
-            alert("Error signing in. Please try again.");
+            this.showMessage('Sign-in failed', 'Something went wrong while signing you in. Please try again.');
           }).finally(() => {
             this.isLoading = false;
           });
@@ -260,39 +284,126 @@ const app = Vue.createApp({
     toggleMobileMenu() {
       this.mobileMenuOpen = !this.mobileMenuOpen;
     },
-    async performSearch() {
-      if (!this.user) {
-        this.showLoginModal = true;
-        return;
-      }
-      this.isLoading = true;
-      this.searchPerformed = true;
-      this.currentPage = 1;
-
-      const searchParams = {
+    buildSearchParams() {
+      return {
         query: this.searchQuery,
         itemType: this.selectedItemType === 'Others' ? this.otherItemType : this.selectedItemType,
         location: this.selectedLocation,
         dateRange: this.searchDateRange
       };
+    },
+    hasSearchCriteria() {
+      const params = this.buildSearchParams();
+      const hasDate = !!(params.dateRange && (params.dateRange.from || params.dateRange.to));
+      return !!(
+        (params.query && params.query.trim()) ||
+        (params.itemType && params.itemType.trim()) ||
+        params.location ||
+        hasDate
+      );
+    },
+    async performSearch() {
+      if (!this.user) {
+        this.showLoginModal = true;
+        return;
+      }
+      if (!this.hasSearchCriteria()) {
+        this.searchError = 'Enter what you lost — a name, type, location, or date — to search.';
+        return;
+      }
+      this.searchError = '';
+      const searchParams = this.buildSearchParams();
+      this.lastSearchParams = searchParams;
+      this.searchPerformed = true;
+      this.currentPage = 1;
 
-      this.aiAssisted = this.isComplexSearch(searchParams);
+      const useAI = this.isComplexSearch(searchParams);
+      this.aiAssisted = useAI;
 
-      let results;
-      if (this.aiAssisted) {
-        results = await this.performAISearch(searchParams);
-      } else {
-        results = this.performBasicSearch(searchParams);
+      if (!useAI) {
+        this.topMatchIds = [];
+        this.updatePagination(this.performBasicSearch(searchParams));
+        this.triggerResultsEntrance();
+        this.shouldScrollToResults = true;
+        return;
       }
 
-      this.updatePagination(results);
-      this.isLoading = false;
+      this.aiCancelled = false;
+      this.aiSearching = true;
+      this.searchResults = [];
+      this.allItems = [];
       this.shouldScrollToResults = true;
+
+      const results = await this.performAISearch(searchParams);
+
+      if (this.aiCancelled) return;
+
+      this.updatePagination(results);
+      this.aiSearching = false;
+      this.$nextTick(() => {
+        this.triggerResultsEntrance();
+        this.computeTopRow();
+      });
+    },
+    tryNormalSearch() {
+      this.aiCancelled = true;
+      this.aiSearching = false;
+      this.aiAssisted = false;
+      this.topMatchIds = [];
+      const params = this.lastSearchParams || this.buildSearchParams();
+      this.updatePagination(this.performBasicSearch(params));
+      this.$nextTick(() => this.triggerResultsEntrance());
+    },
+    entranceStyle(idx) {
+      const col = idx % this.gridCols;
+      const fromLeft = col < this.gridCols / 2;
+      return {
+        '--enter-dir': fromLeft ? -1 : 1,
+        '--enter-delay': (idx % this.itemsPerPage) * 0.05 + 's'
+      };
+    },
+    measureGridCols() {
+      const container = document.querySelector(this.viewMode === 'grid' ? '.results-grid' : '.results-list');
+      if (!container || !container.children.length) {
+        this.gridCols = 1;
+        return;
+      }
+      const cards = Array.from(container.children);
+      const firstTop = cards[0].offsetTop;
+      this.gridCols = cards.filter(c => Math.abs(c.offsetTop - firstTop) < 4).length || 1;
+    },
+    computeTopRow() {
+      this.topMatchIds = [];
+      if (!this.aiAssisted || this.currentPage !== 1 || this.sortOption !== 'relevance' || !this.searchResults.length) {
+        return;
+      }
+      this.$nextTick(() => {
+        if (!this.aiAssisted || this.currentPage !== 1 || this.sortOption !== 'relevance') return;
+        const container = document.querySelector(this.viewMode === 'grid' ? '.results-grid' : '.results-list');
+        if (!container || !container.children.length) return;
+        const cards = Array.from(container.children);
+        const firstTop = cards[0].offsetTop;
+        const rowCount = cards.filter(c => Math.abs(c.offsetTop - firstTop) < 4).length;
+        this.topMatchIds = this.searchResults.slice(0, rowCount).map(item => item.id);
+      });
+    },
+    onResize() {
+      clearTimeout(this.resizeTimer);
+      this.resizeTimer = setTimeout(() => this.computeTopRow(), 150);
+    },
+    triggerResultsEntrance() {
+      this.resultsAnimating = false;
+      this.$nextTick(() => {
+        this.measureGridCols();
+        requestAnimationFrame(() => { this.resultsAnimating = true; });
+        setTimeout(() => { this.resultsAnimating = false; }, 1500);
+      });
     },
     isComplexSearch(params) {
-      return params.query && params.query.length > 2;
+      return params.query && params.query.trim().length > 0;
     },
     performBasicSearch(params) {
+      this.aiRankedIds = [];
       let filtered = this.itemCache.filter(item => {
         const inDate = this.isInDateRange(item.dateFound, params.dateRange);
         const inLocation = !params.location || item.location === params.location;
@@ -306,29 +417,34 @@ const app = Vue.createApp({
 
       return this.sortResults(filtered, params);
     },
+    async aiFetchWithRetry(prompt, maxRetries = 1) {
+      const doFetch = () => requestAIChat({
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.1
+      });
+
+      let response = await doFetch();
+      for (let attempt = 0; attempt < maxRetries && response.status === 429 && !this.aiCancelled; attempt++) {
+        const retryAfter = parseFloat(response.headers.get('retry-after'));
+        const waitMs = Math.min(isNaN(retryAfter) ? 1200 : retryAfter * 1000, 3000);
+        console.info(`[Reunited] AI rate-limited (429); retrying in ${waitMs}ms…`);
+        await new Promise(resolve => setTimeout(resolve, waitMs));
+        if (this.aiCancelled) break;
+        response = await doFetch();
+      }
+      return response;
+    },
     async performAISearch(params) {
-      let results = [];
-      let prefilteredItems = [];
+      this.aiRankedIds = [];
+      const prefilteredItems = this.prefilterItemsForAI(params, this.itemCache);
+
+      if (prefilteredItems.length === 0) {
+        return [];
+      }
+
       try {
-        prefilteredItems = this.prefilterItemsForAI(params, this.itemCache);
-
-        if (prefilteredItems.length === 0) {
-          return [];
-        }
-
         const prompt = this.buildAIPrompt(params, prefilteredItems);
-        const response = await fetch(AI_API_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getEnvVar('OPENROUTER_API_KEY')}`
-          },
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: prompt }],
-            model: 'google/gemini-2.5-flash',
-            temperature: 0.1
-          })
-        });
+        const response = await this.aiFetchWithRetry(prompt);
 
         if (!response.ok) throw new Error(`AI search failed: ${response.status}`);
 
@@ -336,28 +452,60 @@ const app = Vue.createApp({
         const aiResponse = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
         const itemIds = this.extractItemIds(aiResponse);
 
-        if (itemIds.length > 0) {
-          const itemsMap = new Map(prefilteredItems.map(item => [item.id, item]));
-          results = itemIds.map(id => itemsMap.get(id)).filter(Boolean);
-        } else {
-          results = this.fallbackSearch(params, prefilteredItems);
+        if (itemIds.length === 0) {
+          console.warn('[Reunited] AI returned no usable item IDs; using keyword fallback.');
+          return this.sortResults(this.fallbackSearch(params, prefilteredItems), params);
         }
-      } catch (error) {
 
-        results = this.fallbackSearch(params, this.itemCache);
+        const itemsMap = new Map(prefilteredItems.map(item => [item.id, item]));
+        const ranked = itemIds.map(id => itemsMap.get(id)).filter(Boolean);
+
+        if (ranked.length === 0) {
+          return this.sortResults(this.fallbackSearch(params, prefilteredItems), params);
+        }
+
+        this.aiRankedIds = ranked.map(item => item.id);
+        console.info(`[Reunited] AI ranked ${ranked.length} of ${prefilteredItems.length} candidates.`);
+        return this.applyResultSort(ranked, params);
+      } catch (error) {
+        console.warn('[Reunited] AI ranking failed; using keyword fallback:', error);
+        return this.sortResults(this.fallbackSearch(params, prefilteredItems), params);
       }
-      return this.sortResults(results, params);
+    },
+    applyResultSort(items, params) {
+      if (this.sortOption === 'date-desc' || this.sortOption === 'date-asc') {
+        return this.sortResults(items, params);
+      }
+      return items;
     },
     prefilterItemsForAI(params, items) {
+      const pool = items.filter(item => {
+        const inDate = this.isInDateRange(item.dateFound, params.dateRange);
+        const inLocation = !params.location || item.location === params.location;
+        const inType = !params.itemType || (item.category && item.category.toLowerCase() === params.itemType.toLowerCase());
+        return inDate && inLocation && inType;
+      });
+
       const searchTerms = this.generateSearchTerms(params.query);
-      if (searchTerms.length === 0) return items;
-      return items.filter(item =>
+      if (searchTerms.length === 0) return pool.slice(0, 60);
+
+      let candidates = pool.filter(item =>
         item.searchTerms && item.searchTerms.some(term => searchTerms.includes(term))
       );
+      if (candidates.length === 0) {
+        const q = params.query.toLowerCase();
+        candidates = pool.filter(item =>
+          (item.name && item.name.toLowerCase().includes(q)) ||
+          (item.description && item.description.toLowerCase().includes(q))
+        );
+      }
+      if (candidates.length === 0) candidates = pool;
+      return candidates.slice(0, 60);
     },
     buildAIPrompt(params, items) {
-      let prompt = `You are a search relevance API. Your only task is to return a comma-separated list of item IDs.
-CRITICAL RULE: Your entire response MUST be a single line of text containing a comma-separated list of the most relevant item IDs. DO NOT include any other text, explanations, or markdown like \`\`\`.
+      let prompt = `You are a search relevance API for a lost-and-found service. Return ONLY the item IDs that genuinely match the user's query, ordered most relevant first.
+HOW TO MATCH: Judge primarily by the item NAME (what kind of object it is), then the description and category. Note the object TYPE and its COLOUR. EXCLUDE any item that is a different kind of object from what the user asked for — e.g. never return a t-shirt or jacket when the user searches for a "water bottle". A colour mismatch is acceptable if the object type matches, but a wrong object type is not.
+CRITICAL OUTPUT RULE: Your entire response MUST be a single line of text containing a comma-separated list of matching item IDs. DO NOT include any other text, explanations, or markdown like \`\`\`. If nothing matches, return an empty line.
 Correct Output Example: idAbc123,idXyz789,idPqr456
 
 Search Query: "${params.query}"
@@ -417,6 +565,7 @@ Available Items to Rank:
       this.totalPages = Math.ceil(this.allItems.length / this.itemsPerPage);
       this.currentPage = 1;
       this.searchResults = this.allItems.slice(0, this.itemsPerPage);
+      this.computeTopRow();
     },
     sortResults(items = null, params = null) {
       const toSort = items || [...this.allItems];
@@ -430,7 +579,12 @@ Available Items to Rank:
           toSort.sort((a, b) => (a.dateFound && a.dateFound.toDate ? a.dateFound.toDate() : 0) - (b.dateFound && b.dateFound.toDate ? b.dateFound.toDate() : 0));
           break;
         case 'relevance':
-          if (currentParams.query) {
+          if (this.aiRankedIds && this.aiRankedIds.length) {
+            const order = new Map(this.aiRankedIds.map((id, i) => [id, i]));
+            toSort.sort((a, b) =>
+              (order.has(a.id) ? order.get(a.id) : Infinity) - (order.has(b.id) ? order.get(b.id) : Infinity)
+            );
+          } else if (currentParams.query) {
             const query = currentParams.query.toLowerCase();
             toSort.sort((a, b) => this.calculateRelevanceScore(b, query, currentParams.itemType) - this.calculateRelevanceScore(a, query, currentParams.itemType));
           }
@@ -457,15 +611,34 @@ Available Items to Rank:
       if (this.$refs.datePicker && this.$refs.datePicker._flatpickr) {
         this.$refs.datePicker._flatpickr.clear();
       }
-      this.searchResults = [];
-      this.searchPerformed = false;
       this.aiAssisted = false;
+      this.aiSearching = false;
+      this.aiCancelled = true;
+      this.searchError = '';
+      this.searchResults = [];
+      this.allItems = [];
+      this.searchPerformed = false;
+    },
+    selectOption(key, value, event) {
+      this[key] = value;
+      this.searchError = '';
+      const dropdown = event.target.closest('details');
+      if (dropdown) dropdown.open = false;
+    },
+    closeDropdownsOutside(event) {
+      document.querySelectorAll('details.custom-select[open]').forEach(dropdown => {
+        if (!dropdown.contains(event.target)) dropdown.open = false;
+      });
+      if (!event.target.closest('.nav-account')) {
+        this.accountMenuOpen = false;
+      }
     },
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         this.searchResults = this.allItems.slice(startIndex, startIndex + this.itemsPerPage);
+        this.computeTopRow();
       }
     },
     nextPage() {
@@ -473,7 +646,42 @@ Available Items to Rank:
         this.currentPage++;
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         this.searchResults = this.allItems.slice(startIndex, startIndex + this.itemsPerPage);
+        this.computeTopRow();
       }
+    },
+    goToPage(page) {
+      if (page === '…' || page === this.currentPage) return;
+      this.currentPage = page;
+      const startIndex = (page - 1) * this.itemsPerPage;
+      this.searchResults = this.allItems.slice(startIndex, startIndex + this.itemsPerPage);
+      this.computeTopRow();
+    },
+    formatTimeAgo(dateValue) {
+      if (!dateValue) return 'recently';
+      const date = dateValue.toDate ? dateValue.toDate() : new Date(dateValue);
+      if (isNaN(date.getTime())) return 'recently';
+      const days = Math.floor((Date.now() - date.getTime()) / 86400000);
+      if (days <= 0) return 'today';
+      if (days === 1) return '1 day ago';
+      if (days < 7) return `${days} days ago`;
+      const weeks = Math.floor(days / 7);
+      if (weeks === 1) return '1 week ago';
+      if (weeks < 5) return `${weeks} weeks ago`;
+      const months = Math.floor(days / 30);
+      if (months <= 1) return '1 month ago';
+      return `${months} months ago`;
+    },
+    showMessage(title, text, action = null) {
+      this.messageModal = {
+        visible: true,
+        title,
+        text,
+        actionLabel: action ? action.label : '',
+        actionHref: action ? action.href : ''
+      };
+    },
+    closeMessageModal() {
+      this.messageModal.visible = false;
     },
     openItemDetails(item) {
       this.selectedItem = { ...item };
@@ -497,20 +705,12 @@ Available Items to Rank:
     },
     async getItemValuation(item) {
       try {
-        const response = await fetch(AI_API_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getEnvVar('OPENROUTER_API_KEY')}`
-          },
-          body: JSON.stringify({
-            messages: [{
-              role: 'user',
-              content: `Estimate the value of this item in INR. Return only a numeric value or range with the currency symbol, e.g., "₹2000" or "₹8000-12000". No explanation. Item: ${item.name}, Description: ${item.description}`
-            }],
-            model: 'google/gemini-2.5-flash',
-            temperature: 0.3
-          })
+        const response = await requestAIChat({
+          messages: [{
+            role: 'user',
+            content: `Estimate the value of this item in INR. Return only a numeric value or range with the currency symbol, e.g., "₹2000" or "₹8000-12000". No explanation. Item: ${item.name}, Description: ${item.description}`
+          }],
+          temperature: 0.3
         });
         if (!response.ok) throw new Error('AI valuation failed');
         const data = await response.json();
@@ -527,7 +727,7 @@ Available Items to Rank:
         return;
       }
       if (item.claimed) {
-        alert("This item has already been claimed.");
+        this.showMessage('Already claimed', 'This item has already been claimed by another user.');
         return;
       }
       this.claimItem = item;
@@ -535,6 +735,7 @@ Available Items to Rank:
         description: '',
         contactInfo: this.user.phoneNumber || this.user.email || ''
       };
+      this.selectedItem = null;
       this.showClaimModal = true;
     },
     async submitClaim() {
@@ -549,7 +750,7 @@ Available Items to Rank:
         .get();
 
       if (activeClaims.size >= 3) {
-        alert("You can only have 3 active claims at a time. Please wait for your current claims to be resolved.");
+        this.showMessage('Claim limit reached', 'You can have up to 3 active claims at a time. Please wait for your current claims to be resolved.');
         return;
       }
 
@@ -625,9 +826,12 @@ Available Items to Rank:
 
         if (isHighValue) {
           this.showClaimModal = false;
-          const contactUrl = `index.html#contact?claim=${claimRef.id}&item=${this.claimItem.name}`;
-          alert(`This item's estimated value (₹${estimatedValue}) requires verification. Please use the contact form to complete your claim.`);
-          setTimeout(() => { window.location.href = contactUrl; }, 1500);
+          const contactUrl = `index.html#contact?claim=${claimRef.id}&item=${encodeURIComponent(this.claimItem.name)}`;
+          this.showMessage(
+            'Verification needed',
+            `This item's estimated value (₹${estimatedValue}) requires a quick verification. Please use the contact form to complete your claim.`,
+            { label: 'Continue to contact form', href: contactUrl }
+          );
         } else {
           try {
             await fetch('https://api.reunited.co.in/api/send-claim-email', {
@@ -651,20 +855,13 @@ Available Items to Rank:
         }
       } catch (error) {
 
-        alert("An error occurred while submitting your claim. Please try again.");
+        this.showMessage('Something went wrong', 'An error occurred while submitting your claim. Please try again.');
       } finally {
         this.isSubmittingClaim = false;
       }
     },
     goToClaimLog() {
       window.location.href = 'dashboard.html#claims';
-    },
-    reportMatch(itemId) {
-      if (!this.user) {
-        this.showLoginModal = true;
-        return;
-      }
-      window.location.href = 'dashboard.html#lost';
     },
     disputeClaim(itemId) {
       window.location.href = 'index.html#contact';
@@ -732,7 +929,5 @@ Available Items to Rank:
     }
   }
 });
-
-
 
 app.mount('#searchApp');

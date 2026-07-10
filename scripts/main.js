@@ -24,10 +24,10 @@ const app = Vue.createApp({
   data() {
     return {
       loading: true,
+      heroQuery: '',
       mobileMenuOpen: false,
+      accountMenuOpen: false,
       showLoginModal: false,
-      isSigningUp: false,
-      floatingItems: [],
       contactForm: {
         name: '',
         email: '',
@@ -35,24 +35,14 @@ const app = Vue.createApp({
         subject: '',
         message: ''
       },
-      loginForm: {
-        email: '',
-        password: ''
-      },
       user: null,
       authError: null,
       formspreeUrl: getEnvVar('FORMSPREE_URL'),
       formSubmitting: false,
       formSubmitted: false,
-      magicLinkMode: false,
       magicLinkEmail: '',
       magicLinkSending: false,
       magicLinkSent: false,
-      forgotPassword: false,
-      resetEmail: '',
-      passwordResetSending: false,
-      passwordResetSent: false,
-      showAppleComingSoon: false,
       userProfile: {
         displayName: '',
         email: ''
@@ -123,7 +113,6 @@ const app = Vue.createApp({
         });
       }
     }
-    this.generateFloatingItems();
     firebase.auth().onAuthStateChanged(user => {
       this.user = user;
       if (user) {
@@ -131,98 +120,172 @@ const app = Vue.createApp({
       }
     });
     this.startLoadingAnimation();
+    this.$nextTick(() => {
+      this.initScrollFX();
+      this.initRevealObserver();
+    });
+    document.addEventListener('click', this.closeAccountMenuOutside);
+  },
+  unmounted() {
+    document.removeEventListener('click', this.closeAccountMenuOutside);
   },
   methods: {
     startLoadingAnimation() {
+      const appEl = document.getElementById('app');
+      const reveal = () => {
+        const heroContent = document.querySelector('.hero-content');
+        if (heroContent) heroContent.classList.add('revealed');
+      };
+      const finish = () => {
+        document.body.style.overflow = '';
+        this.loading = false;
+      };
+
+      document.body.style.overflow = 'hidden';
+
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const seenSplash = sessionStorage.getItem('reunitedSplashSeen');
+      sessionStorage.setItem('reunitedSplashSeen', '1');
+
       const splashLogo = this.$refs.splashLogo;
-      const splashText = this.$refs.splashText;
       const splashDot = this.$refs.splashDot;
-      const splashDotWrapper = this.$refs.splashDotWrapper;
+      const splashPeriod = this.$refs.splashPeriod;
+      const splashRing = this.$refs.splashRing;
+      const splashWrapper = this.$refs.splashDotWrapper;
       const navLogo = this.$refs.navLogo;
-      if (!splashLogo || !splashText || !splashDot || !splashDotWrapper || !navLogo) {
-        setTimeout(() => { this.loading = false; }, 500);
+      const canAnimate = splashLogo && splashDot && splashPeriod && splashRing && splashWrapper && navLogo;
+
+      if (reducedMotion || seenSplash || !canAnimate) {
+        const splashEl = document.querySelector('.splash-screen');
+        if (splashEl) {
+          splashEl.style.transition = 'opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1)';
+          requestAnimationFrame(() => { splashEl.style.opacity = '0'; });
+        }
+        setTimeout(() => {
+          finish();
+          reveal();
+        }, 480);
         return;
       }
-      const ORBIT_RADIUS = 99;
-      splashDot.style.left = ORBIT_RADIUS + 'px';
-      splashDotWrapper.classList.add('animate-orbit');
-      setTimeout(() => {
-        splashDotWrapper.classList.remove('animate-orbit');
-        const pseudoDot = splashDot.cloneNode(true);
-        const dotRect = splashDot.getBoundingClientRect();
-        pseudoDot.style.position = 'fixed';
-        pseudoDot.style.left = dotRect.left + 'px';
-        pseudoDot.style.top = dotRect.top + 'px';
-        pseudoDot.style.transform = 'scale(1)';
-        pseudoDot.style.transformOrigin = 'center';
-        pseudoDot.style.zIndex = '1';
-        document.querySelector('.splash-screen').appendChild(pseudoDot);
+
+      appEl.classList.add('is-loading');
+      navLogo.style.transition = 'none';
+      navLogo.style.opacity = '0';
+
+      const wrapRect = splashWrapper.getBoundingClientRect();
+      const perRect = splashPeriod.getBoundingClientRect();
+      const tx = perRect.left + perRect.width / 2 - wrapRect.left;
+      const ty = perRect.top + perRect.height * 0.72 - wrapRect.top;
+
+      const targetR = Math.hypot(tx, ty);
+      const targetA = Math.atan2(ty, tx);
+      const TURNS = 1.25;
+      const startA = targetA - TURNS * Math.PI * 2;
+      const START_RX = 135;
+      const START_RY = 62;
+      const ORBIT_MS = 1100;
+
+      const easeOrbit = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+      splashRing.style.left = tx + 'px';
+      splashRing.style.top = ty + 'px';
+
+      const t0 = performance.now();
+      const runOrbit = (now) => {
+        const t = Math.min((now - t0) / ORBIT_MS, 1);
+        const e = easeOrbit(t);
+        const angle = startA + (targetA - startA) * e;
+        const rx = START_RX + (targetR - START_RX) * e;
+        const ry = START_RY + (targetR - START_RY) * e;
+        const x = Math.cos(angle) * rx;
+        const y = Math.sin(angle) * ry;
+        const scale = 1 - 0.5 * Math.max(0, (t - 0.7) / 0.3);
+        splashDot.style.transform = `translate(${x - 7}px, ${y - 7}px) scale(${scale})`;
+        if (t < 1) {
+          requestAnimationFrame(runOrbit);
+        } else {
+          dock();
+        }
+      };
+      requestAnimationFrame(runOrbit);
+
+      function dock() {
+        splashRing.classList.add('pulse');
+        splashDot.style.transition = 'opacity 0.16s ease';
+        splashPeriod.style.transition = 'opacity 0.16s ease';
         splashDot.style.opacity = '0';
-        pseudoDot.style.transition = 'transform 1s ease, opacity 1s ease';
-        const scaleNeeded = Math.sqrt(
-          window.innerWidth ** 2 + window.innerHeight ** 2
-        ) / dotRect.width * 1.5;
-        setTimeout(() => {
-          pseudoDot.style.transform = `scale(${scaleNeeded})`;
-        }, 50);
-        const splashLogoRect = splashLogo.getBoundingClientRect();
-        const navRect = navLogo.getBoundingClientRect();
-        const deltaX = navRect.left - splashLogoRect.left;
-        const deltaY = navRect.top - splashLogoRect.top;
-        splashLogo.style.transition = 'transform 1s ease';
-        splashLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.6)`;
+        splashPeriod.style.opacity = '1';
+        setTimeout(handoff, 170);
+      }
+
+      function handoff() {
+        appEl.classList.remove('is-loading');
+        reveal();
+
+        const splashEl = document.querySelector('.splash-screen');
+        const sRect = splashLogo.getBoundingClientRect();
+        const nRect = navLogo.getBoundingClientRect();
+        const dx = nRect.left - sRect.left;
+        const dy = nRect.top - sRect.top;
+        const sc = nRect.width / sRect.width;
+
+        splashEl.classList.add('splash-clear');
         splashLogo.style.transformOrigin = 'top left';
+        splashLogo.style.transition = 'transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)';
+        splashLogo.style.transform = `translate(${dx}px, ${dy}px) scale(${sc})`;
+
         setTimeout(() => {
-          pseudoDot.style.opacity = '0';
-          splashLogo.style.opacity = '0';
-          const splashScreenEl = document.querySelector('.splash-screen');
-          splashScreenEl.style.transition = 'opacity 0.3s ease';
-          splashScreenEl.style.opacity = '0';
-          setTimeout(() => {
-            this.loading = false;
-          }, 300);
-        }, 1000);
-      }, 2500);
+          navLogo.style.opacity = '';
+          finish();
+        }, 680);
+      }
     },
-    generateFloatingItems() {
-      const items = [];
-      for (let i = 0; i < 20; i++) {
-        const size = Math.random() * 20 + 5;
-        const x = Math.random() * 100;
-        const y = Math.random() * 100;
-        const opacity = Math.random() * 0.15 + 0.05;
-        const delay = Math.random() * 5;
-        const duration = Math.random() * 10 + 10;
-        items.push({
-          style: {
-            width: `${size}px`,
-            height: `${size}px`,
-            left: `${x}%`,
-            top: `${y}%`,
-            opacity: opacity,
-            backgroundColor: Math.random() > 0.5
-              ? 'var(--accent-color)'
-              : 'var(--secondary-accent)',
-            animationDuration: `${duration}s`,
-            animationDelay: `${delay}s`
+    initRevealObserver() {
+      const els = document.querySelectorAll('[data-reveal]');
+      if (!('IntersectionObserver' in window) || !els.length) {
+        els.forEach(el => el.setAttribute('data-revealed', ''));
+        return;
+      }
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.setAttribute('data-revealed', '');
+            obs.unobserve(entry.target);
           }
         });
-      }
-      this.floatingItems = items;
+      }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
+      els.forEach(el => obs.observe(el));
+    },
+    initScrollFX() {
+      const header = document.querySelector('header');
+      if (!header) return;
+
+      let ticking = false;
+      const update = () => {
+        ticking = false;
+        header.classList.toggle('scrolled', window.scrollY > window.innerHeight * 0.6);
+      };
+      const onScroll = () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      update();
     },
     toggleMobileMenu() {
       this.mobileMenuOpen = !this.mobileMenuOpen;
     },
+    closeAccountMenuOutside(event) {
+      if (!event.target.closest('.nav-account')) {
+        this.accountMenuOpen = false;
+      }
+    },
     toggleFaq(index) {
       this.faqs[index].isOpen = !this.faqs[index].isOpen;
     },
-    toggleMagicLinkMode() {
-      this.magicLinkMode = !this.magicLinkMode;
-      this.magicLinkSent = false;
-      this.forgotPassword = false;
-      this.showAppleComingSoon = false;
-    },
-    submitContactForm() {
+    submitContactForm(event) {
       this.formSubmitting = true;
       const formData = new FormData(event.target);
       fetch(this.formspreeUrl, {
@@ -251,34 +314,6 @@ const app = Vue.createApp({
           this.formSubmitting = false;
         });
     },
-    submitLoginForm() {
-      this.authError = null;
-      if (this.isSigningUp) {
-        firebase.auth().createUserWithEmailAndPassword(
-          this.loginForm.email,
-          this.loginForm.password
-        )
-          .then(() => {
-            this.showLoginModal = false;
-            this.loginForm = { email: '', password: '' };
-          })
-          .catch(error => {
-            this.authError = error.message;
-          });
-      } else {
-        firebase.auth().signInWithEmailAndPassword(
-          this.loginForm.email,
-          this.loginForm.password
-        )
-          .then(() => {
-            this.showLoginModal = false;
-            this.loginForm = { email: '', password: '' };
-          })
-          .catch(error => {
-            this.authError = error.message;
-          });
-      }
-    },
     sendMagicLink() {
       if (!this.magicLinkEmail) {
         this.authError = "Please enter your email address";
@@ -302,36 +337,8 @@ const app = Vue.createApp({
           this.magicLinkSending = false;
         });
     },
-    sendPasswordReset() {
-      if (!this.resetEmail) {
-        this.authError = "Please enter your email address";
-        return;
-      }
-      this.passwordResetSending = true;
-      this.authError = null;
-      firebase.auth().sendPasswordResetEmail(this.resetEmail)
-        .then(() => {
-          this.passwordResetSent = true;
-        })
-        .catch(error => {
-          this.authError = error.message;
-        })
-        .finally(() => {
-          this.passwordResetSending = false;
-        });
-    },
     signInWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider)
-        .then(() => {
-          this.showLoginModal = false;
-        })
-        .catch(error => {
-          this.authError = error.message;
-        });
-    },
-    signInWithTwitter() {
-      const provider = new firebase.auth.TwitterAuthProvider();
       firebase.auth().signInWithPopup(provider)
         .then(() => {
           this.showLoginModal = false;
@@ -383,12 +390,11 @@ const app = Vue.createApp({
       return colors[charSum % colors.length];
     },
     goToSearchPage() {
-      window.location.href = "/search.html";
+      const q = (this.heroQuery || '').trim();
+      window.location.href = q ? '/search.html?q=' + encodeURIComponent(q) : '/search.html';
     }
   }
 });
-
-
 
 app.mount('#app');
 

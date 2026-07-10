@@ -22,40 +22,55 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
 
+const AI_ENDPOINT = getEnvVar('AI_DEV_PROXY') || '/api/ai';
+const GEMINI_DIRECT_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+const GEMINI_DIRECT_MODEL = 'gemini-2.5-flash';
+
+const requestAIChat = async (payload) => {
+  const proxyResponse = await fetch(AI_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).catch(() => null);
+
+  const proxyMissing = !proxyResponse || proxyResponse.status === 404 || proxyResponse.status === 405;
+  if (!proxyMissing) return proxyResponse;
+
+  const geminiKey = getEnvVar('GEMINI_API_KEY');
+  if (!geminiKey) {
+    if (proxyResponse) return proxyResponse;
+    throw new Error('AI proxy unreachable');
+  }
+  return fetch(GEMINI_DIRECT_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${geminiKey}`
+    },
+    body: JSON.stringify({ model: GEMINI_DIRECT_MODEL, ...payload })
+  });
+};
+
 const app = Vue.createApp({
   data() {
     return {
       user: null,
       authError: null,
       showLoginModal: false,
-      isSigningUp: false,
-      loginForm: {
-        email: '',
-        password: ''
-      },
-      magicLinkMode: false,
       magicLinkEmail: '',
       magicLinkSending: false,
       magicLinkSent: false,
-      forgotPassword: false,
-      resetEmail: '',
-      passwordResetSending: false,
-      passwordResetSent: false,
-      showAppleComingSoon: false,
-      showNameCollectionModal: false,
-      nameCollectionForm: {
-        firstName: '',
-        lastName: ''
-      },
       isLoading: true,
       cache: {
         userProfile: null,
+        userPreferences: null,
         notifications: null,
         lostItems: null,
         claims: null,
         lastUpdate: null
       },
       mobileMenuOpen: false,
+      accountMenuOpen: false,
       activeTab: 'notifications',
       userProfile: {
         displayName: '',
@@ -64,18 +79,9 @@ const app = Vue.createApp({
       },
       phoneValid: false,
       userPreferences: {
-        emailNotifications: true,
-        matchAlerts: true,
-        statusUpdates: true
+        emailNotifications: true
       },
       isUpdating: false,
-      passwordForm: {
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      },
-      passwordError: null,
-      passwordSuccess: null,
       deleteConfirmation: '',
       isDeleting: false,
       notifications: [],
@@ -96,10 +102,10 @@ const app = Vue.createApp({
         'Lecture Hall', 'Parking Lot', 'Bus Stop', 'Park', 'Other'
       ],
       tabs: [
-        { id: 'notifications', name: 'Notifications', icon: 'fas fa-bell' },
-        { id: 'lost', name: 'Lost Items', icon: 'fas fa-search' },
-        { id: 'claims', name: 'My Claims', icon: 'fas fa-clipboard-check' },
-        { id: 'settings', name: 'Settings', icon: 'fas fa-cog' }
+        { id: 'notifications', name: 'Notifications', icon: 'ri-notification-3-line' },
+        { id: 'lost', name: 'Lost Items', icon: 'ri-search-line' },
+        { id: 'claims', name: 'My Claims', icon: 'ri-checkbox-line' },
+        { id: 'settings', name: 'Settings', icon: 'ri-settings-3-line' }
       ],
       selectedClaim: null,
       flatpickrInstances: {},
@@ -112,13 +118,14 @@ const app = Vue.createApp({
       if (user) {
         this.resetDashboardData();
 
-        // Check if we have cached data less than 5 minutes old
         const cacheAge = this.cache.lastUpdate ? Date.now() - this.cache.lastUpdate : Infinity;
-        const isCacheValid = cacheAge < 300000; // 5 minutes
+        const isCacheValid = cacheAge < 300000;
 
         if (isCacheValid && this.cache.userProfile) {
-          // Use cached data for immediate display
           this.userProfile = { ...this.cache.userProfile };
+          if (this.cache.userPreferences) {
+            this.userPreferences = { ...this.cache.userPreferences };
+          }
           this.notifications = [...(this.cache.notifications || [])];
           this.lostItems = [...(this.cache.lostItems || [])];
           this.claims = [...(this.cache.claims || [])];
@@ -128,10 +135,8 @@ const app = Vue.createApp({
             this.initializeFlatpickr();
           });
 
-          // Still load fresh data in background
           this.refreshDataInBackground();
         } else {
-          // Load fresh data
           Promise.all([
             this.loadUserProfile(),
             this.loadNotifications(),
@@ -164,6 +169,7 @@ const app = Vue.createApp({
       this.activeTab = 'notifications';
     }
     this.checkMagicLinkSignIn();
+    document.addEventListener('click', this.closeAccountMenuOutside);
   },
   methods: {
     hideInitialLoader() {
@@ -227,23 +233,10 @@ Location: ${form.location}
 
 Enhanced description:`;
 
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getEnvVar('OPENROUTER_API_KEY')}`
-          },
-          body: JSON.stringify({
-            messages: [
-              {
-                role: 'user',
-                content: descriptionPrompt
-              }
-            ],
-            model: 'moonshotai/kimi-k2-thinking',
-            max_tokens: 150,
-            temperature: 0.7
-          })
+        const response = await requestAIChat({
+          messages: [{ role: 'user', content: descriptionPrompt }],
+          max_tokens: 300,
+          temperature: 0.7
         });
 
         if (!response.ok) {
@@ -261,23 +254,10 @@ Enhanced description:`;
 
 Item name:`;
 
-            const nameResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getEnvVar('OPENROUTER_API_KEY')}`
-              },
-              body: JSON.stringify({
-                messages: [
-                  {
-                    role: 'user',
-                    content: namePrompt
-                  }
-                ],
-                model: 'moonshotai/kimi-k2-thinking',
-                max_tokens: 20,
-                temperature: 0.5
-              })
+            const nameResponse = await requestAIChat({
+              messages: [{ role: 'user', content: namePrompt }],
+              max_tokens: 60,
+              temperature: 0.5
             });
 
             if (nameResponse.ok) {
@@ -340,17 +320,6 @@ Item name:`;
       this.lostItemForm = this.getInitialLostItemForm();
       this.aiError = null;
     },
-    openChangePasswordPopup() {
-      this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
-      this.passwordError = null;
-      this.passwordSuccess = null;
-      const popup = document.getElementById('changePasswordPopup');
-      if (popup) popup.style.display = 'flex';
-    },
-    closeChangePasswordPopup() {
-      const popup = document.getElementById('changePasswordPopup');
-      if (popup) popup.style.display = 'none';
-    },
     openDeleteAccountPopup() {
       this.deleteConfirmation = '';
       this.authError = null;
@@ -407,22 +376,16 @@ Item name:`;
       this.lostItems = [];
       this.claims = [];
       this.userProfile = { displayName: '', email: '', phone: '' };
-      this.userPreferences = { emailNotifications: true, matchAlerts: true, statusUpdates: true };
+      this.userPreferences = { emailNotifications: true };
       this.selectedItem = null;
       this.selectedClaim = null;
       this.lostItemForm = this.getInitialLostItemForm();
-      this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
-      this.passwordError = null;
-      this.passwordSuccess = null;
       this.deleteConfirmation = '';
       this.authError = null;
-      this.loginForm = { email: '', password: '' };
-      this.isSigningUp = false;
-      this.magicLinkMode = false;
-      this.forgotPassword = false;
       this.aiError = null;
       this.cache = {
         userProfile: null,
+        userPreferences: null,
         notifications: null,
         lostItems: null,
         claims: null,
@@ -453,29 +416,11 @@ Item name:`;
         case 'notifications':
           return this.notifications.filter(notification => !notification.read).length;
         case 'lost':
-          return this.lostItems.length;
+          return 0;
         case 'claims':
           return this.claims.length;
         default:
           return 0;
-      }
-    },
-    getNotificationIcon(type) {
-      switch (type) {
-        case 'claim_update':
-        case 'claim':
-          return 'fas fa-clipboard-check';
-        case 'match_found':
-        case 'match':
-          return 'fas fa-link';
-        case 'item_status':
-        case 'status':
-          return 'fas fa-info-circle';
-        case 'system_message':
-        case 'system':
-          return 'fas fa-cog';
-        default:
-          return 'fas fa-bell';
       }
     },
     refreshDataInBackground() {
@@ -499,12 +444,10 @@ Item name:`;
             };
             if (data.preferences) {
               this.userPreferences = {
-                emailNotifications: data.preferences.emailNotifications !== false,
-                matchAlerts: data.preferences.matchAlerts !== false,
-                statusUpdates: data.preferences.statusUpdates !== false
+                emailNotifications: data.preferences.emailNotifications !== false
               };
             } else {
-              this.userPreferences = { emailNotifications: true, matchAlerts: true, statusUpdates: true };
+              this.userPreferences = { emailNotifications: true };
             }
           } else {
             this.userProfile = {
@@ -512,19 +455,16 @@ Item name:`;
               email: this.user.email,
               phone: ''
             };
-            this.userPreferences = { emailNotifications: true, matchAlerts: true, statusUpdates: true };
+            this.userPreferences = { emailNotifications: true };
             db.collection('users').doc(this.user.uid).set({
               displayName: this.userProfile.displayName,
               email: this.userProfile.email,
               createdAt: firebase.firestore.FieldValue.serverTimestamp(),
               preferences: this.userPreferences
             }).catch(error => { });
-
-            if (!this.userProfile.displayName || this.userProfile.displayName.trim().length === 0) {
-              this.showNameCollectionModal = true;
-            }
           }
           this.cache.userProfile = { ...this.userProfile };
+          this.cache.userPreferences = { ...this.userPreferences };
           this.cache.lastUpdate = Date.now();
         })
         .catch(error => {
@@ -686,6 +626,15 @@ Item name:`;
           break;
       }
     },
+    handleNotificationClick(notification) {
+      if (notification.actionable) {
+        this.handleNotificationAction(notification);
+        return;
+      }
+      if (!notification.read) {
+        this.markAsRead(notification.id);
+      }
+    },
     updateProfile() {
       if (!this.user) return;
       this.isUpdating = true;
@@ -733,118 +682,16 @@ Item name:`;
       this.isUpdating = true;
       db.collection('users').doc(this.user.uid).set({
         preferences: {
-          emailNotifications: this.userPreferences.emailNotifications,
-          matchAlerts: this.userPreferences.matchAlerts,
-          statusUpdates: this.userPreferences.statusUpdates
+          emailNotifications: this.userPreferences.emailNotifications
         }
       }, { merge: true })
         .then(() => {
+          this.cache.userPreferences = { ...this.userPreferences };
           this.showGenericMessagePopup("Preferences saved successfully!");
         })
         .catch(error => {
 
           this.showGenericMessagePopup(`Error saving preferences. Please try again.`);
-        })
-        .finally(() => {
-          this.isUpdating = false;
-        });
-    },
-    submitNameCollection() {
-      if (!this.user) return;
-
-      const firstName = this.nameCollectionForm.firstName.trim();
-      const lastName = this.nameCollectionForm.lastName.trim();
-
-      if (!firstName || !lastName) {
-        this.showGenericMessagePopup("Please enter both first and last name.");
-        return;
-      }
-
-      this.isUpdating = true;
-      const fullName = `${firstName} ${lastName}`;
-
-      const updates = [];
-      updates.push(
-        this.user.updateProfile({
-          displayName: fullName
-        }).catch(error => {
-
-          throw new Error("Auth profile update failed");
-        })
-      );
-
-      updates.push(
-        db.collection('users').doc(this.user.uid).update({
-          displayName: fullName,
-          firstName: firstName,
-          lastName: lastName
-        }).catch(error => {
-
-          throw new Error("Firestore profile update failed");
-        })
-      );
-
-      Promise.all(updates)
-        .then(() => {
-          this.userProfile.displayName = fullName;
-          this.showNameCollectionModal = false;
-          this.nameCollectionForm = { firstName: '', lastName: '' };
-          this.showGenericMessagePopup("Profile completed successfully!");
-        })
-        .catch(error => {
-
-          this.showGenericMessagePopup(`Error updating profile: ${error.message}. Please try again.`);
-        })
-        .finally(() => {
-          this.isUpdating = false;
-        });
-    },
-    changePassword() {
-      this.passwordError = null;
-      this.passwordSuccess = null;
-      if (!this.passwordForm.currentPassword || !this.passwordForm.newPassword || !this.passwordForm.confirmPassword) {
-        this.passwordError = "Please fill in all password fields.";
-        return;
-      }
-      if (this.passwordForm.newPassword.length < 6) {
-        this.passwordError = "New password must be at least 6 characters long.";
-        return;
-      }
-      if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
-        this.passwordError = "New password and confirmation do not match.";
-        return;
-      }
-      if (this.passwordForm.newPassword === this.passwordForm.currentPassword) {
-        this.passwordError = "New password cannot be the same as the current password.";
-        return;
-      }
-      this.isUpdating = true;
-      const credential = firebase.auth.EmailAuthProvider.credential(
-        this.user.email,
-        this.passwordForm.currentPassword
-      );
-      this.user.reauthenticateWithCredential(credential)
-        .then(() => {
-          return this.user.updatePassword(this.passwordForm.newPassword);
-        })
-        .then(() => {
-          this.passwordSuccess = "Password changed successfully!";
-          this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
-          setTimeout(() => {
-            this.closeChangePasswordPopup();
-            this.passwordSuccess = null;
-            this.passwordError = null;
-          }, 2000);
-        })
-        .catch(error => {
-
-          if (error.code === 'auth/wrong-password') {
-            this.passwordError = "Current password is incorrect.";
-          } else if (error.code === 'auth/weak-password') {
-            this.passwordError = "The new password is too weak.";
-          } else {
-            this.passwordError = `An error occurred: ${error.message}`;
-          }
         })
         .finally(() => {
           this.isUpdating = false;
@@ -893,7 +740,7 @@ Item name:`;
         });
       }
     },
-    editItem(item) {
+    editItem(item, type) {
       this.closeItemDetailsPopup();
       if (type === 'lost') {
         this.lostItemForm = {
@@ -941,7 +788,7 @@ Item name:`;
           this.showGenericMessagePopup("Please upload valid image files (e.g., JPG, PNG, GIF).");
           return;
         }
-        if (file.size > 5 * 1024 * 1024) { // 5MB
+        if (file.size > 5 * 1024 * 1024) {
           this.showGenericMessagePopup(`File ${file.name} is too large (max 5MB).`);
           return;
         }
@@ -958,7 +805,7 @@ Item name:`;
         };
         reader.readAsDataURL(file);
       });
-      event.target.value = null; // Reset file input
+      event.target.value = null;
     },
     removeImage(index) {
       const form = this.lostItemForm;
@@ -1150,38 +997,9 @@ Item name:`;
     toggleMobileMenu() {
       this.mobileMenuOpen = !this.mobileMenuOpen;
     },
-    submitLoginForm() {
-      this.authError = null;
-      const email = this.loginForm.email.trim();
-      const password = this.loginForm.password;
-      if (!email || !password) {
-        this.authError = "Please enter both email and password.";
-        return;
-      }
-      if (this.isSigningUp) {
-        if (password.length < 6) {
-          this.authError = "Password must be at least 6 characters long.";
-          return;
-        }
-        firebase.auth().createUserWithEmailAndPassword(email, password)
-          .then((userCredential) => {
-            this.initializeUserProfile(userCredential.user);
-            this.showLoginModal = false;
-            this.loginForm = { email: '', password: '' };
-            this.isSigningUp = false;
-          })
-          .catch(error => {
-            this.authError = this.getFriendlyAuthError(error);
-          });
-      } else {
-        firebase.auth().signInWithEmailAndPassword(email, password)
-          .then(() => {
-            this.showLoginModal = false;
-            this.loginForm = { email: '', password: '' };
-          })
-          .catch(error => {
-            this.authError = this.getFriendlyAuthError(error);
-          });
+    closeAccountMenuOutside(event) {
+      if (!event.target.closest('.nav-account')) {
+        this.accountMenuOpen = false;
       }
     },
     initializeUserProfile(user) {
@@ -1195,9 +1013,7 @@ Item name:`;
             phone: '',
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             preferences: {
-              emailNotifications: true,
-              matchAlerts: true,
-              statusUpdates: true
+              emailNotifications: true
             }
           }).catch(error => { });
         }
@@ -1246,37 +1062,9 @@ Item name:`;
           this.magicLinkSending = false;
         });
     },
-    sendPasswordReset() {
-      const email = this.resetEmail.trim();
-      if (!email) {
-        this.authError = "Please enter your email address";
-        return;
-      }
-      this.passwordResetSending = true;
+    signInWithGoogle() {
       this.authError = null;
-      this.passwordResetSent = false;
-      firebase.auth().sendPasswordResetEmail(email)
-        .then(() => {
-          this.passwordResetSent = true;
-          this.resetEmail = '';
-        })
-        .catch(error => {
-          this.authError = this.getFriendlyAuthError(error);
-        })
-        .finally(() => {
-          this.passwordResetSending = false;
-        });
-    },
-    signInWithProvider(providerType) {
-      let provider;
-      if (providerType === 'google') {
-        provider = new firebase.auth.GoogleAuthProvider();
-      } else if (providerType === 'twitter') {
-        provider = new firebase.auth.TwitterAuthProvider();
-      } else {
-        return;
-      }
-      this.authError = null;
+      const provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithPopup(provider)
         .then((result) => {
           const isNewUser = result.additionalUserInfo?.isNewUser;
@@ -1289,17 +1077,8 @@ Item name:`;
           this.authError = this.getFriendlyAuthError(error);
         });
     },
-    signInWithGoogle() { this.signInWithProvider('google'); },
-    signInWithTwitter() { this.signInWithProvider('twitter'); },
-    toggleMagicLinkMode() {
-      this.magicLinkMode = !this.magicLinkMode;
-      this.authError = null;
-      this.magicLinkSent = false;
-      this.forgotPassword = false;
-      this.showAppleComingSoon = false;
-    },
     getBackgroundImage(imageUrl) {
-      return { backgroundImage: `url(${imageUrl || 'images/no-image.png'})` };
+      return { backgroundImage: `url(${imageUrl || 'assets/no-image.svg'})` };
     },
     signOut() {
       firebase.auth().signOut()
@@ -1342,11 +1121,10 @@ Item name:`;
   },
   beforeUnmount() {
     Object.values(this.flatpickrInstances).forEach(fp => fp.destroy());
+    document.removeEventListener('click', this.closeAccountMenuOutside);
   }
 });
 
 app.use(window.VueTelInput);
-
-
 
 app.mount('#dashboardApp');

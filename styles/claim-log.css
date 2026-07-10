@@ -1,10 +1,20 @@
+
+
+:root {
+  --espresso: #1f1c19;
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.05);
+  --field-bg: rgba(255, 255, 255, 0.78);
+  --ease-brand: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .loading-spinner {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(18, 18, 18, 0.8);
+  inset: 0;
+  background-color: rgba(244, 239, 234, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,45 +24,106 @@
 .spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
+  border: 4px solid rgba(0, 0, 0, 0.08);
   border-radius: 50%;
-  border-top-color: var(--accent-color);
+  border-top-color: var(--secondary-accent);
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
 
 .nav-links a.active {
-  color: var(--accent-color);
-  font-weight: 500;
+  color: var(--text-color);
+  opacity: 1;
+}
+
+.nav-actions .btn-get-started {
+  background-color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+}
+
+.nav-actions .btn-get-started:hover {
+  background-color: var(--espresso);
+  border-color: var(--espresso);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .claim-log-hero {
-  padding: 120px 0 50px;
-  background-color: var(--darker-bg);
+  position: relative;
+  padding: 9.5rem 0 2rem;
+  background-color: transparent;
+  text-align: center;
+}
+
+.claim-log-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('../assets/search-clouds.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(to bottom, black 25%, transparent 96%);
+  mask-image: linear-gradient(to bottom, black 25%, transparent 96%);
+  pointer-events: none;
+}
+
+.claim-log-hero .container {
+  position: relative;
+}
+
+#claimLogApp {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.page-shore {
+  margin-top: auto;
+  position: relative;
+}
+
+.shore-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('../assets/search-waves.jpg');
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(to top, black 60%, transparent 100%);
+  mask-image: linear-gradient(to top, black 60%, transparent 100%);
+  pointer-events: none;
+}
+
+.page-shore footer {
+  position: relative;
+  background-color: transparent;
 }
 
 .claim-log-hero h1 {
-  text-align: center;
+  font-family: 'Canela', serif;
+  font-weight: 300;
+  font-size: 3.6rem;
+  letter-spacing: -0.01em;
   margin-bottom: 1rem;
-  font-size: 2.5rem;
 }
 
 .claim-log-description {
-  text-align: center;
-  max-width: 800px;
+  font-family: 'General Sans', sans-serif;
+  max-width: 620px;
   margin: 0 auto;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  line-height: 1.6;
   color: var(--text-secondary);
 }
 
 .claim-log-description a {
-  color: var(--accent-color);
+  color: var(--secondary-accent);
   text-decoration: none;
-  transition: color 0.3s ease;
+  font-weight: 500;
 }
 
 .claim-log-description a:hover {
@@ -60,296 +131,230 @@
 }
 
 .claim-log-content {
-  padding: 3rem 0;
-  min-height: 60vh;
+  padding: 2.5rem 0 4rem;
+  min-height: 50vh;
 }
 
 .filter-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  margin-bottom: 2rem;
-  background-color: var(--light-bg);
-  padding: 1.5rem;
-  border-radius: 10px;
+  margin: 0 0 1.25rem;
 }
 
 .search-input {
   flex: 2;
+  min-width: 220px;
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .search-input i {
   position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 1rem;
   color: var(--text-secondary);
+  opacity: 0.5;
+  font-size: 0.9rem;
 }
 
 .search-input input {
   width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.5rem;
-  background-color: var(--dark-bg);
+  padding: 0.8rem 1rem 0.8rem 2.6rem;
+  background-color: var(--field-bg);
   color: var(--text-color);
-  border: 1px solid var(--light-bg);
-  border-radius: 5px;
-  font-family: 'Raleway', sans-serif;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  font-family: 'General Sans', sans-serif;
+  font-size: 0.9rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-input input:focus {
+  outline: none;
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 3px rgba(192, 158, 134, 0.18);
+}
+
+.search-input input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.55;
 }
 
 .filter-dropdown {
   flex: 1;
+  min-width: 200px;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .filter-dropdown label {
+  font-family: 'General Sans', sans-serif;
   color: var(--text-secondary);
   white-space: nowrap;
+  font-size: 0.85rem;
 }
 
 .filter-dropdown select {
   flex: 1;
-  padding: 0.8rem;
-  background-color: var(--dark-bg);
+  padding: 0.8rem 2.4rem 0.8rem 1rem;
+  background-color: var(--field-bg);
   color: var(--text-color);
-  border: 1px solid var(--light-bg);
-  border-radius: 5px;
-  font-family: 'Raleway', sans-serif;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  font-family: 'General Sans', sans-serif;
+  font-size: 0.9rem;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%23555'%3E%3Cpath d='M7 10L2 5h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  cursor: pointer;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.no-claims {
-  text-align: center;
-  padding: 3rem 0;
-  color: var(--text-secondary);
-}
-
-.no-claims i {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  opacity: 0.7;
-}
-
-.no-claims h3 {
-  margin-bottom: 0.5rem;
-  font-size: 1.5rem;
+.filter-dropdown select:focus {
+  outline: none;
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 3px rgba(192, 158, 134, 0.18);
 }
 
 .claims-table-container {
-  overflow-x: auto;
-  margin-bottom: 2rem;
+  margin: 0 0 2rem;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 .claims-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: var(--light-bg);
-  border-radius: 10px;
-  overflow: hidden;
+  font-family: 'General Sans', sans-serif;
 }
 
 .claims-table th {
-  padding: 1rem;
+  padding: 0.95rem 1.4rem;
   text-align: left;
-  color: var(--text-color);
-  font-family: 'Kanit', sans-serif;
-  font-weight: 500;
-  background-color: var(--dark-bg);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background-color: rgba(192, 158, 134, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .claims-table td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--dark-bg);
+  padding: 1rem 1.4rem;
+  font-size: 0.92rem;
   color: var(--text-color);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.claims-table tr:last-child td {
+.claims-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.claims-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.claims-table tr:hover td {
-  background-color: rgba(255, 255, 255, 0.05);
+.claims-table tbody tr:hover td {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.claims-table td:first-child {
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.claims-table td:nth-child(2) {
+  font-weight: 600;
+}
+
+.no-claims {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  color: var(--text-secondary);
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 14px;
+}
+
+.no-claims i {
+  font-size: 2.6rem;
+  margin-bottom: 1rem;
+  color: var(--secondary-accent);
+}
+
+.no-claims h3 {
+  font-family: 'Canela', serif;
+  font-weight: 300;
+  font-size: 1.6rem;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.no-claims p {
+  font-family: 'General Sans', sans-serif;
+  font-size: 0.95rem;
 }
 
 .status-badge {
   display: inline-block;
   padding: 0.3rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
+  border-radius: 50px;
+  font-family: 'General Sans', sans-serif;
+  font-size: 0.75rem;
   font-weight: 500;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.status-badge.pending {
-  background-color: rgba(33, 150, 243, 0.1);
-  color: #2196f3;
-}
-
-.status-badge.approved {
-  background-color: rgba(76, 175, 80, 0.1);
-  color: #4caf50;
-}
-
-.status-badge.collected {
-  background-color: rgba(156, 39, 176, 0.1);
-  color: #9c27b0;
-}
-
-.status-badge.rejected {
-  background-color: rgba(244, 67, 54, 0.1);
-  color: #f44336;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.pagination button {
-  background: none;
-  border: none;
-  color: var(--text-color);
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pagination button:not(:disabled):hover {
-  background-color: var(--accent-color);
-  color: white;
-}
-
-.pagination button:disabled {
-  color: var(--text-secondary);
-  cursor: not-allowed;
-}
-
-.pagination span {
-  color: var(--text-secondary);
-}
-
-.instructions-section {
-  margin-top: 4rem;
-  padding-top: 3rem;
-  border-top: 1px solid var(--light-bg);
-}
-
-.instructions-section h2 {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.instruction-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-
-.instruction-card {
-  background-color: var(--light-bg);
-  border-radius: 10px;
-  padding: 2rem;
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.instruction-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-.instruction-icon {
-  font-size: 2rem;
-  color: var(--accent-color);
-  margin-bottom: 1rem;
-}
-
-.instruction-card h3 {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-}
-
-.claim-process-steps {
-  margin-top: 2rem;
-}
-
-.step-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  position: relative;
-  padding-left: 40px;
-}
-
-.step-container::before {
-  content: '';
-  position: absolute;
-  top: 30px;
-  left: 15px;
-  width: 2px;
-  height: calc(100% - 60px);
-  background-color: var(--light-bg);
-}
-
-.step {
-  position: relative;
-}
-
-.step-number {
-  position: absolute;
-  top: 0;
-  left: -40px;
-  width: 30px;
-  height: 30px;
-  background-color: var(--accent-color);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-}
-
-.step-title {
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-}
-
-.step-description {
-  color: var(--text-secondary);
-}
+.status-badge.pending { background-color: rgba(33, 150, 243, 0.12); color: #2176c7; }
+.status-badge.approved { background-color: rgba(76, 175, 80, 0.12); color: #3d8c40; }
+.status-badge.collected { background-color: rgba(156, 39, 176, 0.12); color: #8e35a0; }
+.status-badge.rejected { background-color: rgba(244, 67, 54, 0.12); color: #c5392c; }
 
 @media (max-width: 768px) {
+  .claim-log-hero {
+    padding: 8rem 0 1.5rem;
+  }
+
+  .claim-log-hero h1 {
+    font-size: 2.4rem;
+  }
+
   .filter-controls {
     flex-direction: column;
   }
-  
-  .search-input, .filter-dropdown {
+
+  .search-input,
+  .filter-dropdown {
     flex: auto;
     width: 100%;
   }
-  
-  .claim-log-hero {
-    padding: 100px 0 30px;
+
+  .claims-table th,
+  .claims-table td {
+    padding: 0.75rem 0.6rem;
+    font-size: 0.84rem;
   }
-  
-  .claim-log-hero h1 {
-    font-size: 2rem;
+
+  .claims-table th {
+    font-size: 0.68rem;
+    white-space: nowrap;
   }
-  
-  .claims-table th, .claims-table td {
-    padding: 0.8rem 0.5rem;
-    font-size: 0.9rem;
+
+  .claims-table th:first-child,
+  .claims-table td:first-child {
+    padding-left: 1rem;
+  }
+
+  .claims-table th:last-child,
+  .claims-table td:last-child {
+    padding-right: 1rem;
   }
 }

@@ -27,23 +27,13 @@ const app = Vue.createApp({
       user: null,
       authError: null,
       showLoginModal: false,
-      isSigningUp: false,
-      loginForm: {
-        email: '',
-        password: ''
-      },
-      magicLinkMode: false,
       magicLinkEmail: '',
       magicLinkSending: false,
       magicLinkSent: false,
-      forgotPassword: false,
-      resetEmail: '',
-      passwordResetSending: false,
-      passwordResetSent: false,
-      showAppleComingSoon: false,
 
       isLoading: true,
       mobileMenuOpen: false,
+      accountMenuOpen: false,
 
       searchQuery: '',
       sortOption: 'date-desc',
@@ -96,6 +86,10 @@ const app = Vue.createApp({
     this.loadPublicLog();
 
     this.checkMagicLinkSignIn();
+    document.addEventListener('click', this.closeAccountMenuOutside);
+  },
+  unmounted() {
+    document.removeEventListener('click', this.closeAccountMenuOutside);
   },
   methods: {
     loadPublicLog() {
@@ -186,32 +180,9 @@ const app = Vue.createApp({
       this.mobileMenuOpen = !this.mobileMenuOpen;
     },
 
-    submitLoginForm() {
-      this.authError = null;
-      if (this.isSigningUp) {
-        firebase.auth().createUserWithEmailAndPassword(
-          this.loginForm.email,
-          this.loginForm.password
-        )
-          .then(() => {
-            this.showLoginModal = false;
-            this.loginForm = { email: '', password: '' };
-          })
-          .catch(error => {
-            this.authError = error.message;
-          });
-      } else {
-        firebase.auth().signInWithEmailAndPassword(
-          this.loginForm.email,
-          this.loginForm.password
-        )
-          .then(() => {
-            this.showLoginModal = false;
-            this.loginForm = { email: '', password: '' };
-          })
-          .catch(error => {
-            this.authError = error.message;
-          });
+    closeAccountMenuOutside(event) {
+      if (!event.target.closest('.nav-account')) {
+        this.accountMenuOpen = false;
       }
     },
 
@@ -239,25 +210,6 @@ const app = Vue.createApp({
         });
     },
 
-    sendPasswordReset() {
-      if (!this.resetEmail) {
-        this.authError = "Please enter your email address";
-        return;
-      }
-      this.passwordResetSending = true;
-      this.authError = null;
-      firebase.auth().sendPasswordResetEmail(this.resetEmail)
-        .then(() => {
-          this.passwordResetSent = true;
-        })
-        .catch(error => {
-          this.authError = error.message;
-        })
-        .finally(() => {
-          this.passwordResetSending = false;
-        });
-    },
-
     signInWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithPopup(provider)
@@ -267,24 +219,6 @@ const app = Vue.createApp({
         .catch(error => {
           this.authError = error.message;
         });
-    },
-
-    signInWithTwitter() {
-      const provider = new firebase.auth.TwitterAuthProvider();
-      firebase.auth().signInWithPopup(provider)
-        .then(() => {
-          this.showLoginModal = false;
-        })
-        .catch(error => {
-          this.authError = error.message;
-        });
-    },
-
-    toggleMagicLinkMode() {
-      this.magicLinkMode = !this.magicLinkMode;
-      this.magicLinkSent = false;
-      this.forgotPassword = false;
-      this.showAppleComingSoon = false;
     },
 
     signOut() {
@@ -358,7 +292,5 @@ const app = Vue.createApp({
     }
   }
 });
-
-
 
 app.mount('#claimLogApp');

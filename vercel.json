@@ -5,6 +5,11 @@
       "destination": "/api/env"
     }
   ],
+  "functions": {
+    "api/ai.js": {
+      "maxDuration": 30
+    }
+  },
   "cleanUrls": true,
   "crons": [
     {

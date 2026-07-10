@@ -8,10 +8,11 @@
   <!-- Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
   <link
-    href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Raleway:wght@300;400;500;600&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vue-tel-input@8/dist/vue-tel-input.css">
@@ -42,30 +43,45 @@
       </div>
     </div>
 
-    <div v-if="user && !isLoading">
+    <div v-if="user && !isLoading" class="dashboard-page">
       <header :class="{'mobile-menu-active': mobileMenuOpen}">
         <div class="container header-container">
-          <a href="index.html" class="logo">Reunited</a>
+          <a href="index.html" class="logo">Reunited<span class="logo-dot">.</span></a>
           <button class="mobile-menu-btn" @click="toggleMobileMenu">
-            <i class="fas" :class="mobileMenuOpen ? 'fa-xmark' : 'fa-bars'"></i>
+            <i :class="mobileMenuOpen ? 'ri-close-line' : 'ri-menu-line'"></i>
           </button>
           <div class="nav-links">
             <a href="search.html">Search Items</a>
-            <a href="dashboard.html" class="active">Dashboard</a>
             <a href="claim-log.html">Claim Log</a>
-            <a href="index.html#guidelines">Guidelines</a>
-            <a href="index.html#faqs">FAQs</a>
+            <a href="index.html#how-it-works">How It Works</a>
             <a href="index.html#contact">Contact</a>
-            <a href="#" class="btn btn-outlined" @click.prevent="signOut">Sign Out</a>
+          </div>
+          <div class="nav-actions">
+            <div v-if="user" class="nav-user-section nav-account" :class="{ open: accountMenuOpen }">
+              <button type="button" class="btn btn-get-started account-trigger"
+                @click="accountMenuOpen = !accountMenuOpen" aria-haspopup="true" :aria-expanded="accountMenuOpen">
+                Account <i class="ri-arrow-down-s-line account-caret"></i>
+              </button>
+              <div class="account-menu" v-if="accountMenuOpen">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="#" @click.prevent="accountMenuOpen = false; signOut()">Log out</a>
+              </div>
+            </div>
+            <div v-else class="nav-user-section">
+              <a href="#" class="nav-login" @click.prevent="showLoginModal = true">Log in</a>
+              <a href="#" class="btn btn-get-started" @click.prevent="showLoginModal = true">Get Started &#8599;</a>
+            </div>
           </div>
         </div>
       </header>
 
       <section class="dashboard-header">
+        <div class="dashboard-header-bg"></div>
         <div class="container">
           <div class="user-welcome">
             <div class="user-avatar">
-              <img :src="user.photoURL || 'images/default-avatar.png'" alt="User Avatar">
+              <img v-if="user.photoURL" :src="user.photoURL" alt="User avatar">
+              <div v-else class="avatar-initials">{{ getProfileInitials(userProfile.displayName) }}</div>
             </div>
             <div class="user-info">
               <div class="welcome-header">
@@ -75,9 +91,9 @@
               <p>Manage your lost and found items</p>
             </div>
           </div>
-          <div class="dashboard-actions">
+          <div class="dashboard-actions" v-if="false">
             <button class="btn" @click="openReportLostPopup()">
-              <i class="fas fa-search"></i> Report Lost Item
+              <i class="ri-search-line"></i> Report Lost Item
             </button>
           </div>
         </div>
@@ -96,31 +112,25 @@
           <div class="tab-content" v-if="activeTab === 'notifications'">
             <div class="section-header">
               <h2>Notifications</h2>
-              <button class="btn-tiny" @click="markAllAsRead" v-if="hasUnreadNotifications()">
-                Mark All as Read
+              <button class="notification-clear" @click="markAllAsRead" v-if="hasUnreadNotifications()">
+                Mark all read
               </button>
             </div>
             <div class="empty-state" v-if="notifications.length === 0">
-              <i class="fas fa-bell-slash"></i>
-              <h3>No Notifications</h3>
-              <p>You don't have any notifications at the moment</p>
+              <h3>All quiet.</h3>
+              <p>Claim updates and pickup reminders will appear here when they need your attention.</p>
             </div>
             <div class="notifications-list" v-else>
-              <div v-for="(notification, index) in notifications" :key="index" class="notification-item"
-                :class="{ unread: !notification.read }" @click="markAsRead(notification.id)">
-                <div class="notification-icon">
-                  <i :class="getNotificationIcon(notification.type)"></i>
-                </div>
+              <div v-for="notification in notifications" :key="notification.id" class="notification-item"
+                :class="{ unread: !notification.read, actionable: notification.actionable }"
+                @click="handleNotificationClick(notification)">
+                <span class="notification-dot" aria-hidden="true"></span>
                 <div class="notification-content">
-                  <div class="notification-title">{{ notification.title }}</div>
+                  <div class="notification-top">
+                    <div class="notification-title">{{ notification.title }}</div>
+                    <div class="notification-time">{{ formatDate(notification.timestamp) }}</div>
+                  </div>
                   <div class="notification-message">{{ notification.message }}</div>
-                  <div class="notification-time">{{ formatDate(notification.timestamp) }}</div>
-                </div>
-                <div class="notification-actions">
-                  <button class="action-btn" v-if="notification.actionable"
-                    @click.stop="handleNotificationAction(notification)">
-                    <i class="fas fa-arrow-right"></i>
-                  </button>
                 </div>
               </div>
             </div>
@@ -129,12 +139,23 @@
           <div class="tab-content" v-if="activeTab === 'lost'">
             <div class="section-header">
               <h2>My Lost Item Reports</h2>
+            </div>
+            <div class="coming-soon-state">
+              <h3>Coming soon.</h3>
+              <p>Reporting lost items from your dashboard is on its way. In the meantime,
+                <a href="search.html">browse everything that's been handed in</a>.</p>
+            </div>
+          </div>
+
+          <div class="tab-content" v-if="false">
+            <div class="section-header">
+              <h2>My Lost Item Reports</h2>
               <button class="btn-tiny" @click="openReportLostPopup()">
-                <i class="fas fa-plus"></i> Report New
+                <i class="ri-add-line"></i> Report New
               </button>
             </div>
             <div class="empty-state" v-if="lostItems.length === 0">
-              <i class="fas fa-search"></i>
+              <i class="ri-search-line"></i>
               <h3>No Lost Item Reports</h3>
               <p>You haven't reported any lost items yet</p>
               <button class="btn" @click="openReportLostPopup()">Report a Lost Item</button>
@@ -144,13 +165,13 @@
                 <div class="item-status" :class="getClaimStatusClass(item.status)">{{ item.status.replace('_', ' ') }}
                 </div>
                 <div class="item-image"
-                  :style="{ backgroundImage: 'url(' + (item.image || 'images/no-image.png') + ')' }">
+                  :style="{ backgroundImage: 'url(' + (item.image || 'assets/no-image.svg') + ')' }">
                 </div>
                 <div class="item-info">
                   <h3>{{ item.name }}</h3>
                   <div class="item-meta">
-                    <span><i class="fas fa-calendar-alt"></i> {{ formatDate(item.dateLost) }}</span>
-                    <span><i class="fas fa-map-marker-alt"></i> {{ item.location }}</span>
+                    <span><i class="ri-calendar-2-line"></i> {{ formatDate(item.dateLost) }}</span>
+                    <span><i class="ri-map-pin-line"></i> {{ item.location }}</span>
                   </div>
                   <div class="item-description">{{ truncateDescription(item.description) }}</div>
                 </div>
@@ -164,23 +185,27 @@
               <h2>My Claims</h2>
             </div>
             <div class="empty-state" v-if="claims.length === 0">
-              <i class="fas fa-clipboard-check"></i>
+              <i class="ri-checkbox-line"></i>
               <h3>No Claims</h3>
               <p>You haven't made any claims yet</p>
             </div>
             <div class="claims-list" v-else>
-              <div class="claim-item" v-for="(claim, index) in claims" :key="index">
-                <div class="claim-status" :class="getClaimStatusClass(getEffectiveClaimStatus(claim))">{{
-                  getEffectiveClaimStatus(claim) }}</div>
+              <div class="claim-item" v-for="claim in claims" :key="claim.id">
                 <div class="claim-image"
-                  :style="{ backgroundImage: 'url(' + (claim.item?.image || 'images/no-image.png') + ')' }"></div>
+                  :style="{ backgroundImage: 'url(' + (claim.item?.image || 'assets/no-image.svg') + ')' }"></div>
                 <div class="claim-info">
-                  <h3>{{ claim.item?.name || 'Item details unavailable' }}</h3>
+                  <div class="claim-info-header">
+                    <h3>{{ claim.item?.name || 'Item details unavailable' }}</h3>
+                    <span class="claim-status" :class="getClaimStatusClass(getEffectiveClaimStatus(claim))">
+                      {{ getEffectiveClaimStatus(claim) }}
+                    </span>
+                  </div>
                   <div class="claim-meta">
-                    <span><i class="fas fa-calendar-alt"></i> {{ formatDate(claim.claimDate) }}</span>
+                    <span><i class="ri-calendar-2-line"></i> Claimed {{ formatDate(claim.claimDate) }}</span>
+                    <span v-if="claim.item?.location"><i class="ri-map-pin-line"></i> {{ claim.item.location }}</span>
                   </div>
                   <div class="claim-actions">
-                    <button class="btn-tiny" @click="openClaimDetailsPopup(claim)">View Details</button>
+                    <button class="btn-tiny btn-outlined" @click="openClaimDetailsPopup(claim)">View details</button>
                   </div>
                 </div>
               </div>
@@ -210,30 +235,10 @@
                 <div class="setting-option">
                   <div class="setting-label">
                     <span>Email Notifications</span>
-                    <p class="setting-description">Receive notifications via email</p>
+                    <p class="setting-description">Pickup reminders and claim updates, sent to your inbox</p>
                   </div>
                   <label class="toggle">
                     <input type="checkbox" v-model="userPreferences.emailNotifications">
-                    <span class="toggle-slider"></span>
-                  </label>
-                </div>
-                <div class="setting-option">
-                  <div class="setting-label">
-                    <span>Match Alerts</span>
-                    <p class="setting-description">Get alerts for potential matches</p>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" v-model="userPreferences.matchAlerts">
-                    <span class="toggle-slider"></span>
-                  </label>
-                </div>
-                <div class="setting-option">
-                  <div class="setting-label">
-                    <span>Status Updates</span>
-                    <p class="setting-description">Receive updates on your item status</p>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" v-model="userPreferences.statusUpdates">
                     <span class="toggle-slider"></span>
                   </label>
                 </div>
@@ -244,9 +249,6 @@
               <div class="settings-card">
                 <h3>Security</h3>
                 <div class="security-option">
-                  <button class="btn" @click="openChangePasswordPopup()">Change Password</button>
-                </div>
-                <div class="security-option">
                   <button class="btn btn-danger" @click="openDeleteAccountPopup()">Delete Account</button>
                 </div>
               </div>
@@ -254,71 +256,51 @@
           </div>
         </div>
       </section>
+
+      <div class="page-shore">
+        <div class="shore-bg"></div>
+        <footer>
+          <div class="container">
+            <div class="footer-logo">Reunited</div>
+            <div class="footer-links">
+              <a href="index.html">Home</a>
+              <a href="index.html#guidelines">Guidelines</a>
+              <a href="index.html#faqs">FAQs</a>
+              <a href="index.html#contact">Contact</a>
+            </div>
+
+            <div class="made-with-love">
+              Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav
+                Ravinder</a>
+            </div>
+          </div>
+        </footer>
+      </div>
     </div>
 
     <div class="modal" v-if="showLoginModal">
       <div class="modal-content login-modal-content">
         <span class="close" @click="showLoginModal = false">×</span>
-        <h2 v-if="!isSigningUp">Welcome Back!</h2>
-        <h2 v-else>Create Account</h2>
-        <p v-if="!isSigningUp">Login to continue to your dashboard.</p>
-        <p v-else>Sign up to start finding and reporting items.</p>
+        <h2 class="login-title">Welcome to Reunited<span class="login-title-dot">.</span></h2>
+        <p class="login-lede">Sign in to continue to your dashboard.</p>
 
-        <form @submit.prevent="submitLoginForm">
-          <input type="email" v-model="loginForm.email" placeholder="Email Address" required autocomplete="username">
-          <input type="password" v-model="loginForm.password" placeholder="Password" required
-            autocomplete="current-password">
-          <div v-if="authError" class="error">{{ authError }}</div>
-          <button type="submit" class="btn btn-full">{{ isSigningUp ? 'Sign Up' : 'Login' }}</button>
-        </form>
+        <div v-if="authError" class="error">{{ authError }}</div>
+        <p v-if="magicLinkSent" class="login-success">Magic link sent — check your email to finish signing in.</p>
 
-        <div class="login-options">
-          <a href="#" @click.prevent="forgotPassword = !forgotPassword; magicLinkMode = false"
-            v-if="!isSigningUp && !magicLinkMode && !forgotPassword">Forgot Password?</a>
-          <a href="#" @click.prevent="forgotPassword = false; magicLinkMode = false" v-if="forgotPassword">Back to
-            Login</a>
-          <a href="#" @click.prevent="magicLinkMode = !magicLinkMode; forgotPassword = false">{{ magicLinkMode ? 'Use Password Instead' : 'Use Magic Link' }}</a>
-        </div>
-
-        <div v-if="forgotPassword" class="sub-section">
-          <input type="email" v-model="resetEmail" placeholder="Enter your email to reset password" required>
-          <button class="btn btn-secondary btn-full" @click="sendPasswordReset" :disabled="passwordResetSending">
-            {{ passwordResetSending ? 'Sending...' : 'Send Reset Link' }}
-          </button>
-          <p v-if="passwordResetSent" class="success">Password reset link sent! Check your email.</p>
-        </div>
-
-        <div v-if="magicLinkMode" class="sub-section">
-          <input type="email" v-model="magicLinkEmail" placeholder="Enter your email for magic link" required>
-          <button class="btn btn-secondary btn-full" @click="sendMagicLink" :disabled="magicLinkSending">
-            {{ magicLinkSending ? 'Sending...' : 'Send Magic Link' }}
-          </button>
-          <p v-if="magicLinkSent" class="success">Magic link sent! Check your email.</p>
-        </div>
+        <button type="button" class="btn-google" @click="signInWithGoogle">
+          <i class="ri-google-fill"></i> Continue with Google
+        </button>
 
         <div class="divider">
-          <span>OR</span>
+          <span>or</span>
         </div>
 
-        <div class="social-login-options">
-          <button class="social-btn google" @click="signInWithGoogle">
-            <i class="fab fa-google"></i> Continue with Google
+        <form class="login-form" @submit.prevent="sendMagicLink">
+          <input type="email" v-model="magicLinkEmail" placeholder="you@school.edu" required autocomplete="email">
+          <button type="submit" class="btn btn-full" :disabled="magicLinkSending">
+            {{ magicLinkSending ? 'Sending…' : 'Send magic link' }}
           </button>
-          <button class="social-btn apple" @click="showAppleComingSoon = true">
-            <i class="fab fa-apple"></i> Continue with Apple
-          </button>
-          <button class="social-btn twitter" @click="signInWithTwitter">
-            <i class="fab fa-x-twitter"></i> Continue with X
-          </button>
-          <p v-if="showAppleComingSoon" class="info">Apple Sign In coming soon!</p>
-        </div>
-
-        <p class="toggle-auth">
-          <a href="#"
-            @click.prevent="isSigningUp = !isSigningUp; authError=null; forgotPassword=false; magicLinkMode=false">
-            {{ isSigningUp ? 'Already have an account? Login' : 'Don\'t have an account? Sign Up' }}
-          </a>
-        </p>
+        </form>
       </div>
     </div>
 
@@ -352,7 +334,7 @@
           <button type="button" class="ai-enhance-button" @click="enhanceDescription()"
             :disabled="isEnhancingDescription">
             <span v-if="isEnhancingDescription" class="spinner spinner-tiny"></span>
-            <span v-else><i class="fas fa-magic"></i> Enhance with AI</span>
+            <span v-else><i class="ri-magic-line"></i> Enhance with AI</span>
           </button>
           <div v-if="aiError" class="ai-error-message">{{ aiError }}</div>
           <div class="clear-both"></div>
@@ -361,7 +343,7 @@
             <label class="image-upload">
               <input type="file" multiple @change="handleImageUpload($event, 'lost')" accept="image/*">
               <div class="upload-placeholder">
-                <i class="fas fa-upload"></i>
+                <i class="ri-upload-2-line"></i>
                 <span>Upload Images (Optional, Max 5)</span>
               </div>
             </label>
@@ -379,26 +361,6 @@
       </div>
     </div>
 
-
-    <div id="changePasswordPopup" class="popup-container">
-      <div class="popup-content">
-        <span class="popup-close-btn" @click="closeChangePasswordPopup()">×</span>
-        <h2>Change Password</h2>
-        <form @submit.prevent="changePassword">
-          <input type="password" v-model="passwordForm.currentPassword" placeholder="Current Password" required
-            autocomplete="current-password">
-          <input type="password" v-model="passwordForm.newPassword" placeholder="New Password (min. 6 characters)"
-            required autocomplete="new-password">
-          <input type="password" v-model="passwordForm.confirmPassword" placeholder="Confirm New Password" required
-            autocomplete="new-password">
-          <div v-if="passwordError" class="error">{{ passwordError }}</div>
-          <div v-if="passwordSuccess" class="success">{{ passwordSuccess }}</div>
-          <button type="submit" class="btn btn-full" :disabled="isUpdating">
-            {{ isUpdating ? 'Changing...' : 'Change Password' }}
-          </button>
-        </form>
-      </div>
-    </div>
 
     <div id="deleteAccountPopup" class="popup-container">
       <div class="popup-content delete-modal">
@@ -430,7 +392,7 @@
               <p class="status-message" v-if="getEffectiveClaimStatus(selectedClaim) === 'pending'">Your claim is being
                 reviewed by the item finder.</p>
               <p class="status-message" v-if="getEffectiveClaimStatus(selectedClaim) === 'approved'">Your claim is
-                approved! Please contact the finder (if details provided) or support to arrange collection.</p>
+                approved! Show your claim code at the Lost & Found desk to collect your item.</p>
               <p class="status-message" v-if="getEffectiveClaimStatus(selectedClaim) === 'collected'">This item has been
                 marked as collected.</p>
               <p class="status-message" v-if="getEffectiveClaimStatus(selectedClaim) === 'rejected'">Your claim was
@@ -442,7 +404,7 @@
               <h4>Item Information</h4>
               <div class="claim-item-preview">
                 <div class="claim-item-image"
-                  :style="{ backgroundImage: 'url(' + (selectedClaim.item?.image || 'images/no-image.png') + ')' }">
+                  :style="{ backgroundImage: 'url(' + (selectedClaim.item?.image || 'assets/no-image.svg') + ')' }">
                 </div>
                 <div class="claim-item-info">
                   <div class="detail-row">
@@ -503,17 +465,17 @@
             <h2>{{ selectedItem.name }}</h2>
             <div class="header-actions">
               <button class="btn btn-tiny btn-outlined" @click="editItem(selectedItem, selectedItemType)">
-                <i class="fas fa-pencil-alt"></i> Edit
+                <i class="ri-pencil-line"></i> Edit
               </button>
               <button class="btn btn-tiny btn-danger" @click="deleteItem(selectedItem.id, selectedItemType)">
-                <i class="fas fa-trash-alt"></i> Delete
+                <i class="ri-delete-bin-line"></i> Delete
               </button>
             </div>
           </div>
           <div class="item-detail-content">
             <div class="item-images">
               <div class="main-image"
-                :style="{ backgroundImage: 'url(' + (selectedItem.image || 'images/no-image.png') + ')' }"></div>
+                :style="{ backgroundImage: 'url(' + (selectedItem.image || 'assets/no-image.svg') + ')' }"></div>
             </div>
             <div class="item-details">
               <div class="detail-item"><strong class="detail-key">Category:</strong> <span class="detail-val">{{
@@ -542,35 +504,6 @@
       </div>
     </div>
 
-
-    <!--
-    <div class="modal-overlay" v-if="showNameCollectionModal">
-      <div class="modal name-collection-modal">
-        <div class="modal-header">
-          <h3>Complete Your Profile</h3>
-          <p>Please provide your name to complete your profile setup</p>
-        </div>
-        <form @submit.prevent="submitNameCollection" class="modal-form">
-          <div class="form-group">
-            <label for="firstName">First Name *</label>
-            <input type="text" id="firstName" v-model="nameCollectionForm.firstName" required
-              placeholder="Enter your first name">
-          </div>
-          <div class="form-group">
-            <label for="lastName">Last Name *</label>
-            <input type="text" id="lastName" v-model="nameCollectionForm.lastName" required
-              placeholder="Enter your last name">
-          </div>
-          <div class="modal-actions">
-            <button type="submit" class="btn" :disabled="isUpdating">
-              <span v-if="isUpdating" class="spinner-tiny"></span>
-              Complete Profile
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-    -->
 
   </div>
 

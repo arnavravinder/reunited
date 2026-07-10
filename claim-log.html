@@ -4,14 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reunited - Public Claim Log</title>
+  <title>Reunited - Claim Log</title>
   <!-- Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
   <link
     href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/claim-log.css">
   <link rel="icon" type="image/x-icon" href="favicon.png">
@@ -25,31 +26,39 @@
 
     <header :class="{'mobile-menu-active': mobileMenuOpen}">
       <div class="container header-container">
-        <a href="index.html" class="logo">Reunited</a>
+        <a href="index.html" class="logo">Reunited<span class="logo-dot">.</span></a>
         <button class="mobile-menu-btn" @click="toggleMobileMenu">
-          <i class="fas" :class="mobileMenuOpen ? 'fa-xmark' : 'fa-bars'"></i>
+          <i :class="mobileMenuOpen ? 'ri-close-line' : 'ri-menu-line'"></i>
         </button>
         <div class="nav-links">
           <a href="search.html">Search Items</a>
-          <a v-if="user" href="dashboard.html">Dashboard</a>
           <a href="claim-log.html" class="active">Claim Log</a>
-          <a href="index.html#guidelines">Guidelines</a>
-          <a href="index.html#faqs">FAQs</a>
+          <a href="index.html#how-it-works">How It Works</a>
           <a href="index.html#contact">Contact</a>
-          <div v-if="!user" class="nav-user-section">
-            <a href="#" class="btn btn-outlined" @click.prevent="showLoginModal = true">Login / Sign Up</a>
+        </div>
+        <div class="nav-actions">
+          <div v-if="user" class="nav-user-section nav-account" :class="{ open: accountMenuOpen }">
+            <button type="button" class="btn btn-get-started account-trigger"
+              @click="accountMenuOpen = !accountMenuOpen" aria-haspopup="true" :aria-expanded="accountMenuOpen">
+              Account <i class="ri-arrow-down-s-line account-caret"></i>
+            </button>
+            <div class="account-menu" v-if="accountMenuOpen">
+              <a href="dashboard.html">Dashboard</a>
+              <a href="#" @click.prevent="accountMenuOpen = false; signOut()">Log out</a>
+            </div>
           </div>
           <div v-else class="nav-user-section">
-
-            <a href="#" class="btn btn-outlined" @click.prevent="signOut">Sign Out</a>
+            <a href="#" class="nav-login" @click.prevent="showLoginModal = true">Log in</a>
+            <a href="#" class="btn btn-get-started" @click.prevent="showLoginModal = true">Get Started &#8599;</a>
           </div>
         </div>
       </div>
     </header>
 
     <section class="claim-log-hero">
+      <div class="claim-log-hero-bg"></div>
       <div class="container">
-        <h1>Public Claim Log</h1>
+        <h1>Claim Log</h1>
         <p class="claim-log-description">
           For transparency, this is a public log of recently claimed items. For your personal claim history,
           please visit your <a href="dashboard.html" v-if="user">dashboard</a><a href="#"
@@ -62,7 +71,7 @@
       <div class="container">
         <div class="filter-controls">
           <div class="search-input">
-            <i class="fas fa-search"></i>
+            <i class="ri-search-line"></i>
             <input type="text" v-model="searchQuery" placeholder="Search by item name...">
           </div>
 
@@ -76,7 +85,7 @@
         </div>
 
         <div class="no-claims" v-if="filteredLogs.length === 0 && !isLoading">
-          <i class="fas fa-clipboard-check"></i>
+          <i class="ri-checkbox-line"></i>
           <h3>No Claims Found</h3>
           <p>There are currently no claims matching your search, or no items have been claimed yet.</p>
         </div>
@@ -91,7 +100,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(log, index) in paginatedLogs" :key="index">
+              <tr v-for="(log, index) in filteredLogs" :key="index">
                 <td>{{ formatDate(log.claimDate) }}</td>
                 <td>{{ log.itemName }}</td>
                 <td>{{ log.claimantFirstName }}</td>
@@ -99,159 +108,55 @@
             </tbody>
           </table>
         </div>
-
-        <div class="pagination" v-if="totalPages > 1">
-          <button @click="prevPage" :disabled="currentPage === 1">
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          <span>Page {{ currentPage }} of {{ totalPages }}</span>
-          <button @click="nextPage" :disabled="currentPage === totalPages">
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        </div>
-
-        <div class="instructions-section">
-          <h2>Claim Process</h2>
-          <div class="instruction-cards">
-            <div class="instruction-card">
-              <div class="instruction-icon">
-                <i class="fas fa-search"></i>
-              </div>
-              <h3>1. Find Your Item</h3>
-              <p>Use the search page to find your lost item in our database.</p>
-            </div>
-
-            <div class="instruction-card">
-              <div class="instruction-icon">
-                <i class="fas fa-clipboard-list"></i>
-              </div>
-              <h3>2. Submit a Claim</h3>
-              <p>Provide verification details to prove ownership of the item.</p>
-            </div>
-
-            <div class="instruction-card">
-              <div class="instruction-icon">
-                <i class="fas fa-check-circle"></i>
-              </div>
-              <h3>3. Receive Claim Code</h3>
-              <p>After approval, you'll receive a unique claim code.</p>
-            </div>
-
-            <div class="instruction-card">
-              <div class="instruction-icon">
-                <i class="fas fa-hand-holding"></i>
-              </div>
-              <h3>4. Collect Your Item</h3>
-              <p>Visit the Lost & Found office with your claim code to collect your item.</p>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
 
     <div class="modal-overlay" v-if="showLoginModal">
-      <div class="modal">
+      <div class="modal login-modal">
         <div class="modal-close" @click="showLoginModal = false">×</div>
-        <div class="modal-header">
-          <h3 class="modal-title">{{ isSigningUp ? 'Sign up to Reunited' : 'Login to Reunited' }}</h3>
+        <h3 class="login-title">Welcome to Reunited<span class="login-title-dot">.</span></h3>
+        <p class="login-lede">Sign in to search, claim, and track your items.</p>
+
+        <div v-if="authError" class="auth-error">{{ authError }}</div>
+        <p v-if="magicLinkSent" class="login-success">Magic link sent — check your email to finish signing in.</p>
+
+        <button type="button" class="btn-google" @click="signInWithGoogle">
+          <i class="ri-google-fill"></i> Continue with Google
+        </button>
+
+        <div class="or-divider">
+          <span>or</span>
         </div>
-        <div class="login-methods">
-          <div class="social-login">
-            <div class="social-btn" @click="signInWithGoogle">
-              <i class="fa-brands fa-google"></i>
-            </div>
-            <div class="social-btn" @click="showAppleComingSoon = true">
-              <i class="fa-brands fa-apple"></i>
-            </div>
-            <div class="social-btn" @click="signInWithTwitter">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/5/57/X_logo_2023_%28white%29.png" alt="X"
-                width="20" height="20">
-            </div>
-          </div>
-          <div class="or-divider">
-            <span>or</span>
-          </div>
-          <div v-if="showAppleComingSoon" class="auth-error">
-            Apple Authentication is coming soon!
-          </div>
-          <div v-if="authError" class="auth-error">
-            {{ authError }}
-          </div>
-          <div class="form-group" v-if="!magicLinkMode">
-            <label for="login-email">Email</label>
-            <input type="email" id="login-email" class="form-control" v-model="loginForm.email">
-          </div>
-          <div class="form-group" v-if="!magicLinkMode && !forgotPassword">
-            <label for="login-password">Password</label>
-            <input type="password" id="login-password" class="form-control" v-model="loginForm.password">
-          </div>
-          <div v-if="magicLinkMode">
-            <div class="form-group">
-              <label for="magic-email">Your Email</label>
-              <input type="email" id="magic-email" class="form-control" v-model="magicLinkEmail"
-                placeholder="Enter your email address">
-            </div>
-            <button class="btn w-100" @click.prevent="sendMagicLink" :disabled="magicLinkSending">
-              {{ magicLinkSending ? 'Sending...' : 'Send Magic Link' }}
-            </button>
-            <p v-if="magicLinkSent" class="text-center mt-1 text-success">
-              Magic link sent! Check your email.
-            </p>
-          </div>
-          <div v-if="!magicLinkMode">
-            <button v-if="!forgotPassword" class="btn w-100" @click.prevent="submitLoginForm">
-              {{ isSigningUp ? 'Sign Up' : 'Login' }}
-            </button>
-            <div v-else>
-              <div class="form-group">
-                <input type="email" class="form-control" v-model="resetEmail" placeholder="Enter your email">
-              </div>
-              <button class="btn w-100" @click.prevent="sendPasswordReset">
-                {{ passwordResetSending ? 'Sending...' : 'Reset Password' }}
-              </button>
-              <p v-if="passwordResetSent" class="text-center mt-1 text-success">
-                Password reset email sent!
-              </p>
-            </div>
-            <p class="text-center mt-1 text-secondary-color">
-              {{ isSigningUp ? 'Already have an account?' : 'Don\'t have an account?' }}
-              <a href="#" class="text-accent"
-                @click.prevent="isSigningUp = !isSigningUp; forgotPassword = false; showAppleComingSoon=false">
-                {{ isSigningUp ? 'Login' : 'Sign up' }}
-              </a>
-            </p>
-            <p v-if="!isSigningUp && !forgotPassword" class="text-center mt-05 text-secondary-color">
-              <a href="#" class="text-accent" @click.prevent="forgotPassword = true; showAppleComingSoon=false">
-                Forgot password?
-              </a>
-            </p>
-          </div>
-          <div class="magic-link-section">
-            <h4 class="magic-link-title">{{ magicLinkMode ? 'Use Password Instead' : 'Or Use Magic Link' }}</h4>
-            <button class="btn-tiny btn-outlined" @click.prevent="toggleMagicLinkMode">
-              {{ magicLinkMode ? 'Password' : 'Magic Link' }}
-            </button>
-          </div>
-        </div>
+
+        <form class="login-form" @submit.prevent="sendMagicLink">
+          <input type="email" class="form-control" v-model="magicLinkEmail" placeholder="you@school.edu" required
+            autocomplete="email">
+          <button type="submit" class="btn w-100" :disabled="magicLinkSending">
+            {{ magicLinkSending ? 'Sending…' : 'Send magic link' }}
+          </button>
+        </form>
       </div>
     </div>
 
-    <footer>
-      <div class="container">
-        <div class="footer-logo">Reunited</div>
-        <div class="footer-links">
-          <a href="index.html">Home</a>
-          <a href="index.html#guidelines">Guidelines</a>
-          <a href="index.html#faqs">FAQs</a>
-          <a href="index.html#contact">Contact</a>
-        </div>
+    <div class="page-shore">
+      <div class="shore-bg"></div>
+      <footer>
+        <div class="container">
+          <div class="footer-logo">Reunited</div>
+          <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="index.html#guidelines">Guidelines</a>
+            <a href="index.html#faqs">FAQs</a>
+            <a href="index.html#contact">Contact</a>
+          </div>
 
-        <div class="made-with-love">
-          Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav
-            Ravinder</a>
+          <div class="made-with-love">
+            Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav
+              Ravinder</a>
+          </div>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </div>
 
   </div>
 

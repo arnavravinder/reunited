@@ -4,1202 +4,376 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reunited Platform Guide</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <title>Reunited · Platform Guide</title>
+  <link rel="icon" href="assets/no-image.svg" type="image/svg+xml">
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'Canela';
+      src: url('assets/fonts/Canela_Collection/Canela_Family/Canela-Light-Trial.otf') format('opentype');
+      font-weight: 300;
+    }
 
-  <link rel="stylesheet" href="styles/guide.css">
-  <link rel="stylesheet" href="styles/guide-mockups.css">
-</head>
+    @font-face {
+      font-family: 'Canela';
+      src: url('assets/fonts/Canela_Collection/Canela_Family/Canela-LightItalic-Trial.otf') format('opentype');
+      font-weight: 300;
+      font-style: italic;
+    }
+
+    :root {
+      --cream: #f4efea;
+      --ink: #1a1a1a;
+      --muted: #6b645d;
+      --terracotta: #c09e86;
+      --line: rgba(26, 26, 26, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'General Sans', sans-serif;
+      background-color: var(--cream);
+      color: var(--ink);
+      line-height: 1.65;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .sheet {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      background-color: var(--cream);
+    }
+
+    .sheet::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 360px;
+      background: url('assets/search-clouds.jpg') center bottom / cover no-repeat;
+      -webkit-mask-image: linear-gradient(to bottom, black 45%, transparent 98%);
+      mask-image: linear-gradient(to bottom, black 45%, transparent 98%);
+      filter: saturate(0.72) contrast(0.97);
+      opacity: 0.95;
+      pointer-events: none;
+    }
+
+    .inner {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 5.5rem 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover {
+      justify-content: flex-end;
+      height: 100vh;
+      height: 100svh;
+    }
+
+    .cover::before {
+      height: 100%;
+      background: url('assets/hero-bg.png') center / cover no-repeat;
+      -webkit-mask-image: none;
+      mask-image: none;
+      filter: saturate(0.8) sepia(0.05) contrast(0.95);
+      opacity: 1;
+    }
+
+    .cover .inner {
+      padding-bottom: 4.5rem;
+    }
+
+    .closer::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 300px;
+      background: url('assets/search-waves.jpg') center bottom / cover no-repeat;
+      -webkit-mask-image: linear-gradient(to top, black 20%, transparent 95%);
+      mask-image: linear-gradient(to top, black 20%, transparent 95%);
+      filter: saturate(0.75) contrast(0.97);
+      pointer-events: none;
+    }
+
+    h1,
+    h2 {
+      font-family: 'Canela', serif;
+      font-weight: 300;
+    }
+
+    h1 {
+      font-size: 3.8rem;
+      line-height: 1.1;
+    }
+
+    h2 {
+      font-size: 2.1rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .dot {
+      color: var(--terracotta);
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--muted);
+      max-width: 58ch;
+    }
+
+    p strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    ol,
+    ul {
+      margin: 0 0 1rem 1.2rem;
+      color: var(--muted);
+    }
+
+    li {
+      margin-bottom: 0.55rem;
+      padding-left: 0.3rem;
+    }
+
+    li::marker {
+      color: var(--terracotta);
+      font-weight: 500;
+    }
+
+    .cover h1 {
+      color: #ffffff;
+      text-shadow: 0 2px 30px rgba(31, 28, 25, 0.28);
+    }
+
+    .cover p {
+      font-size: 1.15rem;
+      margin-top: 1.4rem;
+      color: rgba(255, 255, 255, 0.92);
+      text-shadow: 0 1px 18px rgba(31, 28, 25, 0.3);
+    }
+
+    .cover-meta {
+      margin-top: 2.2rem;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-shadow: 0 1px 14px rgba(31, 28, 25, 0.3);
+    }
+
+    .sheet-img {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      margin-top: 2rem;
+      page-break-inside: avoid;
+    }
+
+    .sheet-img.tall {
+      width: auto;
+      max-height: 330px;
+      align-self: flex-start;
+    }
+
+    .credit {
+      margin-top: 2.5rem;
+      font-size: 0.85rem;
+    }
+
+    .credit a {
+      color: var(--ink);
+      text-underline-offset: 3px;
+    }
+
+    .print-btn {
+      position: fixed;
+      top: 1.2rem;
+      right: 1.2rem;
+      text-decoration: none;
+      font-family: 'General Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--ink);
+      background-color: rgba(255, 255, 255, 0.6);
+      border: 1px solid var(--line);
+      border-radius: 50px;
+      padding: 0.55rem 1.2rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .print-btn:hover {
+      background-color: #ffffff;
+    }
+
+    .back-link {
+      position: fixed;
+      top: 1.2rem;
+      left: 1.2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--ink);
+      text-decoration: none;
+      opacity: 0.7;
+    }
+
+    .back-link:hover {
+      opacity: 1;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2.7rem;
+      }
+
+      .inner {
+        padding: 4.5rem 1.4rem;
+      }
+    }
+
+    @media print {
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      .print-btn,
+      .back-link {
+        display: none;
+      }
+
+      .sheet {
+        min-height: 0;
+        height: 297mm;
+        overflow: hidden;
+        page-break-after: always;
+        break-after: page;
+      }
+
+      .sheet:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+
+      .inner {
+        padding: 2.5rem 2rem;
+      }
+
+      .cover .inner {
+        padding-bottom: 4rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <div class="pdf-download-btn" onclick="showPDFOptions()">
-    <i class="fas fa-download"></i> Download PDF Guide
-  </div>
+  <a class="back-link" href="index.html">&larr; reunited.co.in</a>
+  <a class="print-btn" href="assets/reunited-guide.pdf" download="Reunited-Platform-Guide.pdf">Download PDF</a>
 
-  <div id="pdfOptions" class="pdf-options-modal" style="display: none;">
-    <div class="pdf-options-content">
-      <h4>Choose PDF Method</h4>
-      <button class="btn" onclick="downloadPDF(); hidePDFOptions();">
-        <i class="fas fa-print"></i> Browser Print (Recommended)
-      </button>
-      <button class="btn btn-outlined" onclick="downloadPDFAlternative(); hidePDFOptions();">
-        <i class="fas fa-file-pdf"></i> Direct PDF Download
-      </button>
-      <button class="btn-tiny btn-outlined" onclick="hidePDFOptions();">Cancel</button>
-    </div>
-  </div>
-
-  <section class="hero">
-    <div class="hero-content">
-      <h1><span class="reunited-title">Reunited</span><br>Platform Guide</h1>
-      <p class="hero-subtitle">Lost something? Found something? You're in the right place. This guide walks you through
-        everything you need to know about using Reunited to get your stuff back or help others find theirs.</p>
+  <section class="sheet cover">
+    <div class="inner">
+      <h1>Reunited<span class="dot">.</span><br>Platform Guide</h1>
+      <p>How to find, claim, and collect lost items at school — from the website to the Lost &amp; Found desk.</p>
+      <p class="cover-meta">reunited.co.in</p>
     </div>
   </section>
 
-  <section id="overview" class="guide-section">
-    <div class="container">
-      <h2>What's Reunited All About?</h2>
-      <p>Think of Reunited as your personal lost and found superhero. We've built this platform because losing stuff
-        sucks, and finding it shouldn't be a nightmare. Whether you left your phone in the library or found someone's
-        wallet in the cafeteria, Reunited makes the whole process actually work.</p>
-
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-search"></i>
-          </div>
-          <h3>Actually Smart Search</h3>
-          <p>No more endless scrolling. Our AI helps match your search with what's actually been found, so you spend
-            less time looking and more time getting your stuff back.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-shield-alt"></i>
-          </div>
-          <h3>Easy Login (No Hassle)</h3>
-          <p>Sign in with Google, X, or just get a magic link sent to your email. We've got options because nobody likes
-            password drama.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-clipboard-check"></i>
-          </div>
-          <h3>Track Everything</h3>
-          <p>Know exactly where your claim stands. No more wondering if your request got lost in the void - you'll see
-            updates in real time.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-eye"></i>
-          </div>
-          <h3>Keep It Real</h3>
-          <p>Everyone can see what's been claimed (without personal details, obviously). It's all about trust and making
-            sure the system actually works for everyone.</p>
-        </div>
-      </div>
+  <section class="sheet">
+    <div class="inner">
+      <h2>How Reunited works</h2>
+      <p>Reunited is the school's lost and found, online. Items handed in at the Lost &amp; Found desk are photographed
+        and listed on the site, where anyone can search for them.</p>
+      <ol>
+        <li><strong>Search</strong> for the item you lost — by name, type, location, or the date you lost it.</li>
+        <li><strong>Claim</strong> it by describing details only the owner would know.</li>
+        <li><strong>Collect</strong> it from the Lost &amp; Found desk using the claim code you receive.</li>
+      </ol>
+      <p>Every completed claim is also listed on the public Claim Log page, so the process stays transparent.</p>
     </div>
   </section>
 
-  <section id="login" class="guide-section">
-    <div class="container">
-      <h2>Getting Into Your Account</h2>
-      <p>We know you've got better things to do than remember another password. That's why we've made logging in as
-        painless as possible. Here's how it works:</p>
-
-      <div class="instructions-section">
-        <h4 class="text-accent mb-1-5 text-center">How to Login</h4>
-        <div class="steps-grid">
-          <div class="instruction-step-card">
-            <div class="step-number">1</div>
-            <h3>Pick Your Way In</h3>
-            <p>Google account? Perfect. Want a magic link? We've got you. Old school email and password? That works too.
-            </p>
-          </div>
-          <div class="instruction-step-card">
-            <div class="step-number">2</div>
-            <h3>Click and Go</h3>
-            <p>Seriously, it's that simple. No security questions about your first pet's middle name or anything crazy
-              like that.</p>
-          </div>
-          <div class="instruction-step-card">
-            <div class="step-number">3</div>
-            <h3>You're In!</h3>
-            <p>Welcome to your dashboard where all the magic happens. Now you can search, claim, and track your stuff.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="mockup-section">
-        <div class="mockup-container">
-          <div class="mockup-header">
-            <div class="mockup-dot"></div>
-            <div class="mockup-dot"></div>
-            <div class="mockup-dot"></div>
-          </div>
-          <div class="mockup-content-centered">
-
-            <div class="mockup-overlay"></div>
-
-
-            <div class="login-modal-mockup">
-              <div class="mockup-close-btn">×</div>
-
-              <div class="mockup-title-container">
-                <h3 class="mockup-title">Login to Reunited</h3>
-              </div>
-
-              <div class="mockup-social-container">
-                <div class="mockup-social-btn">
-                  <i class="fab fa-google"></i>
-                </div>
-                <div class="mockup-social-btn">
-                  <i class="fab fa-apple"></i>
-                </div>
-                <div class="mockup-social-btn">
-                  <img
-                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/%3E%3C/svg%3E"
-                    alt="X" style="width: 16px; height: 16px;">
-                </div>
-              </div>
-
-              <div class="mockup-divider">
-                <div class="mockup-divider-line"></div>
-                <span class="mockup-divider-text">or</span>
-                <div class="mockup-divider-line"></div>
-              </div>
-
-              <div class="mb-1">
-                <label class="mockup-label">Email</label>
-                <input type="email" class="mockup-input" value="john@example.com">
-              </div>
-
-              <div class="mb-1-5">
-                <label class="mockup-label">Password</label>
-                <input type="password" class="mockup-input" value="••••••••">
-              </div>
-
-              <button class="mockup-btn-primary">
-                Login
-              </button>
-
-              <div class="mockup-footer-links">
-                <a href="#" class="mockup-link">Forgot password?</a>
-                <span class="mockup-separator">|</span>
-                <a href="#" class="mockup-link">Create account</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  <section class="sheet">
+    <div class="inner">
+      <h2>Signing in</h2>
+      <p>You need an account to claim items. There are no passwords to remember — sign in either way:</p>
+      <ul>
+        <li><strong>Continue with Google</strong> — one click with your school Google account.</li>
+        <li><strong>Magic link</strong> — enter your email address and we send you a sign-in link. Open it and you're
+          in.</li>
+      </ul>
+      <p>Both methods lead to the same account as long as you use the same email address.</p>
     </div>
   </section>
 
-  <section id="search" class="guide-section">
-    <div class="container">
-      <h2>Finding Your Lost Stuff</h2>
-      <p style="font-size: 1.2rem;">This is where the real magic happens. Instead of digging through endless lists or
-        posting on random bulletin boards, you can actually search like a normal human being. Here's how to find what
-        you're looking for:</p>
-
-      <div class="instructions-section">
-        <h4 class="text-accent mb-1-5 text-center">Search Tips</h4>
-        <div class="steps-grid">
-          <div class="instruction-step-card">
-            <div class="step-number">1</div>
-            <h3>Be Specific</h3>
-            <p>The more details you add, the better. "Blue water bottle" beats just "bottle" every time.</p>
-          </div>
-          <div class="instruction-step-card">
-            <div class="step-number">2</div>
-            <h3>Use Filters</h3>
-            <p>Narrow down by location and date to save time scrolling through everything.</p>
-          </div>
-          <div class="instruction-step-card">
-            <div class="step-number">3</div>
-            <h3>Let AI Help</h3>
-            <p>Our AI ranks results by relevance, so your stuff usually shows up near the top.</p>
-          </div>
-          <div class="instruction-step-card">
-            <div class="step-number">4</div>
-            <h3>Quick Actions</h3>
-            <p>Found your item? Click to claim it instantly. Want to report something similar? Use the "Report Similar
-              Loss" feature.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="mockup-section">
-        <div class="mockup-container">
-          <div class="mockup-header">
-            <div class="mockup-dot"></div>
-            <div class="mockup-dot"></div>
-            <div class="mockup-dot"></div>
-          </div>
-          <div class="mockup-content-scroll">
-
-            <div class="mockup-nav-header">
-              <div class="mockup-logo-small">Reunited</div>
-              <div class="mockup-nav-links">
-                <span class="text-accent">Search Items</span>
-                <span class="text-secondary-color">Dashboard</span>
-                <span class="text-secondary-color">Claim Log</span>
-              </div>
-              <div class="mockup-user-info">John • <i class="fas fa-sign-out-alt"></i></div>
-            </div>
-
-
-            <h1 class="mockup-page-title">Find Your Lost Items</h1>
-
-
-            <div class="mockup-search-container">
-              <div class="mockup-search-grid">
-                <div>
-                  <label class="mockup-label-tiny">Item Name</label>
-                  <input type="text" class="mockup-input-tiny"
-                    placeholder="What did you lose? e.g., 'blue nike water bottle'" value="iPhone 13 Pro blue">
-                </div>
-                <div>
-                  <label class="mockup-label-tiny">Item Type</label>
-                  <select class="mockup-input-tiny">
-                    <option>Electronics</option>
-                    <option>Clothing</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="mockup-label-tiny">Where Lost</label>
-                  <select class="mockup-input-tiny">
-                    <option>Library</option>
-                    <option>Cafeteria</option>
-                  </select>
-                </div>
-              </div>
-              <div class="d-flex gap-05 align-center">
-                <button class="mockup-btn-search">
-                  <i class="fas fa-search"></i> Search
-                </button>
-                <button class="mockup-btn-reset">
-                  Reset
-                </button>
-              </div>
-            </div>
-
-            <div class="mockup-ai-notice">
-              <i class="fas fa-robot text-accent fs-06"></i>
-              <span class="text-accent fs-045">AI Enhanced Search</span>
-              <span class="text-secondary-color fs-045 ml-auto">8 Items Found</span>
-            </div>
-
-
-            <div class="mockup-results-header">
-              <h2 class="mockup-results-title">8 Items Found</h2>
-              <div class="mockup-view-options">
-                <span class="text-secondary-color">View:</span>
-                <button class="mockup-btn-icon"><i class="fas fa-th-large"></i></button>
-                <button class="mockup-btn-icon-outline"><i class="fas fa-list"></i></button>
-                <span class="text-secondary-color ml-05">Sort By:</span>
-                <select class="mockup-select-tiny">
-                  <option>Relevance</option>
-                  <option>Date (Newest)</option>
-                </select>
-              </div>
-            </div>
-
-
-            <div class="mockup-results-grid">
-              <div class="mockup-card">
-                <div class="mockup-card-image">
-                  <i class="fas fa-mobile-alt text-white fs-1"></i>
-                </div>
-                <div class="mockup-card-content">
-                  <h3 class="mockup-card-title">iPhone 13 Pro</h3>
-                  <div class="mockup-card-meta">
-                    <div><i class="fas fa-map-marker-alt"></i> Library</div>
-                    <div><i class="fas fa-calendar-alt"></i> Jan 15</div>
-                  </div>
-                  <div class="mockup-card-tag">Electronics</div>
-                </div>
-              </div>
-              <div class="mockup-card">
-                <div class="mockup-card-image secondary">
-                  <i class="fas fa-clock text-white fs-1"></i>
-                </div>
-                <div class="mockup-card-content">
-                  <h3 class="mockup-card-title">Apple Watch</h3>
-                  <div class="mockup-card-meta">
-                    <div><i class="fas fa-map-marker-alt"></i> Gym</div>
-                    <div><i class="fas fa-calendar-alt"></i> Jan 14</div>
-                  </div>
-                  <div class="mockup-card-tag">Electronics</div>
-                </div>
-              </div>
-              <div class="mockup-card">
-                <div class="mockup-card-image">
-                  <i class="fas fa-backpack text-white fs-1"></i>
-                </div>
-                <div class="mockup-card-content">
-                  <h3 class="mockup-card-title">Backpack</h3>
-                  <div class="mockup-card-meta">
-                    <div><i class="fas fa-map-marker-alt"></i> Gym</div>
-                    <div><i class="fas fa-calendar-alt"></i> Jan 13</div>
-                  </div>
-                  <div class="mockup-card-tag">Personal Items</div>
-                </div>
-              </div>
-              <div class="mockup-card">
-                <div class="mockup-card-image secondary">
-                  <i class="fas fa-headphones text-white fs-1"></i>
-                </div>
-                <div class="mockup-card-content">
-                  <h3 class="mockup-card-title">AirPods Pro</h3>
-                  <div class="mockup-card-meta">
-                    <div><i class="fas fa-map-marker-alt"></i> Cafeteria</div>
-                    <div><i class="fas fa-calendar-alt"></i> Jan 12</div>
-                  </div>
-                  <div class="mockup-card-tag">Electronics</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+  <section class="sheet">
+    <div class="inner">
+      <h2>Finding your item</h2>
+      <p>On the <strong>Search</strong> page, describe what you lost. You can combine an item name with filters for
+        type, location, and the date it went missing.</p>
+      <p>Search is AI-assisted: a description like "blue bottle with a panda sticker" is matched against item
+        descriptions, not just titles, so nearby matches surface even if the wording differs.</p>
+      <p>Results show a photo, where the item was found, and when. Open any result to see its full details.</p>
+      <img class="sheet-img" src="assets/mockup-search.png" alt="The search page with filters and results">
     </div>
   </section>
 
-  <section id="dashboard" class="guide-section">
-    <div class="container">
-      <h2>Your Personal Command Center</h2>
-      <p>Think of your dashboard as mission control for all your lost and found adventures. Everything you need to know
-        is right here - what you've lost, what you've claimed, and what's happening with both.</p>
-
-      <div class="instructions-section">
-        <h4 class="text-accent mb-1-5 text-center">Dashboard Overview</h4>
-        <div class="steps-grid">
-          <div class="instruction-step-card">
-            <div class="step-number">1</div>
-            <h3>Check Notifications</h3>
-            <p>See updates on your claims and any matches for items you've reported lost.</p>
-          </div>
-          <div class="instruction-step-card">
-            <div class="step-number">2</div>
-            <h3>Track Your Stuff</h3>
-            <p>Keep tabs on what you've lost and what you've claimed. Everything's organized for you.</p>
-          </div>
-          <div class="instruction-step-card">
-            <div class="step-number">3</div>
-            <h3>Report New Items</h3>
-            <p>Lost something else? Click the "Report Lost Item" button to add it to your list.</p>
-          </div>
-          <div class="instruction-step-card">
-            <div class="step-number">4</div>
-            <h3>Manage Claims</h3>
-            <p>View all your active claims and download your claim codes when items are approved.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="mockup-container">
-        <div class="mockup-header">
-          <div class="mockup-dot"></div>
-          <div class="mockup-dot"></div>
-          <div class="mockup-dot"></div>
-        </div>
-        <div class="mockup-content-scroll">
-
-          <div class="mockup-nav-header">
-            <div class="mockup-logo-small">Reunited</div>
-            <div class="mockup-nav-links">
-              <span class="text-secondary-color">Search Items</span>
-              <span class="text-accent">Dashboard</span>
-              <span class="text-secondary-color">Claim Log</span>
-            </div>
-            <div class="mockup-user-info">John • <i class="fas fa-sign-out-alt"></i></div>
-          </div>
-
-
-          <div class="mockup-welcome-banner">
-            <div class="mockup-avatar">
-              <i class="fas fa-user"></i>
-            </div>
-            <div class="flex-1">
-              <h3 class="m-0 fs-08">Welcome, John Doe</h3>
-              <p class="m-0 text-secondary-color fs-06">Dashboard • 3 active items</p>
-            </div>
-            <div class="d-flex gap-03">
-              <button class="mockup-btn-search">
-                <i class="fas fa-search"></i> Report Lost Item
-              </button>
-            </div>
-          </div>
-
-
-          <div class="mockup-tabs">
-            <button class="mockup-tab-active">
-              <i class="fas fa-bell"></i> Notifications <span class="mockup-badge">2</span>
-            </button>
-            <button class="mockup-tab-inactive">
-              <i class="fas fa-search-minus"></i> Lost Items <span class="mockup-badge-light">1</span>
-            </button>
-            <button class="mockup-tab-inactive">
-              <i class="fas fa-hand-holding"></i> Claims <span class="mockup-badge-light">2</span>
-            </button>
-          </div>
-
-
-          <div class="mb-08">
-            <div class="d-flex justify-between align-center mb-05">
-              <h2 class="m-0 fs-08 text-color">Notifications</h2>
-              <button class="mockup-btn-search fs-04 p-05">Mark All as Read</button>
-            </div>
-
-            <div class="mockup-notification-card">
-              <div class="d-flex gap-04">
-                <div class="mockup-notification-icon">
-                  <i class="fas fa-check-circle fs-04 text-white"></i>
-                </div>
-                <div class="flex-1">
-                  <h4 class="m-0 mb-02 fs-06 text-color">Claim Approved</h4>
-                  <p class="m-0 mb-02 fs-05 text-secondary-color">Your claim for iPhone 13 Pro has been approved. Claim
-                    code: RC-7X9K-2M5P</p>
-                  <div class="fs-04 text-secondary-color">2 hours ago</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mockup-notification-card secondary">
-              <div class="d-flex gap-04">
-                <div class="mockup-notification-icon secondary">
-                  <i class="fas fa-search fs-04 text-white"></i>
-                </div>
-                <div class="flex-1">
-                  <h4 class="m-0 mb-02 fs-06 text-color">Potential Match Found</h4>
-                  <p class="m-0 mb-02 fs-05 text-secondary-color">A new item matching your AirPods Pro description has
-                    been found in the Cafeteria</p>
-                  <div class="fs-04 text-secondary-color">1 day ago</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="d-flex gap-08 mockup-grid-2-col">
-            <div>
-              <div class="d-flex justify-between align-center mb-05">
-                <h4 class="m-0 fs-08">My Lost Item Reports</h4>
-                <button class="btn btn-tiny btn-outlined fs-06 p-05">View All</button>
-              </div>
-              <div class="mockup-search-container">
-                <div class="d-flex justify-between align-center">
-                  <div class="flex-1">
-                    <h5 class="m-0 mb-02 fs-08">AirPods Pro</h5>
-                    <div class="fs-06 text-secondary-color mb-03">
-                      <i class="fas fa-calendar-alt"></i> Jan 10 • <i class="fas fa-map-marker-alt"></i> Cafeteria
-                    </div>
-                    <p class="fs-06 m-0 text-secondary-color">White AirPods Pro with case</p>
-                  </div>
-                  <span class="status-badge status-pending fs-05 p-05">Active</span>
-                </div>
-              </div>
-
-              <div class="mt-08">
-                <h4 class="m-0 mb-05 fs-08">Recent Activity</h4>
-                <div class="fs-06 text-secondary-color mockup-search-container">
-                  <div class="mb-03">🔔 New match found for your AirPods Pro</div>
-                  <div>📧 Claim approved for iPhone 13 Pro</div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div class="d-flex justify-between align-center mb-05">
-                <h4 class="m-0 fs-08">My Claims</h4>
-                <button class="btn btn-tiny btn-outlined fs-06 p-05">View All</button>
-              </div>
-              <div class="mockup-search-container">
-                <div class="d-flex justify-between align-center">
-                  <div class="flex-1">
-                    <h5 class="m-0 mb-02 fs-08">iPhone 13 Pro</h5>
-                    <div class="fs-06 text-secondary-color mb-03">
-                      Claimed Jan 16 • Claim ID: RC-7X9K-2M5P
-                    </div>
-                    <button class="btn btn-tiny btn-outlined fs-05 p-05">View Details</button>
-                  </div>
-                  <span class="status-badge status-approved fs-05 p-05">Ready</span>
-                </div>
-              </div>
-
-              <div class="mockup-search-container">
-                <div class="d-flex justify-between align-center">
-                  <div class="flex-1">
-                    <h5 class="m-0 mb-02 fs-08">Backpack</h5>
-                    <div class="fs-06 text-secondary-color mb-03">
-                      Claimed Jan 14 • Under review
-                    </div>
-                    <button class="btn btn-tiny btn-outlined fs-05 p-05">Check Status</button>
-                  </div>
-                  <span class="status-badge status-pending fs-05 p-05">Review</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <section class="sheet">
+    <div class="inner">
+      <h2>Claiming and collecting</h2>
+      <p>Found your item? Press <strong>Claim</strong> and describe features only the owner would know — markings,
+        contents, scratches. Staff review this before approving the claim.</p>
+      <ol>
+        <li>Submit the claim with your verification details.</li>
+        <li>You receive a <strong>claim code</strong> on screen and by email.</li>
+        <li>Show the code at the Lost &amp; Found desk to collect your item.</li>
+      </ol>
+      <p>Please collect within the pickup window mentioned in your email — we send a reminder before the deadline. If
+        an item isn't collected in time, it returns to the shelves and becomes claimable again.</p>
+      <img class="sheet-img tall" src="assets/mockup-claim.png" alt="The claim form asking for verification details">
     </div>
   </section>
 
-  <section id="claim" class="guide-section">
-    <div class="container">
-      <h2>Getting Your Stuff Back</h2>
-      <p>Found your item in the system? Awesome! Now comes the part where you prove it's actually yours and get it back.
-        Don't worry - we've made this as straightforward as possible.</p>
-
-      <div class="instructions-grid">
-        <div class="instruction-card elegant-card">
-          <div style="display: flex; align-items: flex-start; gap: 1rem;">
-            <div
-              style="background-color: var(--accent-color); padding: 0.8rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; min-width: 48px; height: 48px;">
-              <i class="fas fa-search" style="font-size: 1.2rem; color: white;"></i>
-            </div>
-            <div style="flex: 1;">
-              <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: var(--text-color);">Spot Your Stuff</h3>
-              <p style="margin: 0; color: var(--text-secondary); line-height: 1.4;">Search through what's been found.
-                When you see your item, click on it to get started with your claim.</p>
-            </div>
-          </div>
-        </div>
-        <div class="instruction-card elegant-card">
-          <div style="display: flex; align-items: flex-start; gap: 1rem;">
-            <div
-              style="background-color: var(--secondary-accent); padding: 0.8rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; min-width: 48px; height: 48px;">
-              <i class="fas fa-clipboard-list" style="font-size: 1.2rem; color: white;"></i>
-            </div>
-            <div style="flex: 1;">
-              <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: var(--text-color);">Prove It's Yours</h3>
-              <p style="margin: 0; color: var(--text-secondary); line-height: 1.4;">Tell us something only you would
-                know about the item. Like that tiny scratch you made or what's in the case.</p>
-            </div>
-          </div>
-        </div>
-        <div class="instruction-card elegant-card">
-          <div style="display: flex; align-items: flex-start; gap: 1rem;">
-            <div
-              style="background-color: var(--success-color); padding: 0.8rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; min-width: 48px; height: 48px;">
-              <i class="fas fa-check-circle" style="font-size: 1.2rem; color: white;"></i>
-            </div>
-            <div style="flex: 1;">
-              <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: var(--text-color);">Get Your Code</h3>
-              <p style="margin: 0; color: var(--text-secondary); line-height: 1.4;">Once approved, you'll get a unique
-                claim code. Think of it as your golden ticket to get your stuff back.</p>
-            </div>
-          </div>
-        </div>
-        <div class="instruction-card elegant-card">
-          <div style="display: flex; align-items: flex-start; gap: 1rem;">
-            <div
-              style="background-color: var(--accent-color); padding: 0.8rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; min-width: 48px; height: 48px;">
-              <i class="fas fa-hand-holding" style="font-size: 1.2rem; color: white;"></i>
-            </div>
-            <div style="flex: 1;">
-              <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: var(--text-color);">Pick It Up</h3>
-              <p style="margin: 0; color: var(--text-secondary); line-height: 1.4;">Head to the Lost & Found office,
-                show your code, and boom - you're reunited with your belongings!</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <h3 style="margin-top: 3rem;">Claiming an Item</h3>
-      <div class="mockup-container">
-        <div class="mockup-header">
-          <div class="mockup-dot"></div>
-          <div class="mockup-dot"></div>
-          <div class="mockup-dot"></div>
-        </div>
-        <div class="mockup-content" style="padding: 0.4rem; aspect-ratio: 16/9; max-width: 900px; margin: 0 auto;">
-          <div
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--light-bg);">
-            <div>
-              <h3 style="margin: 0; font-size: 0.7rem;">Claim Item</h3>
-              <p style="margin: 0; font-size: 0.5rem; color: var(--text-secondary);">Found Items > iPhone 13 Pro > Claim
-              </p>
-            </div>
-            <button style="background: none; border: none; color: var(--text-secondary); font-size: 0.8rem;">×</button>
-          </div>
-
-          <div style="background-color: var(--darker-bg); border-radius: 4px; padding: 0.4rem; margin-bottom: 0.6rem;">
-            <div style="display: flex; gap: 0.4rem; align-items: center; margin-bottom: 0.3rem;">
-              <div
-                style="width: 30px; height: 30px; background-color: var(--light-bg); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
-                📱
-              </div>
-              <div style="flex: 1;">
-                <h4 style="margin: 0 0 0.15rem; font-size: 0.7rem;">iPhone 13 Pro</h4>
-                <div style="display: flex; gap: 0.8rem; font-size: 0.5rem; color: var(--text-secondary);">
-                  <span><i class="fas fa-map-marker-alt"></i> Library, 2nd Floor</span>
-                  <span><i class="fas fa-calendar-alt"></i> Jan 15, 2025</span>
-                  <span><i class="fas fa-clock"></i> 3:45 PM</span>
-                </div>
-              </div>
-              <div style="text-align: right;">
-                <div style="font-size: 0.5rem; color: var(--accent-color);">Item #LF2025-0115</div>
-                <div style="font-size: 0.5rem; color: var(--text-secondary);">Status: Available</div>
-              </div>
-            </div>
-            <div
-              style="padding: 0.3rem; background-color: var(--light-bg); border-radius: 3px; font-size: 0.5rem; color: var(--text-secondary);">
-              Description: Blue iPhone 13 Pro, appears to be in good condition, found near study tables
-            </div>
-          </div>
-
-          <div class="form-group" style="margin-bottom: 0.6rem;">
-            <label style="font-size: 0.6rem; margin-bottom: 0.2rem; color: var(--text-color);">Please provide details to
-              verify this is your item:</label>
-            <textarea class="form-control"
-              placeholder="Describe unique features, markings, or contents that only the owner would know"
-              style="min-height: 60px; font-size: 0.6rem; padding: 0.3rem;">Blue iPhone 13 Pro with clear MagSafe case. Small scratch on bottom left corner from keys. Lock screen wallpaper is a photo of my golden retriever, Max.</textarea>
-          </div>
-
-          <div class="form-group" style="margin-bottom: 0.6rem;">
-            <label style="font-size: 0.6rem; margin-bottom: 0.2rem; color: var(--text-color);">Contact
-              Information:</label>
-            <input type="text" class="form-control" style="font-size: 0.6rem; padding: 0.3rem;"
-              placeholder="Phone number or other contact details" value="john.doe@email.com">
-          </div>
-
-          <div class="form-actions" style="display: flex; gap: 0.6rem;">
-            <button class="btn btn-outlined" style="flex: 1; font-size: 0.6rem; padding: 0.4rem;">Cancel</button>
-            <button class="btn" style="flex: 1; font-size: 0.6rem; padding: 0.4rem;">Submit Claim</button>
-          </div>
-
-          <div
-            style="margin-top: 0.6rem; padding: 0.4rem; background-color: var(--darker-bg); border-radius: 4px; font-size: 0.6rem; color: var(--text-secondary);">
-            <i class="fas fa-info-circle" style="color: var(--accent-color); margin-right: 0.3rem;"></i>
-            Claims are typically reviewed within 2-4 hours. You'll be notified once approved.
-          </div>
-        </div>
-      </div>
-
-      <h3 style="margin-top: 3rem;">Claim Code</h3>
-      <div class="mockup-container">
-        <div class="mockup-header">
-          <div class="mockup-dot"></div>
-          <div class="mockup-dot"></div>
-          <div class="mockup-dot"></div>
-        </div>
-        <div class="mockup-content" style="padding: 0.4rem; aspect-ratio: 16/9; max-width: 900px; margin: 0 auto;">
-
-          <div class="mockup-claim-header">
-            <h2 class="m-0 fs-08 text-accent">Claim Details</h2>
-            <span class="fs-05 text-secondary-color">Jan 16, 2023</span>
-          </div>
-
-          <div class="mockup-item-preview">
-            <div class="d-flex gap-06 align-center">
-              <div class="mockup-item-icon">
-                <i class="fas fa-mobile-alt"></i>
-              </div>
-              <div>
-                <h3 class="m-0 fs-07">iPhone 13 Pro</h3>
-                <p class="m-0 fs-05 text-secondary-color">Found in Library • Electronics</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="mockup-claim-code-box">
-            <p class="fs-05 text-secondary-color mb-02">Your Claim Code</p>
-            <div class="mockup-claim-code">RC-7X9K-2M5P</div>
-            <p class="fs-04 text-success"><i class="fas fa-check-circle"></i> Valid & Active</p>
-          </div>
-
-          <div class="mockup-info-grid">
-            <div class="mockup-info-box">
-              <h4 class="fs-05 text-accent mb-03">Next Steps</h4>
-              <ul class="mockup-list">
-                <li>Visit the Lost & Found office</li>
-                <li>Present your student ID</li>
-                <li>Show this claim code</li>
-                <li>Sign release form</li>
-              </ul>
-            </div>
-            <div class="mockup-info-box">
-              <h4 class="fs-05 text-accent mb-03">Office Info</h4>
-              <ul class="mockup-list">
-                <li><i class="fas fa-clock"></i> Mon-Fri, 9am - 5pm</li>
-                <li><i class="fas fa-map-marker-alt"></i> Student Center, Room 101</li>
-                <li><i class="fas fa-phone"></i> (555) 123-4567</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="mockup-action-grid">
-            <button class="mockup-btn-action">
-              <i class="fas fa-download"></i> Download PDF
-            </button>
-            <button class="mockup-btn-action-outline">
-              <i class="fas fa-envelope"></i> Email Code
-            </button>
-            <button class="mockup-btn-action-outline">
-              <i class="fas fa-print"></i> Print
-            </button>
-          </div>
-
-          <div style="text-align: center; margin-top: 0.6rem; padding: 0.4rem; border-top: 1px solid var(--light-bg);">
-            <p style="margin: 0; font-size: 0.5rem; color: var(--text-secondary);">
-              Need help? Contact our support team for assistance with your claim
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div style="page-break-before: always;"></div>
-      <h3 style="margin-top: 3rem;">The Public Claim Log</h3>
-      <p>We believe in keeping things transparent. That's why everyone can see what's been claimed recently (don't
-        worry, no personal info is shared - just first names and item details):</p>
-
-      <div class="mockup-container">
-        <div class="mockup-header">
-          <div class="mockup-dot"></div>
-          <div class="mockup-dot"></div>
-          <div class="mockup-dot"></div>
-        </div>
-        <div class="mockup-content" style="padding: 0.4rem; aspect-ratio: 16/9; max-width: 900px; margin: 0 auto;">
-          <h3 style="margin-bottom: 0.6rem; font-size: 0.8rem;">Public Claim Log</h3>
-          <p style="margin-bottom: 0.8rem; color: var(--text-secondary); font-size: 0.6rem;">For transparency, this is a
-            public log of recently claimed items.</p>
-
-          <table class="demo-table">
-            <thead>
-              <tr>
-                <th>Claim Date</th>
-                <th>Item Name</th>
-                <th>Claimed By</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Jan 16, 2025</td>
-                <td>iPhone 13 Pro</td>
-                <td>John</td>
-              </tr>
-              <tr>
-                <td>Jan 15, 2025</td>
-                <td>Apple Watch</td>
-                <td>Sarah</td>
-              </tr>
-              <tr>
-                <td>Jan 14, 2025</td>
-                <td>Backpack</td>
-                <td>Mike</td>
-              </tr>
-              <tr>
-                <td>Jan 13, 2025</td>
-                <td>AirPods</td>
-                <td>Emma</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+  <section class="sheet">
+    <div class="inner">
+      <h2>Your dashboard</h2>
+      <p>The <strong>Dashboard</strong> keeps everything about your account in one place:</p>
+      <ul>
+        <li><strong>Notifications</strong> — claim approvals, review updates, and pickup reminders.</li>
+        <li><strong>My Claims</strong> — every claim you've made, with its current status and details.</li>
+        <li><strong>Settings</strong> — update your name and choose whether to receive email notifications.</li>
+      </ul>
+      <p>Reporting lost items yourself is coming soon; for now, items are listed by the Lost &amp; Found desk.</p>
+      <img class="sheet-img" src="assets/mockup-cards.png" alt="Item cards as they appear on the site">
     </div>
   </section>
 
-
-  <section id="contact" class="guide-section">
-    <div class="container">
-      <h2>Need Help? We've Got You</h2>
-      <p>Stuck on something? Have a question? Think we messed up? No problem - just drop us a message and we'll sort it
-        out. Real humans actually read these, so don't be shy.</p>
-
-      <div class="mockup-container">
-        <div class="mockup-header">
-          <div class="mockup-dot"></div>
-          <div class="mockup-dot"></div>
-          <div class="mockup-dot"></div>
-        </div>
-        <div class="mockup-content-scroll">
-
-          <div class="mockup-nav-header">
-            <div class="mockup-logo-small">Reunited</div>
-            <div class="mockup-nav-links">
-              <span class="text-secondary-color">Search Items</span>
-              <span class="text-secondary-color">Dashboard</span>
-              <span class="text-accent">Claim Log</span>
-            </div>
-            <div class="mockup-user-info">John • <i class="fas fa-sign-out-alt"></i></div>
-          </div>
-
-          <h4 class="text-accent mb-1-5 text-center">Contact Support</h4>
-
-
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.3rem; margin-bottom: 0.6rem;">
-            <div
-              style="background-color: var(--darker-bg); padding: 0.4rem; border-radius: 4px; text-align: center; font-size: 0.5rem; cursor: pointer;">
-              <i class="fas fa-search" style="color: var(--accent-color); margin-bottom: 0.2rem; display: block;"></i>
-              <div>Search Help</div>
-            </div>
-            <div class="mockup-contact-option">
-              <i class="fas fa-clipboard-list text-accent mb-02 d-block"></i>
-              <div>Claim Issues</div>
-            </div>
-            <div
-              style="background-color: var(--darker-bg); padding: 0.4rem; border-radius: 4px; text-align: center; font-size: 0.5rem; cursor: pointer;">
-              <i class="fas fa-user-cog" style="color: var(--accent-color); margin-bottom: 0.2rem; display: block;"></i>
-              <div>Account Help</div>
-            </div>
-          </div>
-
-
-          <div style="background-color: var(--darker-bg); border-radius: 6px; padding: 0.5rem;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-bottom: 0.4rem;">
-              <div>
-                <label
-                  style="font-size: 0.4rem; color: var(--text-secondary); display: block; margin-bottom: 0.2rem;">Full
-                  Name</label>
-                <input type="text"
-                  style="width: 100%; padding: 0.3rem; font-size: 0.5rem; background-color: var(--dark-bg); border: 1px solid var(--light-bg); border-radius: 3px; color: var(--text-color);"
-                  value="John Doe">
-              </div>
-              <div>
-                <label
-                  style="font-size: 0.4rem; color: var(--text-secondary); display: block; margin-bottom: 0.2rem;">Email
-                  Address</label>
-                <input type="email"
-                  style="width: 100%; padding: 0.3rem; font-size: 0.5rem; background-color: var(--dark-bg); border: 1px solid var(--light-bg); border-radius: 3px; color: var(--text-color);"
-                  value="john@example.com">
-              </div>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-bottom: 0.4rem;">
-              <div>
-                <label
-                  style="font-size: 0.4rem; color: var(--text-secondary); display: block; margin-bottom: 0.2rem;">Phone
-                  Number</label>
-                <input type="tel"
-                  style="width: 100%; padding: 0.3rem; font-size: 0.5rem; background-color: var(--dark-bg); border: 1px solid var(--light-bg); border-radius: 3px; color: var(--text-color);">
-              </div>
-              <div>
-                <label
-                  style="font-size: 0.4rem; color: var(--text-secondary); display: block; margin-bottom: 0.2rem;">Subject</label>
-                <input type="text"
-                  style="width: 100%; padding: 0.3rem; font-size: 0.5rem; background-color: var(--dark-bg); border: 1px solid var(--light-bg); border-radius: 3px; color: var(--text-color);"
-                  value="Question about claim process">
-              </div>
-            </div>
-
-            <div style="margin-bottom: 0.4rem;">
-              <label
-                style="font-size: 0.4rem; color: var(--text-secondary); display: block; margin-bottom: 0.2rem;">Message</label>
-              <textarea
-                style="width: 100%; padding: 0.3rem; font-size: 0.5rem; background-color: var(--dark-bg); border: 1px solid var(--light-bg); border-radius: 3px; color: var(--text-color); height: 80px; resize: none;">Hi, I have a question about the claim process for my lost iPhone. I submitted a claim yesterday but haven't received a response yet.</textarea>
-            </div>
-
-            <button
-              style="width: 100%; padding: 0.4rem; font-size: 0.5rem; background-color: var(--accent-color); color: white; border: none; border-radius: 3px; cursor: pointer;">
-              Send Message
-            </button>
-          </div>
-        </div>
-      </div>
+  <section class="sheet closer">
+    <div class="inner">
+      <h2>Questions or problems</h2>
+      <p>If a claim is taking long, a code didn't arrive, or something on the site isn't working, use the
+        <strong>Contact</strong> form on the home page — messages go straight to the team.</p>
+      <p>Thanks for using Reunited<span class="dot">.</span></p>
+      <p class="credit">Reunited is open source — the code is at
+        <a href="https://gh.arnav.ink/reunited">gh.arnav.ink/reunited</a>. Made with &#10084;&#65039; by
+        <a href="https://www.linkedin.com/in/arnav-ravinder">Arnav Ravinder</a>.</p>
     </div>
   </section>
-
-
-
-  <section class="guide-section">
-    <div class="container">
-      <div style="text-align: center; padding: 4rem 0;">
-        <div style="max-width: 600px; margin: 0 auto;">
-          <h2 style="font-size: 3rem; margin-bottom: 2rem; color: var(--accent-color);">Thank You!</h2>
-
-          <p style="font-size: 1.5rem; margin-bottom: 2rem; color: var(--text-color);">
-            Thanks for checking out this guide. I hope Reunited helps you get your stuff back!
-          </p>
-
-          <div class="thank-you-card">
-            <h2>Ready to Get Started?</h2>
-            <p>Join the community and help reunite lost items with their owners.</p>
-
-            <div class="thank-you-links">
-              <a href="index.html" class="btn thank-you-btn">
-                <i class="fas fa-home"></i> Go Home
-              </a>
-              <a href="search.html" class="btn btn-outlined thank-you-btn">
-                <i class="fas fa-search"></i> Start Searching
-              </a>
-            </div>
-
-            <div class="credits-box">
-              <p class="made-with-love">
-                Made with <span class="heart">❤</span> by <a href="https://www.linkedin.com/in/arnav-ravinder"
-                  target="_blank">Arnav Ravinder</a>
-              </p>
-            </div>
-          </div>
-          <p style="font-size: 0.9rem; color: var(--text-secondary);">
-            Got ideas? Found bugs? Want to contribute? <br>
-            Head over to <a href="https://gh.arnav.ink/reunited" target="_blank"
-              style="color: var(--accent-color); text-decoration: none;">gh.arnav.ink/reunited</a>
-          </p>
-
-          <div
-            style="margin-top: 2rem; padding: 1rem; background-color: var(--darker-bg); border-radius: 10px; text-align: center;">
-            <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">
-              Created by <strong style="color: var(--text-color);">Arnav Ravinder</strong><br>
-              <a href="https://github.com/arnavravinder" target="_blank"
-                style="color: var(--accent-color); text-decoration: none;">github.com/arnavravinder</a> •
-              <a href="https://linkedin.com/in/arnav-ravinder" target="_blank"
-                style="color: var(--accent-color); text-decoration: none;">linkedin.com/in/arnav-ravinder</a>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-
-  <script>
-    function downloadPDF() {
-      // Use browser's native print functionality with custom CSS
-      const originalTitle = document.title;
-      document.title = 'Reunited Platform Guide';
-
-      // Create a temporary print stylesheet
-      const printStyle = document.createElement('style');
-      printStyle.textContent = `
-        @media print {
-          * { 
-            -webkit-print-color-adjust: exact !important; 
-            print-color-adjust: exact !important; 
-            box-shadow: none !important;
-          }
-          
-          @page { 
-            size: A4;
-            margin: 0.5in; 
-            background: #1a1a1a;
-          }
-          
-          body { 
-            margin: 0 !important; 
-            background: #1a1a1a !important; 
-            font-size: 12pt;
-          }
-          
-          .container {
-            width: 95% !important;
-            max-width: none !important;
-            padding: 1rem 0 !important;
-          }
-          
-          .pdf-download-btn, .pdf-options-modal { 
-            display: none !important; 
-          }
-          
-          .guide-section { 
-            page-break-inside: avoid;
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-          }
-          
-          .mockup-with-steps {
-            page-break-inside: avoid;
-            display: flex !important;
-            flex-direction: column !important;
-            height: auto;
-            min-height: auto;
-          }
-          
-          .mockup-section {
-            height: auto !important;
-            margin-bottom: 1rem !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-          }
-          
-          .mockup-container {
-            width: 100% !important;
-            max-width: 800px !important;
-            margin: 1rem auto !important;
-            page-break-inside: avoid !important;
-          }
-          
-          .mockup-content {
-            overflow: visible !important;
-          }
-          
-          #search .steps-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 1rem !important;
-          }
-          
-          #login .steps-grid {
-            grid-template-columns: 1fr !important;
-            max-width: 450px !important;
-          }
-          
-          #claim .instructions-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 1rem !important;
-          }
-          
-          .guide-section:last-of-type .steps-grid {
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 1rem !important;
-          }
-          
-          
-          .instructions-section {
-            height: auto !important;
-            overflow: visible !important;
-          }
-          
-          .steps-grid {
-            display: grid !important;
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 1rem !important;
-            height: auto !important;
-          }
-          
-          #login .steps-grid {
-            grid-template-columns: 1fr !important;
-            max-width: 100% !important;
-          }
-          
-          #login .instruction-step-card {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          
-          #login .instructions-section {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          
-          #login .instruction-step-card {
-            padding: 0.8rem !important;
-            min-height: 100px !important;
-          }
-          
-          .instruction-step-card {
-            height: fit-content !important;
-            padding: 1.2rem !important;
-            background: var(--light-bg) !important;
-            break-inside: avoid;
-          }
-          
-          .feature-grid {
-            display: grid !important;
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 1rem !important;
-            page-break-inside: avoid;
-          }
-          
-          .feature-card {
-            padding: 1.2rem !important;
-            break-inside: avoid;
-          }
-          
-          .form-control, input, select, textarea {
-            background: #1a1a1a !important;
-            border: 1px solid #444 !important;
-            color: #f8f8f8 !important;
-            font-size: 10pt !important;
-          }
-          
-          h1 { font-size: 32pt !important; }
-          h2 { font-size: 24pt !important; }
-          h3 { font-size: 18pt !important; }
-          h4 { font-size: 16pt !important; }
-          p { font-size: 12pt !important; }
-          
-          .hero h1 { font-size: 48pt !important; }
-          .hero-subtitle { font-size: 18pt !important; }
-        }
-      `;
-      document.head.appendChild(printStyle);
-
-      // Hide download button temporarily
-      const downloadBtn = document.querySelector('.pdf-download-btn');
-      downloadBtn.style.display = 'none';
-
-      // Trigger print
-      setTimeout(() => {
-        window.print();
-
-        // Cleanup
-        setTimeout(() => {
-          document.head.removeChild(printStyle);
-          document.title = originalTitle;
-          downloadBtn.style.display = 'block';
-        }, 1000);
-      }, 100);
-    }
-
-    // Alternative PDF function using html2pdf with simpler config
-    function downloadPDFAlternative() {
-      const downloadBtn = document.querySelector('.pdf-download-btn');
-      downloadBtn.style.display = 'none';
-
-      const options = {
-        margin: [0.3, 0.3, 0.3, 0.3],
-        filename: 'Reunited-Platform-Guide.pdf',
-        image: { type: 'jpeg', quality: 0.85 },
-        html2canvas: {
-          scale: 1,
-          backgroundColor: '#1a1a1a',
-          useCORS: true
-        },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-      };
-
-      // Clone and modify the body for PDF
-      const element = document.body.cloneNode(true);
-      element.querySelector('.pdf-download-btn').remove();
-
-      html2pdf().set(options).from(element).save().then(() => {
-        downloadBtn.style.display = 'block';
-      }).catch(() => {
-        downloadBtn.style.display = 'block';
-        alert('PDF generation failed. Using browser print instead.');
-        downloadPDF(); // Fallback to print
-      });
-    }
-
-    function showPDFOptions() {
-      document.getElementById('pdfOptions').style.display = 'flex';
-    }
-
-    function hidePDFOptions() {
-      document.getElementById('pdfOptions').style.display = 'none';
-    }
-
-    // Close modal when clicking outside
-    document.addEventListener('click', function (event) {
-      const modal = document.getElementById('pdfOptions');
-      if (event.target === modal) {
-        hidePDFOptions();
-      }
-    });
-
-    // Smooth scrolling for any hash links
-    document.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-          e.preventDefault();
-          const target = document.querySelector(this.getAttribute('href'));
-          if (target) {
-            target.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
-            });
-          }
-        });
-      });
-    });
-
-    // Add some hover effects to mockup containers
-    document.addEventListener('DOMContentLoaded', function () {
-      const mockups = document.querySelectorAll('.mockup-container');
-      mockups.forEach(mockup => {
-        mockup.addEventListener('mouseenter', function () {
-          this.style.transform = 'translateY(-5px)';
-        });
-        mockup.addEventListener('mouseleave', function () {
-          this.style.transform = 'translateY(0)';
-        });
-      });
-    });
-  </script>
 </body>
 
 </html>

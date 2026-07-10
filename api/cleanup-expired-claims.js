@@ -2,6 +2,18 @@ import admin from 'firebase-admin';
 
 let db;
 
+const EMAIL_API_BASE = process.env.EMAIL_API_BASE || 'https://api.reunited.co.in';
+const REMINDER_WINDOW_MS = 2 * 24 * 60 * 60 * 1000;
+
+const sendEmail = (path, payload) =>
+  fetch(`${EMAIL_API_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(response => {
+    if (!response.ok) throw new Error(`${path} responded ${response.status}`);
+  });
+
 export default async function handler(req, res) {
   try {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -39,59 +51,44 @@ export default async function handler(req, res) {
     }
     const now = admin.firestore.Timestamp.now();
 
-    // Optimized query: only fetch active claims that have passed the deadline
-    // Note: This requires a composite index on [status, pickupDeadline]
     const expiredClaimsSnapshot = await db.collection('claims')
       .where('status', 'in', ['pending', 'approved'])
       .where('pickupDeadline', '<=', now)
       .get();
 
-    if (expiredClaimsSnapshot.empty) {
-      return res.status(200).json({
-        success: true,
-        processedCount: 0,
-        message: 'No expired claims found'
-      });
-    }
-
     let processedCount = 0;
-    const batchSize = 150; // Keep well under 500 limit (3 operations per claim = 450 ops)
+    const emailQueue = [];
+    const batchSize = 150;
     const chunks = [];
 
-    // Create chunks of documents
     for (let i = 0; i < expiredClaimsSnapshot.docs.length; i += batchSize) {
       chunks.push(expiredClaimsSnapshot.docs.slice(i, i + batchSize));
     }
 
-    // Process each chunk
     for (const chunk of chunks) {
       const batch = db.batch();
 
       for (const doc of chunk) {
         const claimData = doc.data();
 
-        // Double check status just in case
         if (claimData.status !== 'pending' && claimData.status !== 'approved') {
           continue;
         }
 
-        // 1. Update claim status
         batch.update(doc.ref, {
           status: 'expired',
           expiredAt: now
         });
 
-        // 2. Update item status
         const itemRef = db.collection('items').doc(claimData.itemId);
         batch.update(itemRef, {
           claimed: false,
           claimId: null,
           claimStatus: null,
           status: 'available',
-          claimCode: admin.firestore.FieldValue.delete() // Optional: remove claim code when returned to pool
+          claimCode: admin.firestore.FieldValue.delete()
         });
 
-        // 3. Notify user
         const notificationRef = db.collection('notifications').doc();
         batch.set(notificationRef, {
           userId: claimData.userId,
@@ -105,16 +102,78 @@ export default async function handler(req, res) {
           claimId: doc.id
         });
 
+        if (claimData.userEmail) {
+          emailQueue.push({
+            userId: claimData.userId,
+            path: '/api/send-claim-expired',
+            payload: {
+              email: claimData.userEmail,
+              userName: claimData.userName,
+              itemName: claimData.itemName
+            }
+          });
+        }
+
         processedCount++;
       }
 
       await batch.commit();
     }
 
+    const reminderWindowEnd = admin.firestore.Timestamp.fromMillis(now.toMillis() + REMINDER_WINDOW_MS);
+    const upcomingSnapshot = await db.collection('claims')
+      .where('status', '==', 'approved')
+      .where('pickupDeadline', '>', now)
+      .where('pickupDeadline', '<=', reminderWindowEnd)
+      .get();
+
+    let remindedCount = 0;
+    const reminderBatch = db.batch();
+    for (const doc of upcomingSnapshot.docs) {
+      const claimData = doc.data();
+      if (claimData.reminderSentAt || !claimData.userEmail) continue;
+
+      reminderBatch.update(doc.ref, { reminderSentAt: now });
+      emailQueue.push({
+        userId: claimData.userId,
+        path: '/api/send-pickup-reminder',
+        payload: {
+          email: claimData.userEmail,
+          userName: claimData.userName,
+          itemName: claimData.itemName,
+          deadline: claimData.pickupDeadline.toDate().toISOString()
+        }
+      });
+      remindedCount++;
+    }
+    if (remindedCount > 0) {
+      await reminderBatch.commit();
+    }
+
+    const userIds = [...new Set(emailQueue.map(job => job.userId).filter(Boolean))];
+    const optedOut = new Set();
+    if (userIds.length > 0) {
+      const userDocs = await db.getAll(...userIds.map(id => db.collection('users').doc(id)));
+      for (const userDoc of userDocs) {
+        if (userDoc.exists && userDoc.data().preferences?.emailNotifications === false) {
+          optedOut.add(userDoc.id);
+        }
+      }
+    }
+
+    const emailJobs = emailQueue
+      .filter(job => !optedOut.has(job.userId))
+      .map(job => sendEmail(job.path, job.payload));
+    const emailResults = await Promise.allSettled(emailJobs);
+    const emailFailures = emailResults.filter(result => result.status === 'rejected').length;
+
     return res.status(200).json({
       success: true,
       processedCount,
-      message: `Successfully processed ${processedCount} expired claims in ${chunks.length} batches`
+      remindedCount,
+      emailsSent: emailJobs.length - emailFailures,
+      emailFailures,
+      message: `Expired ${processedCount} claims, sent ${remindedCount} pickup reminders`
     });
 
   } catch (error) {
