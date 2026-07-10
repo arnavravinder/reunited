@@ -24,7 +24,7 @@ const storage = firebase.storage();
 
 const AI_ENDPOINT = getEnvVar('AI_DEV_PROXY') || '/api/ai';
 const GEMINI_DIRECT_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-const GEMINI_DIRECT_MODEL = 'gemini-2.5-flash';
+const GEMINI_DIRECT_MODEL = 'gemini-3.1-flash-lite';
 
 const requestAIChat = async (payload) => {
   const proxyResponse = await fetch(AI_ENDPOINT, {
