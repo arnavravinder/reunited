@@ -18,13 +18,13 @@
   --darker-bg: #eae5de;
   --light-bg: #ffffff;
   --accent-color: #1a1a1a;
-  --secondary-accent: #e13b3b;
+  --secondary-accent: #c09e86;
   --text-color: #111111;
   --text-secondary: #555555;
   --success-color: #4caf50;
-
+  
   --accent-color-rgb: 26, 26, 26;
-  --secondary-accent-rgb: 225, 59, 59;
+  --secondary-accent-rgb: 192, 158, 134;
   --text-color-rgb: 17, 17, 17;
 }
 
@@ -164,7 +164,7 @@ p {
 }
 
 .btn-secondary:hover {
-  background-color: #c42f2f;
+  background-color: #a8866d;
 }
 
 .btn-tiny {
@@ -373,11 +373,11 @@ header {
 .hero-bg {
   position: absolute;
   top: -5%; left: -5%; width: 110%; height: 110%;
-  background-image: url('../assets/hero-inventure.jpg');
+  background-image: url('../assets/hero-bg.png');
   background-size: cover;
   background-position: center right;
   background-repeat: no-repeat;
-  filter: saturate(0.96) contrast(0.98);
+  filter: saturate(0.8) sepia(0.05) contrast(0.95) url(#wave-displacement);
   z-index: 0;
   will-change: transform;
 }
@@ -385,7 +385,7 @@ header {
 .haze-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(100deg, rgba(246, 243, 238, 0.72) 0%, rgba(246, 243, 238, 0.42) 34%, rgba(246, 243, 238, 0.12) 66%, rgba(246, 243, 238, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(246, 243, 238, 0.1) 0%, rgba(246, 243, 238, 0.4) 100%);
   z-index: 1;
   pointer-events: none;
 }
@@ -1114,7 +1114,7 @@ copyright {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #c42f2f;
+  background-color: #a9876b;
 }
 
 ::-webkit-scrollbar-corner {
