@@ -21,7 +21,13 @@
   <div id="app">
     <header :class="{'mobile-menu-active': mobileMenuOpen}">
       <div class="container header-container">
-        <a href="#" class="logo" ref="navLogo">Reunited<span class="logo-dot">.</span></a>
+        <div class="brand-lockup">
+          <a href="https://www.inventureacademy.com" target="_blank" rel="noopener"
+            class="partner-logo" aria-label="Inventure Academy — visit website">
+            <img src="assets/inventure-logo.png" alt="Inventure Academy logo">
+          </a>
+          <a href="#" class="logo" ref="navLogo">Reunited<span class="logo-dot">.</span></a>
+        </div>
         <button class="mobile-menu-btn" @click="toggleMobileMenu">
           <i :class="mobileMenuOpen ? 'ri-close-line' : 'ri-menu-line'"></i>
         </button>

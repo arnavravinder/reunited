@@ -18,13 +18,13 @@
   --darker-bg: #eae5de;
   --light-bg: #ffffff;
   --accent-color: #1a1a1a;
-  --secondary-accent: #e13b3b;
+  --secondary-accent: #e8642a;
   --text-color: #111111;
   --text-secondary: #555555;
   --success-color: #4caf50;
 
   --accent-color-rgb: 26, 26, 26;
-  --secondary-accent-rgb: 225, 59, 59;
+  --secondary-accent-rgb: 232, 100, 42;
   --text-color-rgb: 17, 17, 17;
 }
 
@@ -164,7 +164,7 @@ p {
 }
 
 .btn-secondary:hover {
-  background-color: #c42f2f;
+  background-color: #c9501f;
 }
 
 .btn-tiny {
@@ -202,6 +202,30 @@ header {
 
 .logo-dot {
   color: var(--secondary-accent);
+}
+
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.partner-logo {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.partner-logo img {
+  height: 34px;
+  width: auto;
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+}
+
+.partner-logo:hover img {
+  transform: scale(1.06);
+  opacity: 0.88;
 }
 
 .nav-links {
@@ -377,15 +401,17 @@ header {
   background-size: cover;
   background-position: center right;
   background-repeat: no-repeat;
-  filter: saturate(0.96) contrast(0.98);
+  filter: saturate(0.72) brightness(0.95) contrast(0.94);
   z-index: 0;
   will-change: transform;
 }
 
+/* Even, uniform veil across the whole hero — softens the photo and lifts
+   text legibility consistently rather than only on one side. */
 .haze-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(100deg, rgba(246, 243, 238, 0.72) 0%, rgba(246, 243, 238, 0.42) 34%, rgba(246, 243, 238, 0.12) 66%, rgba(246, 243, 238, 0.05) 100%);
+  background: rgba(245, 241, 235, 0.42);
   z-index: 1;
   pointer-events: none;
 }
@@ -1114,7 +1140,7 @@ copyright {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #c42f2f;
+  background-color: #c9501f;
 }
 
 ::-webkit-scrollbar-corner {
