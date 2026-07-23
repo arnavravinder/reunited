@@ -18,13 +18,16 @@
   --darker-bg: #eae5de;
   --light-bg: #ffffff;
   --accent-color: #1a1a1a;
-  --secondary-accent: #e8642a;
+  --secondary-accent: #d9683a;
   --text-color: #111111;
   --text-secondary: #555555;
   --success-color: #4caf50;
 
+  --accent-blue: #54749e;
+  --accent-blue-rgb: 84, 116, 158;
+
   --accent-color-rgb: 26, 26, 26;
-  --secondary-accent-rgb: 232, 100, 42;
+  --secondary-accent-rgb: 217, 104, 58;
   --text-color-rgb: 17, 17, 17;
 }
 
@@ -72,8 +75,6 @@
   box-sizing: border-box;
 }
 
-/* iOS rubber-band overscroll paints the root background; sea-tinted so
-   over-pulling past the shore footer reads as more water, not a void. */
 html {
   background-color: #c1c8d5;
   overscroll-behavior-y: none;
@@ -164,7 +165,7 @@ p {
 }
 
 .btn-secondary:hover {
-  background-color: #c9501f;
+  background-color: #b25327;
 }
 
 .btn-tiny {
@@ -394,18 +395,13 @@ header {
   top: -5%; left: -5%; width: 110%; height: 110%;
   background-image: url('../assets/hero-inventure.jpg');
   background-size: cover;
-  /* Anchor to the top: the image has extended sky baked in so the
-     headline sits over sky rather than the trees. */
   background-position: center top;
   background-repeat: no-repeat;
-  /* Grade is baked into the image now — keep the CSS layer light */
   filter: saturate(0.96);
   z-index: 0;
   will-change: transform;
 }
 
-/* Even, uniform veil across the whole hero — softens the photo and lifts
-   text legibility consistently rather than only on one side. */
 .haze-overlay {
   position: absolute;
   inset: 0;
@@ -467,8 +463,6 @@ header {
   margin: 0 auto;
   position: relative;
   z-index: 2;
-  /* Sit slightly higher so the headline stays on sky while the campus
-     and a strip of road remain visible below. */
   margin-top: 0.5rem;
 }
 
@@ -787,7 +781,7 @@ textarea.form-control {
 
 .auth-error {
   font-family: 'General Sans', sans-serif;
-  color: #b4452f;
+  color: #a63c3c;
   text-align: left;
   margin-bottom: 1.1rem;
   font-size: 0.92rem;
@@ -1028,11 +1022,10 @@ copyright {
     padding: 2rem 0;
   }
 
-  /* Zoom the framing on phones so the headline still lands on sky
-     with the campus and a bit of road below. */
   .hero-bg {
-    background-size: auto 150%;
-    background-position: right top;
+    background-image: url('../assets/hero-inventure-mobile.jpg');
+    background-size: cover;
+    background-position: center top;
   }
 }
 
@@ -1127,7 +1120,7 @@ copyright {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--secondary-accent) transparent;
+  scrollbar-color: #c6bfb4 transparent;
 }
 
 ::-webkit-scrollbar {
@@ -1140,7 +1133,7 @@ copyright {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--secondary-accent);
+  background-color: #c6bfb4;
   border-radius: 999px;
   border: 3px solid var(--bg-color);
   background-clip: padding-box;

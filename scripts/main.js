@@ -59,23 +59,23 @@ const app = Vue.createApp({
       },
       faqs: [
         {
-          question: "How can I post about a lost item on the website?",
-          answer: "If you have lost an item, login with your account and scroll to the bottom of the page. Fill in the form to find lost items which match the description of your post.",
+          question: "How do I find something I've lost?",
+          answer: "Log in, head to Search Items, and describe what you lost — the name, colour, or where you last had it. Search pulls up the closest matches, with a little help from AI.",
           isOpen: false
         },
         {
           question: "What happens if someone loses an expensive item?",
-          answer: "If you lose an item of high value such as a phone or a laptop, contact us using the form at the bottom of this page and we will get back to you as soon as possible.",
+          answer: "Phones, laptops, anything valuable — reach us through the urgent contact form at the bottom of this page and we'll get back to you as soon as possible.",
           isOpen: false
         },
         {
           question: "What happens if an item is not claimed?",
-          answer: "Posts remain active for 6 months. If an item is not claimed within this time frame, it will be donated to a local charity or the support staff at workplace.",
+          answer: "Items stay listed for 6 months. If no one claims an item in that time, it is donated to a local charity or to the support staff at school.",
           isOpen: false
         },
         {
-          question: "How to report a lost item?",
-          answer: "To report a lost item, please hand it over to our team at the Lost and Found, located in the lunch hall.",
+          question: "I found something — what should I do?",
+          answer: "Hand it over to the Lost & Found desk in the lunch hall. The team will photograph and log it the same day, so its owner can find it here.",
           isOpen: false
         }
       ]
@@ -292,7 +292,7 @@ const app = Vue.createApp({
     },
     goToSearchPage() {
       const q = (this.heroQuery || '').trim();
-      window.location.href = q ? '/search.html?q=' + encodeURIComponent(q) : '/search.html';
+      window.location.href = q ? '/search?q=' + encodeURIComponent(q) : '/search';
     }
   }
 });

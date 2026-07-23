@@ -126,6 +126,7 @@
                   <i class="ri-calendar-line"></i>
                   <input type="text" id="date-lost" class="datepicker-input" placeholder="Any date" ref="datePicker">
                 </div>
+                <span class="field-hint">Not sure? Leave it blank and we'll search every date.</span>
               </div>
               <div class="field-group others-field" v-if="selectedItemType === 'Others'">
                 <label for="item-type-other">Specify item type</label>
@@ -147,14 +148,16 @@
       </div>
     </section>
 
-    <section class="ai-loader-section" v-if="aiSearching">
+    <section class="ai-loader-section" :class="{ leaving: aiLeaving }" v-if="aiSearching">
       <div class="container">
         <div class="ai-loader">
+          <div class="ai-loader-glow" aria-hidden="true"></div>
           <div class="ai-spinner" aria-hidden="true">
             <span></span><span></span><span></span><span></span>
             <span></span><span></span><span></span><span></span>
             <span></span><span></span><span></span><span></span>
           </div>
+          <p class="ai-loader-label">Searching with AI</p>
           <button class="ai-loader-normal" @click="tryNormalSearch">
             Use normal search instead
           </button>
