@@ -72,10 +72,10 @@
   box-sizing: border-box;
 }
 
-/* iOS rubber-band overscroll paints the root background; sand-tinted so
-   over-pulling past the shore footer reads as more beach, not a void. */
+/* iOS rubber-band overscroll paints the root background; sea-tinted so
+   over-pulling past the shore footer reads as more water, not a void. */
 html {
-  background-color: #e4c9b3;
+  background-color: #c1c8d5;
   overscroll-behavior-y: none;
 }
 
@@ -213,7 +213,7 @@ header {
 }
 
 .footer-partner img {
-  height: 42px;
+  height: 46px;
   width: auto;
   display: block;
 }
