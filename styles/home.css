@@ -16,6 +16,13 @@ h2 em {
   color: var(--secondary-accent);
 }
 
+.steps h2 em,
+.steps .step-copy h3 em,
+.faqs h2 em,
+.contact h2 em {
+  color: var(--accent-blue);
+}
+
 section[id],
 .anchor-alias {
   scroll-margin-top: 90px;
@@ -169,7 +176,7 @@ header.scrolled .container {
 .step-link:hover {
   transform: translateY(-2px);
   background-color: var(--secondary-accent);
-  box-shadow: 0 12px 26px rgba(192, 158, 134, 0.45);
+  box-shadow: 0 12px 26px rgba(var(--secondary-accent-rgb), 0.35);
 }
 
 .step-link:hover i {
@@ -206,7 +213,7 @@ header.scrolled .container {
 
 .thumb-1 { background: linear-gradient(135deg, #8fb3d9, #5d86b8); }
 .thumb-2 { background: linear-gradient(135deg, #3f3a36, #1f1c19); }
-.thumb-3 { background: linear-gradient(135deg, #d9b48f, #c09e86); }
+.thumb-3 { background: linear-gradient(135deg, #e98d5f, #d9683a); }
 
 .mock-card {
   background: rgba(255, 255, 255, 0.88);
@@ -394,7 +401,7 @@ header.scrolled .container {
   font-weight: 600;
   font-size: 0.68rem;
   color: var(--secondary-accent);
-  background: rgba(192, 158, 134, 0.16);
+  background: rgba(var(--secondary-accent-rgb), 0.16);
   padding: 0.28rem 0.55rem;
   border-radius: 999px;
 }
@@ -537,7 +544,7 @@ header.scrolled .container {
   gap: 0.35rem;
   padding: 1rem;
   background: #f6f1ec;
-  border: 1px solid rgba(192, 158, 134, 0.3);
+  border: 1px solid rgba(var(--secondary-accent-rgb), 0.3);
   border-radius: 12px;
 }
 
@@ -774,7 +781,7 @@ header.scrolled .container {
 
 .contact .field-control:focus-within {
   border-color: var(--secondary-accent);
-  box-shadow: 0 0 0 3px rgba(192, 158, 134, 0.16);
+  box-shadow: 0 0 0 3px rgba(var(--secondary-accent-rgb), 0.16);
 }
 
 .contact .field-control > i {
@@ -938,4 +945,214 @@ header.scrolled .container {
   .contact .field-control textarea {
     font-size: 16px;
   }
+}
+
+.mockup {
+  font-family: 'General Sans', sans-serif;
+  pointer-events: none;
+  user-select: none;
+}
+
+.mock-cardrow {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.3rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+.mcard {
+  background-color: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 18px;
+  padding: 0.7rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.03);
+}
+
+.mcard-img {
+  height: 150px;
+  border-radius: 13px;
+  background-size: cover;
+  background-position: center;
+}
+
+.mcard-info {
+  display: flex;
+  flex-direction: column;
+  padding: 0.9rem 0.4rem 0.4rem;
+  min-width: 0;
+}
+
+.mcard-title {
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--text-color);
+  margin-bottom: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mcard-cat {
+  font-size: 0.83rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.7rem;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.mcard-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.mcard-meta i { font-size: 0.75rem; }
+
+.mock-searchui {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 430px;
+}
+
+.msearch-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.06);
+  padding: 1rem;
+}
+
+.msearch-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem 0.7rem;
+  min-width: 0;
+}
+
+.mfield { display: flex; flex-direction: column; gap: 0.28rem; min-width: 0; }
+
+.mfield-label {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.mfield-control {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  padding: 0.42rem 0.55rem;
+  font-size: 0.66rem;
+  color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.mfield-control i { font-size: 0.66rem; opacity: 0.4; flex-shrink: 0; }
+
+.mfield-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mfield-caret { margin-left: 0; opacity: 0.35; }
+
+.msearch-go {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #1f1c19;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+
+.mresults {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.7rem;
+  width: 100%;
+}
+
+.mcard-sm { padding: 0.45rem; }
+.mcard-sm .mcard-img { height: 78px; border-radius: 11px; }
+.mcard-sm .mcard-info { padding: 0.45rem 0.2rem 0.2rem; }
+.mcard-sm .mcard-title { font-size: 0.68rem; margin-bottom: 0.22rem; }
+.mcard-sm .mcard-meta { font-size: 0.6rem; margin-bottom: 0; gap: 0.3rem; }
+.mcard-sm .mcard-meta i { font-size: 0.6rem; }
+
+.mcard-likely {
+  position: relative;
+  box-shadow: 0 16px 40px rgba(224, 122, 95, 0.24);
+}
+
+.mcard-likely::before {
+  content: '';
+  position: absolute;
+  inset: -2.5px;
+  border-radius: 20px;
+  padding: 2.5px;
+  background: linear-gradient(115deg, #ff7a4d, #ffb43d, #ff5d8f, #a96bff, #2fb7c9, #ff7a4d);
+  background-size: 320% 320%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.mock-mail-img {
+  width: 100%;
+  max-width: 330px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 30px rgba(31, 28, 25, 0.08);
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+@media (max-width: 600px) {
+  .mock-cardrow {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+    max-width: 260px;
+  }
+
+  .mock-cardrow .mcard-img { height: 130px; }
+
+  .msearch-grid { grid-template-columns: 1fr; }
+  .mock-searchui { max-width: 320px; }
+  .msearch-go { width: 38px; height: 38px; }
+  .mock-mail-img { max-width: 300px; }
+  .mresults { gap: 0.5rem; }
+
+  .step-visual { min-height: 0; }
 }

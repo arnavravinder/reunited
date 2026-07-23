@@ -43,7 +43,7 @@
 }
 
 .text-danger {
-  color: #b4452f !important;
+  color: #a63c3c !important;
 }
 
 .profile-picture {
@@ -302,14 +302,14 @@
 }
 
 .btn-tiny.btn-danger {
-  background-color: #b4452f;
-  border-color: #b4452f;
+  background-color: #a63c3c;
+  border-color: #a63c3c;
   color: white;
 }
 
 .btn-tiny.btn-danger:hover {
-  background-color: #9c3a26;
-  border-color: #9c3a26;
+  background-color: #8c3232;
+  border-color: #8c3232;
 }
 
 .empty-state {
@@ -491,8 +491,8 @@
 
 .item-status.claimed,
 .item-status.collected {
-  background-color: rgba(156, 39, 176, 0.1);
-  color: #9c27b0;
+  background-color: rgba(var(--accent-blue-rgb), 0.12);
+  color: var(--accent-blue);
 }
 
 .item-status.rejected {
@@ -931,7 +931,7 @@ input:checked+.toggle-slider:before {
 }
 
 .modal .error {
-  color: #b4452f;
+  color: #a63c3c;
   margin: -0.5rem 0 0.5rem;
   font-size: 0.9rem;
   text-align: center;
@@ -1148,9 +1148,9 @@ input:checked+.toggle-slider:before {
 }
 
 .status-badge.collected {
-  background-color: rgba(156, 39, 176, 0.1);
-  color: #9c27b0;
-  border: 1px solid rgba(156, 39, 176, 0.3);
+  background-color: rgba(var(--accent-blue-rgb), 0.12);
+  color: var(--accent-blue);
+  border: 1px solid rgba(var(--accent-blue-rgb), 0.3);
 }
 
 .status-badge.rejected {
@@ -1271,14 +1271,14 @@ input:checked+.toggle-slider:before {
 }
 
 .btn-danger {
-  background-color: #b4452f;
-  border-color: #b4452f;
+  background-color: #a63c3c;
+  border-color: #a63c3c;
   color: white;
 }
 
 .btn-danger:hover {
-  background-color: #9c3a26;
-  border-color: #9c3a26;
+  background-color: #8c3232;
+  border-color: #8c3232;
 }
 
 .btn-danger:disabled {
@@ -1694,7 +1694,7 @@ input:checked+.toggle-slider:before {
 }
 
 .popup-content .error {
-  color: #b4452f;
+  color: #a63c3c;
   margin: -0.5rem 0 1.2rem;
   font-size: 0.9rem;
   text-align: center;
@@ -2138,7 +2138,7 @@ span.flatpickr-weekday {
 }
 
 .ai-error-message {
-  color: #b4452f;
+  color: #a63c3c;
   font-size: 0.85rem;
   margin-top: -0.8rem;
   margin-bottom: 1rem;
@@ -2160,8 +2160,8 @@ span.flatpickr-weekday {
 }
 
 .user-avatar {
-  border: 2px solid var(--secondary-accent);
-  box-shadow: 0 10px 26px rgba(192, 158, 134, 0.25);
+  border: 2px solid var(--accent-blue);
+  box-shadow: 0 10px 26px rgba(var(--accent-blue-rgb), 0.25);
 }
 
 .user-info h1,
@@ -2209,7 +2209,7 @@ span.flatpickr-weekday {
 }
 
 .tab-count {
-  background-color: var(--secondary-accent);
+  background-color: var(--accent-blue);
 }
 
 .section-header h2 {
@@ -2297,7 +2297,7 @@ span.flatpickr-weekday {
 .settings-card input[type="password"]:focus,
 .settings-card input[type="tel"]:focus {
   border-color: rgba(0, 0, 0, 0.2);
-  box-shadow: 0 0 0 3px rgba(192, 158, 134, 0.18);
+  box-shadow: 0 0 0 3px rgba(var(--secondary-accent-rgb), 0.18);
 }
 
 .setting-option {
@@ -2380,7 +2380,7 @@ input:checked + .toggle-slider {
 .popup-content select:focus,
 .popup-content textarea:focus {
   border-color: rgba(0, 0, 0, 0.2);
-  box-shadow: 0 0 0 3px rgba(192, 158, 134, 0.18);
+  box-shadow: 0 0 0 3px rgba(var(--secondary-accent-rgb), 0.18);
 }
 
 .popup-content .image-upload {
@@ -2391,7 +2391,7 @@ input:checked + .toggle-slider {
 
 .popup-content .image-upload:hover {
   border-color: var(--secondary-accent);
-  background-color: rgba(192, 158, 134, 0.08);
+  background-color: rgba(var(--secondary-accent-rgb), 0.08);
 }
 
 .popup-content .upload-placeholder,
@@ -2420,13 +2420,13 @@ input:checked + .toggle-slider {
 }
 
 .ai-enhance-button:hover {
-  background-color: rgba(192, 158, 134, 0.12);
+  background-color: rgba(var(--secondary-accent-rgb), 0.12);
   transform: translateY(-1px);
 }
 
 .ai-enhance-button .spinner-tiny {
-  border: 2px solid rgba(192, 158, 134, 0.25);
-  border-top-color: var(--secondary-accent);
+  border: 2px solid rgba(31, 28, 25, 0.15);
+  border-top-color: #1f1c19;
 }
 
 .nav-links a.active {
@@ -2613,8 +2613,8 @@ input:checked + .toggle-slider {
 .item-status.collected,
 .claim-status.collected,
 .status-badge.collected {
-  background-color: rgba(156, 39, 176, 0.12);
-  color: #8e35a0;
+  background-color: rgba(var(--accent-blue-rgb), 0.12);
+  color: var(--accent-blue);
 }
 
 .item-status.rejected,
@@ -2654,7 +2654,7 @@ input:checked + .toggle-slider {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--secondary-accent);
+  background-color: var(--accent-blue);
   color: #ffffff;
   font-family: 'General Sans', sans-serif;
   font-size: 1.7rem;

@@ -80,6 +80,7 @@ const app = Vue.createApp({
       searchPerformed: false,
       aiAssisted: false,
       aiSearching: false,
+      aiLeaving: false,
       aiCancelled: false,
       resultsAnimating: false,
       topMatchIds: [],
@@ -353,8 +354,13 @@ const app = Vue.createApp({
 
       if (this.aiCancelled) return;
 
+      this.aiLeaving = true;
+      await new Promise(resolve => setTimeout(resolve, 340));
+      if (this.aiCancelled) return;
+
       this.updatePagination(results);
       this.aiSearching = false;
+      this.aiLeaving = false;
       this.$nextTick(() => {
         this.triggerResultsEntrance();
         this.computeTopRow();
@@ -363,6 +369,7 @@ const app = Vue.createApp({
     tryNormalSearch() {
       this.aiCancelled = true;
       this.aiSearching = false;
+      this.aiLeaving = false;
       this.aiAssisted = false;
       this.topMatchIds = [];
       const params = this.lastSearchParams || this.buildSearchParams();
@@ -502,7 +509,7 @@ const app = Vue.createApp({
       });
 
       const searchTerms = this.generateSearchTerms(params.query);
-      if (searchTerms.length === 0) return pool.slice(0, 60);
+      if (searchTerms.length === 0) return pool.slice(0, 40);
 
       let candidates = pool.filter(item =>
         item.searchTerms && item.searchTerms.some(term => searchTerms.includes(term))
@@ -515,7 +522,7 @@ const app = Vue.createApp({
         );
       }
       if (candidates.length === 0) candidates = pool;
-      return candidates.slice(0, 60);
+      return candidates.slice(0, 40);
     },
     buildAIPrompt(params, items) {
       let prompt = `You are a search relevance API for a lost-and-found service. Return ONLY the item IDs that genuinely match the user's query, ordered most relevant first.
@@ -528,7 +535,8 @@ Search Query: "${params.query}"
 Available Items to Rank:
 `;
       items.forEach(item => {
-        prompt += `ID: ${item.id}, Name: ${item.name}, Description: ${item.description}, Category: ${item.category}\n`;
+        const desc = (item.description || '').slice(0, 90);
+        prompt += `ID: ${item.id}, Name: ${item.name}, Description: ${desc}, Category: ${item.category}\n`;
       });
       return prompt;
     },

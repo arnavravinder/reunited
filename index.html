@@ -8,7 +8,8 @@
   <!-- Are you a developer/do you work in tech? I'm a 16 year old student, and open to exploring opportunities! Please reach out if you can: https://www.linkedin.com/in/arnav-ravinder -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="image" href="assets/hero-bg.png">
+  <link rel="preload" as="image" href="assets/hero-inventure.jpg" media="(min-width: 769px)">
+  <link rel="preload" as="image" href="assets/hero-inventure-mobile.jpg" media="(max-width: 768px)">
   <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
   <link rel="stylesheet" href="styles/main.css">
@@ -86,18 +87,82 @@
 
           <article class="step-row" data-reveal>
             <div class="step-visual">
-              <img src="assets/mockup-cards.png" alt="Found items logged" class="mockup-img">
+              <div class="mockup mock-cardrow" aria-hidden="true">
+                <div class="mcard">
+                  <div class="mcard-img" style="background-image: url('assets/mock-item-cap.jpg')"></div>
+                  <div class="mcard-info">
+                    <span class="mcard-title">Adidas cap, blue</span>
+                    <span class="mcard-cat">Accessories</span>
+                    <span class="mcard-meta"><i class="ri-map-pin-line"></i>Dining hall</span>
+                    <span class="mcard-meta">Found today</span>
+                  </div>
+                </div>
+                <div class="mcard">
+                  <div class="mcard-img" style="background-image: url('assets/mock-item-watch.jpg')"></div>
+                  <div class="mcard-info">
+                    <span class="mcard-title">Q&amp;Q digital watch</span>
+                    <span class="mcard-cat">Accessories</span>
+                    <span class="mcard-meta"><i class="ri-map-pin-line"></i>Dining hall</span>
+                    <span class="mcard-meta">Found today</span>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="step-copy">
               <span class="step-num">(1)</span>
               <h3>Found items get <em>logged</em></h3>
-              <p>Most things are picked up by our team &mdash; and anyone can hand in what they find. Each item is photographed and logged the day it arrives.</p>
+              <p>Left behind in a classroom, on the field, on the bus &mdash; staff collect it, or whoever finds it hands it in. Every item is photographed and logged the day it arrives.</p>
             </div>
           </article>
 
           <article class="step-row" data-reveal>
             <div class="step-visual">
-              <img src="assets/mockup-search.png" alt="Search interface" class="mockup-img">
+              <div class="mockup mock-searchui" aria-hidden="true">
+                <div class="msearch-panel">
+                  <div class="msearch-grid">
+                    <div class="mfield">
+                      <span class="mfield-label">Item name</span>
+                      <span class="mfield-control"><i class="ri-search-line"></i><span class="mfield-text">blue hoodie, lost after PE</span></span>
+                    </div>
+                    <div class="mfield">
+                      <span class="mfield-label">Item type</span>
+                      <span class="mfield-control"><i class="ri-price-tag-3-line"></i><span class="mfield-text">All types</span><i class="ri-arrow-down-s-line mfield-caret"></i></span>
+                    </div>
+                    <div class="mfield">
+                      <span class="mfield-label">Where lost</span>
+                      <span class="mfield-control"><i class="ri-map-pin-line"></i><span class="mfield-text">All locations</span><i class="ri-arrow-down-s-line mfield-caret"></i></span>
+                    </div>
+                    <div class="mfield">
+                      <span class="mfield-label">Date lost</span>
+                      <span class="mfield-control"><i class="ri-calendar-line"></i><span class="mfield-text">Any date</span></span>
+                    </div>
+                  </div>
+                  <span class="msearch-go"><i class="ri-search-line"></i></span>
+                </div>
+                <div class="mresults">
+                  <div class="mcard mcard-sm mcard-likely">
+                    <div class="mcard-img" style="background-image: url('assets/mock-hoodie.jpg')"></div>
+                    <div class="mcard-info">
+                      <span class="mcard-title">Navy hoodie</span>
+                      <span class="mcard-meta"><i class="ri-map-pin-line"></i>Football Field</span>
+                    </div>
+                  </div>
+                  <div class="mcard mcard-sm">
+                    <div class="mcard-img" style="background-image: url('assets/mock-jacket40.jpg')"></div>
+                    <div class="mcard-info">
+                      <span class="mcard-title">Jacket size 40</span>
+                      <span class="mcard-meta"><i class="ri-map-pin-line"></i>Hub</span>
+                    </div>
+                  </div>
+                  <div class="mcard mcard-sm">
+                    <div class="mcard-img" style="background-image: url('assets/mock-iahoodie.jpg')"></div>
+                    <div class="mcard-info">
+                      <span class="mcard-title">IA Hoodie &ndash; 40</span>
+                      <span class="mcard-meta"><i class="ri-map-pin-line"></i>Classroom</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="step-copy">
               <span class="step-num">(2)</span>
@@ -109,12 +174,12 @@
 
           <article class="step-row" data-reveal>
             <div class="step-visual">
-              <img src="assets/mockup-claim.png" alt="Claim code" class="mockup-img">
+              <img class="mock-mail-img" src="assets/mock-email-mail.jpg" alt="Claim approval email in Apple Mail">
             </div>
             <div class="step-copy">
               <span class="step-num">(3)</span>
               <h3>Claim it, then <em>collect</em></h3>
-              <p>Claim the item on Reunited and we&rsquo;ll email you its code &mdash; it&rsquo;s on your dashboard too. Show it at the office, and you&rsquo;re reunited.</p>
+              <p>Claim the item on Reunited and we&rsquo;ll email you its code &mdash; it&rsquo;s on your dashboard too. Show it at the Lost &amp; Found desk, and you&rsquo;re reunited.</p>
             </div>
           </article>
 
@@ -148,7 +213,7 @@
     <section class="contact" id="contact">
       <div class="container">
         <div class="contact-card" data-reveal>
-          <h2>Lost something? <em>Talk to us</em>.</h2>
+          <h2>Something urgent? <em>Talk to us</em>.</h2>
           <div class="contact-form-side">
             <div class="form-success" v-if="formSubmitted">
               Your message has been sent successfully! We'll get back to you soon.
@@ -209,7 +274,7 @@
       <div class="shore-bg"></div>
       <section class="home-cta">
         <div class="container" data-reveal>
-          <h2 class="home-cta-title">Find what <em>you've lost</em>.</h2>
+          <h2 class="home-cta-title">Find what you've <em>lost</em>.</h2>
           <a href="search.html" class="btn-shore">Start searching <i class="ri-arrow-right-line"></i></a>
         </div>
       </section>
@@ -227,6 +292,11 @@
             Made with <span class="heart">❤️</span> by <a href="https://github.com/arnavravinder" target="_blank">Arnav
               Ravinder</a>
           </div>
+
+          <a href="https://www.inventureacademy.com" target="_blank" rel="noopener" class="footer-partner"
+            aria-label="Inventure Academy — visit website">
+            <img src="assets/inventure-logo-full.png" alt="Inventure Academy logo">
+          </a>
         </div>
       </footer>
     </div>

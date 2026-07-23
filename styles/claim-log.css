@@ -26,7 +26,7 @@
   height: 50px;
   border: 4px solid rgba(0, 0, 0, 0.08);
   border-radius: 50%;
-  border-top-color: var(--secondary-accent);
+  border-top-color: #1f1c19;
   animation: spin 1s linear infinite;
 }
 
@@ -173,7 +173,7 @@
 .search-input input:focus {
   outline: none;
   border-color: rgba(0, 0, 0, 0.2);
-  box-shadow: 0 0 0 3px rgba(192, 158, 134, 0.18);
+  box-shadow: 0 0 0 3px rgba(var(--secondary-accent-rgb), 0.18);
 }
 
 .search-input input::placeholder {
@@ -217,7 +217,7 @@
 .filter-dropdown select:focus {
   outline: none;
   border-color: rgba(0, 0, 0, 0.2);
-  box-shadow: 0 0 0 3px rgba(192, 158, 134, 0.18);
+  box-shadow: 0 0 0 3px rgba(var(--secondary-accent-rgb), 0.18);
 }
 
 .claims-table-container {
@@ -242,7 +242,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  background-color: rgba(192, 158, 134, 0.1);
+  background-color: rgba(var(--secondary-accent-rgb), 0.1);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 

@@ -18,13 +18,16 @@
   --darker-bg: #eae5de;
   --light-bg: #ffffff;
   --accent-color: #1a1a1a;
-  --secondary-accent: #c09e86;
+  --secondary-accent: #d9683a;
   --text-color: #111111;
   --text-secondary: #555555;
   --success-color: #4caf50;
-  
+
+  --accent-blue: #54749e;
+  --accent-blue-rgb: 84, 116, 158;
+
   --accent-color-rgb: 26, 26, 26;
-  --secondary-accent-rgb: 192, 158, 134;
+  --secondary-accent-rgb: 217, 104, 58;
   --text-color-rgb: 17, 17, 17;
 }
 
@@ -72,10 +75,8 @@
   box-sizing: border-box;
 }
 
-/* iOS rubber-band overscroll paints the root background; sand-tinted so
-   over-pulling past the shore footer reads as more beach, not a void. */
 html {
-  background-color: #e4c9b3;
+  background-color: #c1c8d5;
   overscroll-behavior-y: none;
 }
 
@@ -164,7 +165,7 @@ p {
 }
 
 .btn-secondary:hover {
-  background-color: #a8866d;
+  background-color: #b25327;
 }
 
 .btn-tiny {
@@ -202,6 +203,25 @@ header {
 
 .logo-dot {
   color: var(--secondary-accent);
+}
+
+.footer-partner {
+  display: inline-flex;
+  margin-top: 1.4rem;
+  line-height: 0;
+  opacity: 0.85;
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.footer-partner img {
+  height: 46px;
+  width: auto;
+  display: block;
+}
+
+.footer-partner:hover {
+  opacity: 1;
+  transform: scale(1.05);
 }
 
 .nav-links {
@@ -373,11 +393,11 @@ header {
 .hero-bg {
   position: absolute;
   top: -5%; left: -5%; width: 110%; height: 110%;
-  background-image: url('../assets/hero-bg.png');
+  background-image: url('../assets/hero-inventure.jpg');
   background-size: cover;
-  background-position: center right;
+  background-position: center top;
   background-repeat: no-repeat;
-  filter: saturate(0.8) sepia(0.05) contrast(0.95) url(#wave-displacement);
+  filter: saturate(0.96);
   z-index: 0;
   will-change: transform;
 }
@@ -385,7 +405,7 @@ header {
 .haze-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(246, 243, 238, 0.1) 0%, rgba(246, 243, 238, 0.4) 100%);
+  background: rgba(245, 241, 235, 0.26);
   z-index: 1;
   pointer-events: none;
 }
@@ -443,7 +463,7 @@ header {
   margin: 0 auto;
   position: relative;
   z-index: 2;
-  margin-top: 8rem;
+  margin-top: 0.5rem;
 }
 
 .search-bar-pill {
@@ -761,7 +781,7 @@ textarea.form-control {
 
 .auth-error {
   font-family: 'General Sans', sans-serif;
-  color: #b4452f;
+  color: #a63c3c;
   text-align: left;
   margin-bottom: 1.1rem;
   font-size: 0.92rem;
@@ -1001,6 +1021,12 @@ copyright {
     min-height: 100vh;
     padding: 2rem 0;
   }
+
+  .hero-bg {
+    background-image: url('../assets/hero-inventure-mobile.jpg');
+    background-size: cover;
+    background-position: center top;
+  }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
@@ -1094,7 +1120,7 @@ copyright {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--secondary-accent) transparent;
+  scrollbar-color: #c6bfb4 transparent;
 }
 
 ::-webkit-scrollbar {
@@ -1107,14 +1133,14 @@ copyright {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--secondary-accent);
+  background-color: #c6bfb4;
   border-radius: 999px;
   border: 3px solid var(--bg-color);
   background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #a9876b;
+  background-color: #c9501f;
 }
 
 ::-webkit-scrollbar-corner {

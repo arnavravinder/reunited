@@ -25,7 +25,7 @@
       --cream: #f4efea;
       --ink: #1a1a1a;
       --muted: #6b645d;
-      --terracotta: #c09e86;
+      --terracotta: #d9683a;
       --line: rgba(26, 26, 26, 0.1);
     }
 
@@ -33,6 +33,10 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+    }
+
+    html {
+      background-color: var(--cream);
     }
 
     body {
@@ -55,61 +59,60 @@
     }
 
     .sheet::before {
-      content: '';
+      content: none;
+    }
+
+    .page-band {
       position: absolute;
-      top: 0;
       left: 0;
-      right: 0;
-      height: 360px;
-      background: url('assets/search-clouds.jpg') center bottom / cover no-repeat;
-      -webkit-mask-image: linear-gradient(to bottom, black 45%, transparent 98%);
-      mask-image: linear-gradient(to bottom, black 45%, transparent 98%);
-      filter: saturate(0.72) contrast(0.97);
-      opacity: 0.95;
+      width: 100%;
+      height: auto;
       pointer-events: none;
+      z-index: 0;
+      display: block;
+    }
+
+    .page-band.clouds {
+      top: 0;
+    }
+
+    .page-band.waves {
+      bottom: 0;
     }
 
     .inner {
       width: 100%;
       max-width: 720px;
       margin: 0 auto;
-      padding: 5.5rem 2rem;
+      padding: 5.5rem 2rem 7rem;
       position: relative;
       z-index: 1;
     }
 
     .cover {
-      justify-content: flex-end;
+      justify-content: flex-start;
       height: 100vh;
       height: 100svh;
     }
 
     .cover::before {
-      height: 100%;
-      background: url('assets/hero-bg.png') center / cover no-repeat;
-      -webkit-mask-image: none;
-      mask-image: none;
-      filter: saturate(0.8) sepia(0.05) contrast(0.95);
+      content: '';
+      position: absolute;
+      inset: 0;
+      height: auto;
+      background: url('assets/hero-inventure.jpg') center top / cover no-repeat;
       opacity: 1;
+      pointer-events: none;
     }
 
     .cover .inner {
-      padding-bottom: 4.5rem;
+      padding-top: 6rem;
     }
 
     .closer::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 300px;
-      background: url('assets/search-waves.jpg') center bottom / cover no-repeat;
-      -webkit-mask-image: linear-gradient(to top, black 20%, transparent 95%);
-      mask-image: linear-gradient(to top, black 20%, transparent 95%);
-      filter: saturate(0.75) contrast(0.97);
-      pointer-events: none;
+      content: none;
     }
+
 
     h1,
     h2 {
@@ -159,22 +162,20 @@
     }
 
     .cover h1 {
-      color: #ffffff;
-      text-shadow: 0 2px 30px rgba(31, 28, 25, 0.28);
+      color: var(--ink);
     }
 
     .cover p {
       font-size: 1.15rem;
       margin-top: 1.4rem;
-      color: rgba(255, 255, 255, 0.92);
-      text-shadow: 0 1px 18px rgba(31, 28, 25, 0.3);
+      color: rgba(26, 26, 26, 0.78);
     }
 
-    .cover-meta {
-      margin-top: 2.2rem;
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.8);
-      text-shadow: 0 1px 14px rgba(31, 28, 25, 0.3);
+    .cover-inventure-logo {
+      display: block;
+      width: 172px;
+      height: auto;
+      margin-top: 2rem;
     }
 
     .sheet-img {
@@ -276,25 +277,27 @@
       }
 
       .cover .inner {
-        padding-bottom: 4rem;
+        padding-top: 5rem;
       }
     }
   </style>
 </head>
 
 <body>
-  <a class="back-link" href="index.html">&larr; reunited.co.in</a>
+  <a class="back-link" href="index.html">&larr; Back to Reunited</a>
   <a class="print-btn" href="assets/reunited-guide.pdf" download="Reunited-Platform-Guide.pdf">Download PDF</a>
 
   <section class="sheet cover">
     <div class="inner">
       <h1>Reunited<span class="dot">.</span><br>Platform Guide</h1>
       <p>How to find, claim, and collect lost items at school — from the website to the Lost &amp; Found desk.</p>
-      <p class="cover-meta">reunited.co.in</p>
+      <img class="cover-inventure-logo" src="assets/inventure-logo-full.png" alt="Inventure Academy">
     </div>
   </section>
 
   <section class="sheet">
+    <img class="page-band clouds" src="assets/guide-cloud-band.jpg" alt="">
+    <img class="page-band waves" src="assets/guide-wave-band.jpg" alt="">
     <div class="inner">
       <h2>How Reunited works</h2>
       <p>Reunited is the school's lost and found, online. Items handed in at the Lost &amp; Found desk are photographed
@@ -309,6 +312,8 @@
   </section>
 
   <section class="sheet">
+    <img class="page-band clouds" src="assets/guide-cloud-band.jpg" alt="">
+    <img class="page-band waves" src="assets/guide-wave-band.jpg" alt="">
     <div class="inner">
       <h2>Signing in</h2>
       <p>You need an account to claim items. There are no passwords to remember — sign in either way:</p>
@@ -322,6 +327,8 @@
   </section>
 
   <section class="sheet">
+    <img class="page-band clouds" src="assets/guide-cloud-band.jpg" alt="">
+    <img class="page-band waves" src="assets/guide-wave-band.jpg" alt="">
     <div class="inner">
       <h2>Finding your item</h2>
       <p>On the <strong>Search</strong> page, describe what you lost. You can combine an item name with filters for
@@ -329,11 +336,13 @@
       <p>Search is AI-assisted: a description like "blue bottle with a panda sticker" is matched against item
         descriptions, not just titles, so nearby matches surface even if the wording differs.</p>
       <p>Results show a photo, where the item was found, and when. Open any result to see its full details.</p>
-      <img class="sheet-img" src="assets/mockup-search.png" alt="The search page with filters and results">
+      <img class="sheet-img" src="assets/guide-search.jpg" alt="The search panel with its filters">
     </div>
   </section>
 
   <section class="sheet">
+    <img class="page-band clouds" src="assets/guide-cloud-band.jpg" alt="">
+    <img class="page-band waves" src="assets/guide-wave-band.jpg" alt="">
     <div class="inner">
       <h2>Claiming and collecting</h2>
       <p>Found your item? Press <strong>Claim</strong> and describe features only the owner would know — markings,
@@ -345,11 +354,13 @@
       </ol>
       <p>Please collect within the pickup window mentioned in your email — we send a reminder before the deadline. If
         an item isn't collected in time, it returns to the shelves and becomes claimable again.</p>
-      <img class="sheet-img tall" src="assets/mockup-claim.png" alt="The claim form asking for verification details">
+      <img class="sheet-img tall" src="assets/mock-email-mail.jpg" alt="The claim approval email with your code">
     </div>
   </section>
 
   <section class="sheet">
+    <img class="page-band clouds" src="assets/guide-cloud-band.jpg" alt="">
+    <img class="page-band waves" src="assets/guide-wave-band.jpg" alt="">
     <div class="inner">
       <h2>Your dashboard</h2>
       <p>The <strong>Dashboard</strong> keeps everything about your account in one place:</p>
@@ -359,11 +370,13 @@
         <li><strong>Settings</strong> — update your name and choose whether to receive email notifications.</li>
       </ul>
       <p>Reporting lost items yourself is coming soon; for now, items are listed by the Lost &amp; Found desk.</p>
-      <img class="sheet-img" src="assets/mockup-cards.png" alt="Item cards as they appear on the site">
+      <img class="sheet-img" src="assets/guide-cards.jpg" alt="Item cards as they appear on the site">
     </div>
   </section>
 
   <section class="sheet closer">
+    <img class="page-band clouds" src="assets/guide-cloud-band.jpg" alt="">
+    <img class="page-band waves" src="assets/guide-wave-band.jpg" alt="">
     <div class="inner">
       <h2>Questions or problems</h2>
       <p>If a claim is taking long, a code didn't arrive, or something on the site isn't working, use the

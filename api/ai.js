@@ -1,4 +1,7 @@
-const UPSTREAM_TIMEOUT_MS = 20000;
+const UPSTREAM_TIMEOUT_MS = 8000;
+
+const SKIP_WINDOW_MS = 10 * 60 * 1000;
+const providerSkipUntil = new Map();
 
 const flattenMessages = (messages) => messages
   .map(m => (typeof m.content === 'string' ? m.content : JSON.stringify(m.content)))
@@ -77,6 +80,7 @@ export default async function handler(req, res) {
 
   for (const provider of PROVIDERS) {
     if (!provider.enabled()) continue;
+    if ((providerSkipUntil.get(provider.name) || 0) > Date.now()) continue;
 
     try {
       const { url, headers, body } = provider.request(messages, opts);
@@ -101,9 +105,13 @@ export default async function handler(req, res) {
 
       lastStatus = upstream.status;
       lastError = `${provider.name} responded with ${upstream.status}`;
+      if ([401, 402, 403].includes(upstream.status)) {
+        providerSkipUntil.set(provider.name, Date.now() + SKIP_WINDOW_MS);
+      }
     } catch (error) {
       lastStatus = 502;
       lastError = `${provider.name} request failed`;
+      providerSkipUntil.set(provider.name, Date.now() + SKIP_WINDOW_MS);
     }
   }
 
