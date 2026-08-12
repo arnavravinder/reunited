@@ -161,6 +161,16 @@ const app = Vue.createApp({
       const header = document.querySelector('header');
       if (!header) return;
 
+      const syncHeaderHeight = () => {
+        if (header.classList.contains('scrolled')) return;
+        document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+      };
+      syncHeaderHeight();
+      window.addEventListener('resize', syncHeaderHeight, { passive: true });
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(syncHeaderHeight);
+      }
+
       let ticking = false;
       const update = () => {
         ticking = false;
