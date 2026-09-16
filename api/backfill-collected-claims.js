@@ -8,8 +8,9 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const authHeader = req.headers.authorization;
-    if (!authHeader || authHeader !== `Bearer ${process.env.CLEANUP_API_KEY}`) {
+    const authHeader = req.headers.authorization || '';
+    const accepted = [process.env.CLEANUP_API_KEY].filter(Boolean).map(secret => `Bearer ${secret}`);
+    if (!accepted.length || !accepted.includes(authHeader)) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
