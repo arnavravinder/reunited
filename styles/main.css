@@ -1208,3 +1208,23 @@ copyright {
 .mb-1-5 {
   margin-bottom: 1.5rem;
 }
+
+select.form-control {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23555' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.6rem;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+select.form-control:invalid,
+select.form-control option[value=""] {
+  color: var(--text-secondary);
+}
+
+.form-row .form-group {
+  min-width: 0;
+}

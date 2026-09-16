@@ -645,6 +645,9 @@ Item name:`;
       }
     },
     updateProfile() {
+      if (!(this.userProfile.displayName || '').trim() && (this.userProfile.studentName || '').trim()) {
+        this.userProfile.displayName = this.userProfile.studentName.trim();
+      }
       if (!this.user) return;
       this.isUpdating = true;
 

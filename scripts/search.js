@@ -820,7 +820,7 @@ Available Items to Rank:
         const claimData = {
           itemId: this.claimItem.id,
           userId: this.user.uid,
-          userName: this.user.displayName || this.user.email,
+          userName: this.user.displayName || this.claimForm.studentName.trim() || this.user.email,
           userEmail: this.user.email,
           claimDate: firebase.firestore.FieldValue.serverTimestamp(),
           description: this.claimForm.description,
@@ -839,11 +839,17 @@ Available Items to Rank:
 
         const claimRef = await db.collection('claims').add(claimData);
 
-        await db.collection('users').doc(this.user.uid).set({
+        const profileUpdate = {
           studentName: this.claimForm.studentName.trim(),
           studentGrade: this.claimForm.studentGrade,
           studentSection: this.claimForm.studentSection
-        }, { merge: true }).catch(() => { });
+        };
+        if (!this.user.displayName) {
+          profileUpdate.displayName = this.claimForm.studentName.trim();
+          await this.user.updateProfile({ displayName: profileUpdate.displayName }).catch(() => { });
+          if (this.userProfile) this.userProfile.displayName = profileUpdate.displayName;
+        }
+        await db.collection('users').doc(this.user.uid).set(profileUpdate, { merge: true }).catch(() => { });
         if (this.userProfile) {
           this.userProfile.studentName = this.claimForm.studentName.trim();
           this.userProfile.studentGrade = this.claimForm.studentGrade;
@@ -857,7 +863,7 @@ Available Items to Rank:
           claimCode: claimCode
         });
 
-        const claimantFirstName = this.user.displayName ? this.user.displayName.split(' ')[0] : 'User';
+        const claimantFirstName = (this.user.displayName || this.claimForm.studentName.trim() || 'User').split(' ')[0];
         await db.collection('log').add({
           itemName: this.claimItem.name,
           claimDate: firebase.firestore.FieldValue.serverTimestamp(),
