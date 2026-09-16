@@ -75,8 +75,13 @@ const app = Vue.createApp({
       userProfile: {
         displayName: '',
         email: '',
-        phone: ''
+        phone: '',
+        studentName: '',
+        studentGrade: '',
+        studentSection: ''
       },
+      gradeOptions: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+      sectionOptions: ['A', 'B', 'C', 'D', 'E'],
       phoneValid: false,
       userPreferences: {
         emailNotifications: true
@@ -440,7 +445,10 @@ Item name:`;
             this.userProfile = {
               displayName: data.displayName || this.user.displayName || '',
               email: this.user.email,
-              phone: data.phone || ''
+              phone: data.phone || '',
+              studentName: data.studentName || '',
+              studentGrade: data.studentGrade || '',
+              studentSection: data.studentSection || ''
             };
             if (data.preferences) {
               this.userPreferences = {
@@ -525,11 +533,12 @@ Item name:`;
             };
             if (claim.itemId) {
               const itemPromise = db.collection('items').doc(claim.itemId).get()
+                .then(itemDoc => itemDoc.exists ? itemDoc : db.collection('archivedItems').doc(claim.itemId).get())
                 .then(itemDoc => {
                   if (itemDoc.exists) {
                     return {
                       ...claim,
-                      item: { id: itemDoc.id, ...itemDoc.data() }
+                      item: { id: itemDoc.id, ...itemDoc.data(), archived: itemDoc.ref.parent.id === 'archivedItems' }
                     };
                   } else {
 
@@ -659,7 +668,10 @@ Item name:`;
       updates.push(
         db.collection('users').doc(this.user.uid).update({
           displayName: this.userProfile.displayName,
-          phone: this.userProfile.phone || ''
+          phone: this.userProfile.phone || '',
+          studentName: this.userProfile.studentName || '',
+          studentGrade: this.userProfile.studentGrade || '',
+          studentSection: this.userProfile.studentSection || ''
         }).catch(error => {
 
           throw new Error("Firestore profile update failed");

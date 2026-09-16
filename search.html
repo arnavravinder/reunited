@@ -378,6 +378,30 @@
             </div>
 
             <div class="form-group">
+              <label>Student name:</label>
+              <input type="text" class="form-control" v-model="claimForm.studentName"
+                placeholder="Full name of the student this item belongs to" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Grade:</label>
+                <select class="form-control" v-model="claimForm.studentGrade" required>
+                  <option value="" disabled>Select grade</option>
+                  <option v-for="grade in gradeOptions" :key="grade" :value="grade">Grade {{ grade }}</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Section:</label>
+                <select class="form-control" v-model="claimForm.studentSection" required>
+                  <option value="" disabled>Select section</option>
+                  <option v-for="section in sectionOptions" :key="section" :value="section">{{ section }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
               <label>Contact Information:</label>
               <input type="text" class="form-control" v-model="claimForm.contactInfo"
                 placeholder="Phone number or other contact details" required>

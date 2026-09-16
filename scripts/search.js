@@ -104,7 +104,10 @@ const app = Vue.createApp({
       itemCache: [],
       userProfile: {
         displayName: '',
-        email: ''
+        email: '',
+        studentName: '',
+        studentGrade: '',
+        studentSection: ''
       },
       selectedItem: null,
       itemValuation: null,
@@ -112,7 +115,9 @@ const app = Vue.createApp({
       showClaimModal: false,
       showClaimCodeModal: false,
       claimItem: null,
-      claimForm: { description: '', contactInfo: '' },
+      claimForm: { description: '', contactInfo: '', studentName: '', studentGrade: '', studentSection: '' },
+      gradeOptions: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+      sectionOptions: ['A', 'B', 'C', 'D', 'E'],
       isSubmittingClaim: false,
       itemTypes: [
         'Apparel', 'Jacket', 'Electronics', 'Water Bottle',
@@ -201,12 +206,18 @@ const app = Vue.createApp({
           const data = doc.data();
           this.userProfile = {
             displayName: data.displayName || this.user.displayName || '',
-            email: this.user.email
+            email: this.user.email,
+            studentName: data.studentName || '',
+            studentGrade: data.studentGrade || '',
+            studentSection: data.studentSection || ''
           };
         } else {
           this.userProfile = {
             displayName: this.user.displayName || '',
-            email: this.user.email
+            email: this.user.email,
+            studentName: '',
+            studentGrade: '',
+            studentSection: ''
           };
           db.collection('users').doc(this.user.uid).set({
             displayName: this.userProfile.displayName,
@@ -756,7 +767,10 @@ Available Items to Rank:
       this.claimItem = item;
       this.claimForm = {
         description: '',
-        contactInfo: this.user.phoneNumber || this.user.email || ''
+        contactInfo: this.user.phoneNumber || this.user.email || '',
+        studentName: (this.userProfile && this.userProfile.studentName) || '',
+        studentGrade: (this.userProfile && this.userProfile.studentGrade) || '',
+        studentSection: (this.userProfile && this.userProfile.studentSection) || ''
       };
       this.selectedItem = null;
       this.showClaimModal = true;
@@ -764,6 +778,11 @@ Available Items to Rank:
     async submitClaim() {
       if (!this.user || !this.claimItem) {
         this.showLoginModal = true;
+        return;
+      }
+
+      if (!this.claimForm.studentName.trim() || !this.claimForm.studentGrade || !this.claimForm.studentSection) {
+        this.showMessage('Student details needed', 'Please enter the student name, grade and section so the team knows who to hand the item to.');
         return;
       }
 
@@ -806,6 +825,9 @@ Available Items to Rank:
           claimDate: firebase.firestore.FieldValue.serverTimestamp(),
           description: this.claimForm.description,
           contactInfo: this.claimForm.contactInfo,
+          studentName: this.claimForm.studentName.trim(),
+          studentGrade: this.claimForm.studentGrade,
+          studentSection: this.claimForm.studentSection,
           status: claimStatus,
           itemName: this.claimItem.name,
           itemCategory: this.claimItem.category,
@@ -816,6 +838,17 @@ Available Items to Rank:
         };
 
         const claimRef = await db.collection('claims').add(claimData);
+
+        await db.collection('users').doc(this.user.uid).set({
+          studentName: this.claimForm.studentName.trim(),
+          studentGrade: this.claimForm.studentGrade,
+          studentSection: this.claimForm.studentSection
+        }, { merge: true }).catch(() => { });
+        if (this.userProfile) {
+          this.userProfile.studentName = this.claimForm.studentName.trim();
+          this.userProfile.studentGrade = this.claimForm.studentGrade;
+          this.userProfile.studentSection = this.claimForm.studentSection;
+        }
 
         await db.collection('items').doc(this.claimItem.id).update({
           claimed: true,
