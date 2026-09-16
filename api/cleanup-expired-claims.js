@@ -8,7 +8,10 @@ const REMINDER_WINDOW_MS = 2 * 24 * 60 * 60 * 1000;
 const sendEmail = (path, payload) =>
   fetch(`${EMAIL_API_BASE}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.CLEANUP_API_KEY}`
+    },
     body: JSON.stringify(payload)
   }).then(response => {
     if (!response.ok) throw new Error(`${path} responded ${response.status}`);
@@ -28,10 +31,10 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const authHeader = req.headers.authorization;
-    const isVercelCron = req.headers['x-vercel-signature'];
+    const authHeader = req.headers.authorization || '';
+    const accepted = [process.env.CRON_SECRET, process.env.CLEANUP_API_KEY].filter(Boolean).map(secret => `Bearer ${secret}`);
 
-    if (!isVercelCron && (!authHeader || authHeader !== `Bearer ${process.env.CLEANUP_API_KEY}`)) {
+    if (!accepted.length || !accepted.includes(authHeader)) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 

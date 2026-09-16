@@ -892,7 +892,10 @@ Available Items to Rank:
           try {
             await fetch('https://api.reunited.co.in/api/send-claim-email', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${await firebase.auth().currentUser.getIdToken()}`
+              },
               body: JSON.stringify({
                 email: this.user.email,
                 userName: this.user.displayName || this.user.email,
