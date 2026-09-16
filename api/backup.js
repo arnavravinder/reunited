@@ -72,7 +72,7 @@ export default async function handler(req, res) {
 
     const generatedAt = new Date();
     const stamp = generatedAt.toISOString().slice(0, 10);
-    const bucketName = process.env.FIREBASE_STORAGE_BUCKET || 'reunited-web.appspot.com';
+    const bucketName = process.env.BACKUP_BUCKET || 'reunited-web-backups';
     const bucket = admin.storage().bucket(bucketName);
 
     const counts = {};
