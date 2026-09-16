@@ -3,7 +3,7 @@ import admin from 'firebase-admin';
 let db;
 
 const EMAIL_API_BASE = process.env.EMAIL_API_BASE || 'https://api.reunited.co.in';
-const COLLECTIONS = ['items', 'claims', 'lostItems', 'users'];
+const COLLECTIONS = ['items', 'claims', 'lostItems', 'users', 'archivedItems', 'archivedLostItems', 'archivedClaims', 'log', 'notifications'];
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
 
 const serialise = (value) => {
