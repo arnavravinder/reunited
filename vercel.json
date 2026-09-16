@@ -8,6 +8,12 @@
   "functions": {
     "api/ai.js": {
       "maxDuration": 30
+    },
+    "api/backup.js": {
+      "maxDuration": 60
+    },
+    "api/cleanup-expired-claims.js": {
+      "maxDuration": 60
     }
   },
   "cleanUrls": true,
